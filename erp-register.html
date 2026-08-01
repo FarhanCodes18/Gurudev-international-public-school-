@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Registration - Gurudev International ERP</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/erp.css">
+</head>
+<body class="erp-auth-page">
+
+  <div class="erp-auth-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+  </div>
+
+  <div class="erp-auth-card wide">
+    <div class="erp-auth-header">
+      <div class="erp-auth-logo">GI</div>
+      <h2>Student Registration</h2>
+      <p>Create your ERP portal account</p>
+    </div>
+
+    <div id="authAlert" class="erp-alert"></div>
+
+    <form id="registerForm">
+      <div class="erp-form-grid">
+        <div class="form-group">
+          <label class="form-label" for="regName">Full Name *</label>
+          <input type="text" id="regName" class="form-control" placeholder="e.g. Rahul Sharma" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="regMobile">Mobile Number *</label>
+          <input type="tel" id="regMobile" class="form-control" placeholder="e.g. 9876543210" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regEmail">Email Address *</label>
+          <input type="email" id="regEmail" class="form-control" placeholder="e.g. student@example.com" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regClass">Class *</label>
+          <select id="regClass" class="form-control" required>
+            <option value="" disabled selected>Select Class</option>
+            <option value="9">Class 9</option>
+            <option value="10">Class 10</option>
+            <option value="11">Class 11</option>
+            <option value="12">Class 12</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regGender">Gender *</label>
+          <select id="regGender" class="form-control" required>
+            <option value="" disabled selected>Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regDob">Date of Birth *</label>
+          <input type="date" id="regDob" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regPassword">Password *</label>
+          <input type="password" id="regPassword" class="form-control" placeholder="Minimum 6 characters" required minlength="6">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regPhoto">Student Photo (Optional but Recommended)</label>
+          <label class="erp-file-upload">
+            <input type="file" id="regPhoto" accept="image/*" style="display:none">
+            <div id="uploadText">
+              <i class="fa-solid fa-cloud-arrow-up" style="font-size: 1.5rem; color: var(--primary); margin-bottom: 8px;"></i><br>
+              Click to Upload Photo
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <button type="submit" id="btnRegister" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 24px; padding: 16px; font-size: 1.1rem;">
+        Register Student
+      </button>
+    </form>
+    
+    <div style="text-align: center; margin-top: 24px; font-size: 0.9rem; color: var(--text-muted);">
+      Already have an account? <a href="erp-login.html" style="color: var(--primary); font-weight: 600;">Login Here</a>
+    </div>
+  </div>
+
+  <script type="module" src="js/erp-auth.js"></script>
+</body>
+</html>

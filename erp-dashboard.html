@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard - Gurudev International ERP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/erp.css">
+</head>
+<body style="background: #f8f9fa; font-family: var(--font-body); padding-bottom: 50px; min-height: 100vh;">
+
+  <!-- Top Navbar -->
+  <div class="erp-top-nav">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div style="width:40px; height:40px; background:linear-gradient(135deg, var(--primary), #1a56b8); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">GI</div>
+        <h2 style="font-family:var(--font-primary); font-weight:700; font-size:1.2rem; color:#021226; margin:0;">Gurudev International</h2>
+      </div>
+      <button id="btnLogout" class="btn btn-outline-primary" style="background:#fee2e2; color:#ef4444; border:none; padding:8px 16px; border-radius:8px; font-weight:600; cursor:pointer;"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+    </div>
+  </div>
+
+  <div class="container" style="max-width: 1200px;">
+    <!-- Blue Profile Banner -->
+    <div class="erp-profile-banner">
+      <div class="erp-profile-img-wrapper">
+        <img src="assets/images/default-avatar.png" id="topProfileImg" alt="Profile">
+        <div class="camera-icon"><i class="fa-solid fa-camera"></i></div>
+      </div>
+      <div class="erp-profile-info">
+        <div class="welcome-text">WELCOME BACK</div>
+        <h1 id="topProfileName">Loading...</h1>
+        <div class="mobile-text"><i class="fa-solid fa-phone"></i> <span id="topProfileMobile">Loading...</span></div>
+        <div class="badges-row">
+          <div class="badge-item"><i class="fa-solid fa-graduation-cap"></i> Enrolled in <strong id="topProfileClass">--</strong></div>
+          <div class="badge-item"><i class="fa-solid fa-id-card"></i> ID: <strong id="topProfileId">--</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Academic Overview Section -->
+    <div style="margin-top: 40px; margin-bottom: 24px; display:flex; align-items:center; gap:12px;">
+      <div style="width:5px; height:28px; background:var(--primary); border-radius:4px;"></div>
+      <h2 style="font-family:var(--font-primary); font-weight:800; font-size:1.6rem; color:#0f172a; margin:0;">Academic Overview</h2>
+    </div>
+
+    <div class="erp-features-grid">
+      <!-- 1 -->
+      <div class="feature-card border-yellow">
+        <div class="icon-box bg-yellow-light text-yellow"><i class="fa-solid fa-trophy"></i></div>
+        <div class="text-box">
+          <h3>Achievement Badges</h3>
+          <p class="text-green">View Certificates</p>
+        </div>
+      </div>
+      <!-- 2 -->
+      <div class="feature-card border-purple">
+        <div class="icon-box bg-purple-light text-purple"><i class="fa-regular fa-calendar"></i></div>
+        <div class="text-box">
+          <h3>School Calendar</h3>
+          <p>Holidays & Events</p>
+        </div>
+      </div>
+      <!-- 3 -->
+      <div class="feature-card border-blue">
+        <div class="icon-box bg-blue-light text-blue"><i class="fa-regular fa-calendar-check"></i></div>
+        <div class="text-box">
+          <h3>My Attendance</h3>
+          <p>Check daily status</p>
+        </div>
+      </div>
+      <!-- 4 -->
+      <div class="feature-card border-pink">
+        <div class="icon-box bg-pink-light text-pink"><i class="fa-regular fa-calendar-plus"></i></div>
+        <div class="text-box">
+          <h3>Apply Leave</h3>
+          <p>Submit request</p>
+        </div>
+      </div>
+      <!-- 5 -->
+      <div class="feature-card border-yellow">
+        <div class="icon-box bg-yellow-light text-yellow"><i class="fa-solid fa-bus"></i></div>
+        <div class="text-box">
+          <h3>Transport Routes</h3>
+          <p>Bus & Driver info</p>
+        </div>
+      </div>
+      <!-- 6 -->
+      <div class="feature-card border-red">
+        <div class="icon-box bg-red-light text-red"><i class="fa-regular fa-clock"></i></div>
+        <div class="text-box">
+          <h3>Timetable</h3>
+          <p>Daily schedule</p>
+        </div>
+      </div>
+      <!-- 7 -->
+      <div class="feature-card border-teal">
+        <div class="icon-box bg-teal-light text-teal"><i class="fa-solid fa-book-open"></i></div>
+        <div class="text-box">
+          <h3>Assignments</h3>
+          <p>Pending homework</p>
+        </div>
+      </div>
+      <!-- 8 -->
+      <div class="feature-card border-orange">
+        <div class="icon-box bg-orange-light text-orange"><i class="fa-regular fa-folder-open"></i></div>
+        <div class="text-box">
+          <h3>My Documents</h3>
+          <p>Upload & View Documents</p>
+        </div>
+      </div>
+      
+      <!-- Locked / Coming Soon -->
+      <!-- 9 -->
+      <div class="feature-card locked-card">
+        <div class="icon-box bg-gray-light text-gray"><i class="fa-solid fa-gear"></i></div>
+        <div class="text-box">
+          <h3>Account Settings</h3>
+          <p class="text-red">Locked by Admin</p>
+        </div>
+        <div class="lock-icon"><i class="fa-solid fa-lock"></i></div>
+      </div>
+      <!-- 10 -->
+      <div class="feature-card locked-card">
+        <div class="icon-box bg-gray-light text-gray"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+        <div class="text-box">
+          <h3>Fee Record</h3>
+          <p class="text-red">Coming Soon</p>
+        </div>
+        <div class="lock-icon"><i class="fa-solid fa-lock"></i></div>
+      </div>
+      <!-- 11 -->
+      <div class="feature-card locked-card">
+        <div class="icon-box bg-gray-light text-gray"><i class="fa-solid fa-chart-line"></i></div>
+        <div class="text-box">
+          <h3>My Progress</h3>
+          <p class="text-red">Coming Soon</p>
+        </div>
+        <div class="lock-icon"><i class="fa-solid fa-lock"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generic Dashboard Modal -->
+  <div class="erp-modal-overlay" id="erpModalOverlay">
+    <div class="erp-modal" id="erpModal">
+      <div class="erp-modal-header">
+        <h3 id="modalTitle">Module Details</h3>
+        <button class="erp-modal-close" id="modalClose"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="erp-modal-body" id="modalBody">
+        <!-- JS injects dynamic content here -->
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/erp-student.js"></script>
+</body>
+</html>

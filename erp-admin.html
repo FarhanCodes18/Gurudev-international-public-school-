@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Gurudev International ERP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/erp.css">
+  <style>
+    .admin-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .admin-table th, .admin-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+    .admin-table th { background: #f8fafc; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; text-transform: uppercase; }
+    .admin-table td { color: #021226; font-size: 0.95rem; }
+    .admin-table tr:hover { background: #f8fafc; }
+    .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+    .status-active { background: #dcfce7; color: #166534; }
+    .status-pending { background: #fef9c3; color: #854d0e; }
+    .action-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; transition: 0.2s; }
+    .action-btn:hover { color: var(--primary); }
+    .reveal-password { font-family: monospace; letter-spacing: 1px; color: #ef4444; font-weight: bold; }
+  </style>
+</head>
+<body class="erp-layout">
+
+  <!-- Admin Sidebar -->
+  <aside class="erp-sidebar" id="erpSidebar">
+    <div class="erp-sidebar-header">
+      <div class="erp-sidebar-logo" style="background: linear-gradient(135deg, #0f172a, #334155);">GI</div>
+      <div class="erp-sidebar-title">Admin Panel</div>
+    </div>
+    
+    <nav class="erp-sidebar-nav">
+      <div class="erp-nav-item active" data-target="module-overview">
+        <i class="fa-solid fa-chart-pie"></i> Overview
+      </div>
+      <div class="erp-nav-item" data-target="module-students">
+        <i class="fa-solid fa-users"></i> Students Data
+      </div>
+      <div class="erp-nav-item" data-target="module-notices">
+        <i class="fa-solid fa-bullhorn"></i> Notice Board
+      </div>
+      <div class="erp-nav-item" data-target="module-homework">
+        <i class="fa-solid fa-file-upload"></i> Upload Homework
+      </div>
+    </nav>
+    
+    <div class="erp-sidebar-footer">
+      <div class="erp-nav-item" id="btnLogout" style="color: #ef4444;">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout Admin
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="erp-main">
+    
+    <header class="erp-header">
+      <div class="erp-header-left">
+        <button class="mobile-menu-btn" id="mobileMenuBtn"><i class="fa-solid fa-bars"></i></button>
+        <h1 id="pageTitle">Admin Overview</h1>
+      </div>
+      <div class="erp-header-right">
+        <div class="erp-user-profile">
+          <img src="assets/images/default-avatar.png" alt="Profile">
+          <div class="erp-user-info">
+            <h4>System Administrator</h4>
+            <p>Admin Mode</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="erp-content-area">
+      
+      <!-- Module 1: Overview -->
+      <div id="module-overview" class="erp-module active">
+        <div class="erp-grid-4">
+          <div class="stat-widget">
+            <div class="stat-icon bg-blue-light"><i class="fa-solid fa-users"></i></div>
+            <div class="stat-info">
+              <h3 id="totalStudentsCount">0</h3>
+              <p>Total Students</p>
+            </div>
+          </div>
+          <div class="stat-widget">
+            <div class="stat-icon bg-orange-light"><i class="fa-solid fa-user-clock"></i></div>
+            <div class="stat-info">
+              <h3 id="pendingApprovalsCount">0</h3>
+              <p>Pending Approvals</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module 2: Students Data -->
+      <div id="module-students" class="erp-module">
+        <div class="erp-card" style="overflow-x: auto;">
+          <div class="erp-card-header">
+            <div class="erp-card-title">Registered Students</div>
+          </div>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">Real-time sync from Firestore. As requested, passwords created during registration are visible to the administrator.</p>
+          
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Photo</th>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Class</th>
+                <th>Mobile</th>
+                <th>Password</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="studentsTableBody">
+              <!-- JS will inject rows here -->
+              <tr>
+                <td colspan="8" style="text-align:center; color: var(--text-muted);">Loading students from Firestore...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Module 3: Notice Board -->
+      <div id="module-notices" class="erp-module">
+        <div class="erp-card">
+          <div class="erp-card-header">
+            <div class="erp-card-title">Create New Notice</div>
+          </div>
+          <form style="max-width: 500px;">
+            <div class="form-group">
+              <label class="form-label">Notice Title</label>
+              <input type="text" class="form-control" placeholder="e.g. Upcoming Holidays">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Description</label>
+              <textarea class="form-control" rows="4" placeholder="Notice details..."></textarea>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="alert('Notice Published (Mock)')">Publish Notice</button>
+          </form>
+        </div>
+      </div>
+
+      <div id="module-homework" class="erp-module">
+        <div class="erp-card">
+          <div class="erp-card-header">
+            <div class="erp-card-title">Upload Homework</div>
+          </div>
+          <p>Mock interface for uploading homework to specific classes.</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script type="module" src="js/erp-admin.js"></script>
+</body>
+</html>

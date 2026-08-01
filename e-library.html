@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Library | Gurudev International</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body { background: var(--bg-body); font-family: 'Poppins', sans-serif; color: var(--text-primary); margin:0; padding:0; }
+    .header { background: var(--primary); color: white; padding: 40px 20px; text-align: center; }
+    .header h1 { margin: 0; font-size: 2.5rem; font-family: var(--font-heading); font-weight:800; }
+    .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+    
+    .library-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .book-card {
+      background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+      border: 1px solid var(--border-color); transition: transform 0.3s ease;
+      display: flex; flex-direction: column;
+    }
+    .book-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); border-color: var(--accent); }
+    .book-icon { font-size: 2.5rem; color: var(--primary); margin-bottom: 15px; }
+    .book-subject { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 5px; }
+    .book-title { font-size: 1.2rem; color: var(--text-primary); margin: 0 0 15px 0; font-weight: 700; line-height: 1.4; flex-grow: 1; }
+    .book-date { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px; }
+    
+    .btn-read { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; text-align: center; transition: background 0.2s; }
+    .btn-read:hover { background: var(--primary-dark); }
+    
+    .empty-state { text-align: center; padding: 80px 20px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); grid-column: 1 / -1; }
+    .empty-state i { font-size: 4rem; color: #cbd5e1; margin-bottom: 20px; }
+    .empty-state h3 { color: var(--text-muted); margin: 0; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1><i class="fa-solid fa-book-open-reader"></i> Digital E-Library</h1>
+    <p style="opacity: 0.8; margin-top: 10px;">Access official study materials, PDFs, and reference books.</p>
+  </div>
+  
+  <div class="container">
+    <div class="library-grid" id="library-container">
+      <!-- Populated by JS -->
+    </div>
+
+    <div style="text-align: center; margin-top: 40px; margin-bottom: 40px;">
+      <a href="student-portal.html" class="btn btn-outline"><i class="fa-solid fa-arrow-left"></i> Back to Portal</a>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('library-container');
+      const library = JSON.parse(localStorage.getItem('erp_library')) || [];
+      
+      if (library.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fa-solid fa-book-journal-whills"></i>
+            <h3>No books available yet.</h3>
+            <p style="margin-top:10px; color:var(--text-secondary);">Admin has not added any e-learning materials.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = '';
+      library.forEach(book => {
+        // Just pick a random icon based on subject loosely
+        let iconClass = 'fa-book';
+        if(book.subject.toLowerCase().includes('science')) iconClass = 'fa-flask';
+        if(book.subject.toLowerCase().includes('math')) iconClass = 'fa-calculator';
+        
+        container.innerHTML += `
+          <div class="book-card">
+            <i class="fa-solid ${iconClass} book-icon"></i>
+            <div class="book-subject">${book.subject}</div>
+            <h2 class="book-title">${book.name}</h2>
+            <div class="book-date">Added: ${book.date}</div>
+            <a href="${book.link}" target="_blank" class="btn-read"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open Resource</a>
+          </div>
+        `;
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Examination Results | Gurudev International</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body { background: var(--bg-body); font-family: 'Poppins', sans-serif; color: var(--text-primary); margin:0; padding:0; }
+    .header { background: var(--primary); color: white; padding: 40px 20px; text-align: center; }
+    .header h1 { margin: 0; font-size: 2.5rem; font-family: var(--font-heading); font-weight:800; }
+    .container { max-width: 700px; margin: 40px auto; padding: 0 20px; }
+    
+    .search-box {
+      background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; margin-bottom: 30px; border: 1px solid var(--border-color);
+    }
+    .search-box input {
+      width: 100%; max-width: 400px; padding: 15px 20px; font-size: 1.1rem; border: 2px solid var(--border-color); border-radius: 8px; margin-bottom: 20px; text-align: center; font-family: monospace; font-weight: 700; color: var(--primary);
+    }
+    .search-box input:focus { outline: none; border-color: var(--accent); }
+    
+    .result-card {
+      background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 5px solid var(--accent); overflow: hidden; display: none;
+    }
+    .result-header { background: #f8fafc; padding: 20px; text-align: center; border-bottom: 1px solid var(--border-color); }
+    .result-header h2 { margin: 0 0 5px 0; color: var(--primary); }
+    .result-header p { margin: 0; color: var(--text-muted); font-size: 0.9rem; font-weight: 600; }
+    
+    .marks-table { width: 100%; border-collapse: collapse; }
+    .marks-table th, .marks-table td { padding: 15px; border-bottom: 1px solid var(--border-color); text-align: center; }
+    .marks-table th { background: #f1f5f9; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+    .marks-table td { font-weight: 700; color: var(--text-primary); font-size: 1.1rem; }
+    
+    .result-footer { padding: 25px; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
+    .total-box { text-align: left; }
+    .total-box span { display: block; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 5px; }
+    .total-box strong { font-size: 1.8rem; color: var(--primary); line-height: 1; }
+    
+    .status-pass { background: #dcfce7; color: #16a34a; padding: 8px 20px; border-radius: 30px; font-weight: 800; font-size: 1.2rem; display: inline-block; }
+    .status-fail { background: #fee2e2; color: #dc2626; padding: 8px 20px; border-radius: 30px; font-weight: 800; font-size: 1.2rem; display: inline-block; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1><i class="fa-solid fa-graduation-cap"></i> Examination Results</h1>
+    <p style="opacity: 0.8; margin-top: 10px;">Check your academic performance securely.</p>
+  </div>
+  
+  <div class="container">
+    <div class="search-box">
+      <h3 style="margin-bottom: 20px; color: var(--text-primary);">Enter Your Roll Number</h3>
+      <input type="text" id="roll-input" placeholder="e.g. 1010" autocomplete="off" />
+      <div>
+        <button class="btn btn-primary" onclick="searchResult()" style="font-size: 1.1rem; padding: 12px 30px;"><i class="fa-solid fa-magnifying-glass"></i> View Result</button>
+      </div>
+      <p id="error-msg" style="color: #dc2626; font-weight: 600; margin-top: 15px; display: none;">Result not found. Please check your Roll Number.</p>
+    </div>
+
+    <div class="result-card" id="result-card">
+      <div class="result-header">
+        <h2 id="res-name">Student Name</h2>
+        <p>Roll No: <span id="res-roll" style="color:var(--text-primary);"></span> &nbsp;|&nbsp; Class: <span id="res-class" style="color:var(--text-primary);"></span> &nbsp;|&nbsp; Date: <span id="res-date" style="color:var(--text-primary);"></span></p>
+      </div>
+      
+      <table class="marks-table">
+        <thead>
+          <tr>
+            <th style="text-align:left;">Subject</th>
+            <th>Max Marks</th>
+            <th>Marks Obtained</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="text-align:left; color:var(--text-secondary); font-weight:500;">English</td><td>100</td><td id="m-eng">0</td></tr>
+          <tr><td style="text-align:left; color:var(--text-secondary); font-weight:500;">Mathematics</td><td>100</td><td id="m-math">0</td></tr>
+          <tr><td style="text-align:left; color:var(--text-secondary); font-weight:500;">Science</td><td>100</td><td id="m-sci">0</td></tr>
+          <tr><td style="text-align:left; color:var(--text-secondary); font-weight:500;">Social Studies</td><td>100</td><td id="m-soc">0</td></tr>
+          <tr><td style="text-align:left; color:var(--text-secondary); font-weight:500;">Hindi</td><td>100</td><td id="m-hin">0</td></tr>
+        </tbody>
+      </table>
+      
+      <div class="result-footer">
+        <div class="total-box">
+          <span>Total / Percentage</span>
+          <strong><span id="m-total">0</span>/500 (<span id="m-pct">0</span>%)</strong>
+        </div>
+        <div id="m-status" class="status-pass">PASS</div>
+      </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 40px; margin-bottom: 40px;">
+      <a href="index.html" class="btn btn-outline"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+    </div>
+  </div>
+
+  <script>
+    function searchResult() {
+      const roll = document.getElementById('roll-input').value.trim();
+      const err = document.getElementById('error-msg');
+      const card = document.getElementById('result-card');
+      
+      if(!roll) return;
+      
+      const results = JSON.parse(localStorage.getItem('erp_results')) || {};
+      const res = results[roll];
+      
+      if(res) {
+        err.style.display = 'none';
+        card.style.display = 'block';
+        
+        document.getElementById('res-name').innerText = res.name;
+        document.getElementById('res-roll').innerText = res.roll;
+        document.getElementById('res-class').innerText = res.class;
+        document.getElementById('res-date').innerText = res.date;
+        
+        document.getElementById('m-eng').innerText = res.marks.english;
+        document.getElementById('m-math').innerText = res.marks.math;
+        document.getElementById('m-sci').innerText = res.marks.science;
+        document.getElementById('m-soc').innerText = res.marks.social;
+        document.getElementById('m-hin').innerText = res.marks.hindi;
+        
+        document.getElementById('m-total').innerText = res.total;
+        document.getElementById('m-pct').innerText = res.percentage;
+        
+        const statEl = document.getElementById('m-status');
+        statEl.innerText = res.status;
+        if(res.status === 'FAIL') {
+          statEl.className = 'status-fail';
+        } else {
+          statEl.className = 'status-pass';
+        }
+      } else {
+        card.style.display = 'none';
+        err.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>

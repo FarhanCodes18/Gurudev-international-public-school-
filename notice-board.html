@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notice Board | Gurudev International</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body { background: var(--bg-body); font-family: 'Poppins', sans-serif; color: var(--text-primary); margin:0; padding:0; }
+    .header { background: var(--primary); color: white; padding: 40px 20px; text-align: center; }
+    .header h1 { margin: 0; font-size: 2.5rem; font-family: var(--font-heading); font-weight:800; }
+    .container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
+    .notice-card { background: white; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 4px solid var(--accent); transition: transform 0.3s ease; }
+    .notice-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    .notice-date { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; margin-bottom: 10px; display: block; }
+    .notice-title { font-size: 1.4rem; color: var(--primary); margin: 0 0 15px 0; font-weight: 700; }
+    .notice-body { color: var(--text-secondary); line-height: 1.6; white-space: pre-line; margin: 0; }
+    .empty-state { text-align: center; padding: 60px 20px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .empty-state i { font-size: 4rem; color: #cbd5e1; margin-bottom: 20px; }
+    .empty-state h3 { color: var(--text-muted); margin: 0; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1><i class="fa-solid fa-bullhorn"></i> Official Notice Board</h1>
+    <p style="opacity: 0.8; margin-top: 10px;">Stay updated with the latest announcements from Gurudev International.</p>
+  </div>
+  
+  <div class="container" id="notices-container">
+    <!-- Populated by JS -->
+  </div>
+
+  <div style="text-align: center; margin-bottom: 40px;">
+    <a href="index.html" class="btn btn-primary"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('notices-container');
+      const notices = JSON.parse(localStorage.getItem('erp_notices')) || [];
+      
+      if (notices.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fa-regular fa-folder-open"></i>
+            <h3>No recent notices published.</h3>
+            <p style="margin-top:10px; color:var(--text-secondary);">Admin has not shared any notices yet.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = '';
+      notices.forEach(notice => {
+        container.innerHTML += `
+          <div class="notice-card">
+            <span class="notice-date"><i class="fa-regular fa-calendar"></i> Published: ${notice.date}</span>
+            <h2 class="notice-title">${notice.title}</h2>
+            <p class="notice-body">${notice.body}</p>
+          </div>
+        `;
+      });
+    });
+  </script>
+</body>
+</html>

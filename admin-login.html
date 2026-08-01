@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login | IDEAL Superpower Panel</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #f3f4f6;
+      --card-dark: #191224;
+      --text-muted: #a1a1aa;
+      --primary-blue: #3b82f6;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .login-wrapper {
+      width: 100%;
+      max-width: 480px;
+      padding: 20px;
+    }
+    .login-card {
+      background: white;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+    }
+    .login-header {
+      background: var(--card-dark);
+      color: white;
+      padding: 40px 30px;
+    }
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      margin-bottom: 24px;
+      color: #cbd5e1;
+    }
+    .subtitle {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 700;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+    }
+    .title {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+    .desc {
+      font-size: 0.95rem;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    
+    .login-body {
+      padding: 30px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #64748b;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .input-wrapper {
+      position: relative;
+    }
+    .input-wrapper i {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+    }
+    .input-wrapper i.right-icon {
+      left: auto;
+      right: 16px;
+      cursor: pointer;
+    }
+    .form-control {
+      width: 100%;
+      padding: 14px 16px 14px 45px;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      color: #334155;
+      font-weight: 500;
+      outline: none;
+      transition: 0.3s;
+    }
+    .form-control:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+    
+    .forgot-link {
+      display: block;
+      text-align: right;
+      color: var(--primary-blue);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 24px;
+    }
+    .forgot-link:hover { text-decoration: underline; }
+    
+    .btn-submit {
+      width: 100%;
+      padding: 16px;
+      background: #111827;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: 0.2s;
+    }
+    .btn-submit:hover {
+      background: black;
+      transform: translateY(-2px);
+    }
+    
+    .login-footer {
+      background: #f8fafc;
+      padding: 20px;
+      text-align: center;
+      border-top: 1px solid #f1f5f9;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #94a3b8;
+    }
+    
+    .error-msg {
+      color: #ef4444;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 15px;
+      display: none;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="login-wrapper">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="logo-icon"><i class="fa-regular fa-square"></i></div>
+        <div class="subtitle">IDEAL ADMIN</div>
+        <h1 class="title">Superpower Panel</h1>
+        <p class="desc">Sign in to access the admin dashboard and manage submissions.</p>
+      </div>
+      
+      <div class="login-body">
+        <form id="admin-login-form">
+          <div class="error-msg" id="error-msg">Invalid username or password.</div>
+          
+          <div class="form-group">
+            <label class="form-label">USERNAME</label>
+            <div class="input-wrapper">
+              <i class="fa-regular fa-envelope"></i>
+              <input type="text" id="admin-user" class="form-control" value="idealpublicschool47@gmail.com" />
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">PASSWORD</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-lock"></i>
+              <input type="password" id="admin-pass" class="form-control" value="admin123" />
+              <i class="fa-regular fa-eye right-icon" onclick="togglePassword()"></i>
+            </div>
+          </div>
+          
+          <a href="#" class="forgot-link">Forgot Password?</a>
+          
+          <button type="submit" class="btn-submit"><i class="fa-solid fa-arrow-right-to-bracket"></i> Sign in</button>
+        </form>
+      </div>
+      
+      <div class="login-footer">
+        Restricted area • Authorized personnel only
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function togglePassword() {
+      const pass = document.getElementById('admin-pass');
+      if (pass.type === 'password') { pass.type = 'text'; }
+      else { pass.type = 'password'; }
+    }
+
+    document.getElementById('admin-login-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const user = document.getElementById('admin-user').value;
+      const pass = document.getElementById('admin-pass').value;
+      
+      if(user === 'idealpublicschool47@gmail.com' && pass === 'admin123') {
+        // Create session
+        localStorage.setItem('admin_session', 'active');
+        window.location.href = 'gurudev-super.html';
+      } else {
+        document.getElementById('error-msg').style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
