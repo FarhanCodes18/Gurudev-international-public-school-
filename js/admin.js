@@ -153,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load Admissions and Contact Inquiries initially
   loadCallbacks();
   loadContactMessages();
+  loadQuickCallbacks();
 });
 
 // --- GLOBAL LOADER TOOL ---
@@ -571,7 +572,9 @@ function loadCallbacks() {
   }
   
   listBody.innerHTML = '';
-  callbacks.reverse().forEach(cb => {
+  const total = callbacks.length;
+  callbacks.reverse().forEach((cb, i) => {
+    const origIndex = total - 1 - i;
     listBody.innerHTML += `
       <tr>
         <td>${cb.date}</td>
@@ -579,6 +582,7 @@ function loadCallbacks() {
         <td><a href="tel:${cb.phone}" style="color:var(--admin-accent); text-decoration:none;">${cb.phone}</a></td>
         <td><span class="status-badge status-active">${cb.position || cb.class}</span></td>
         <td style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${cb.message || 'N/A'}">${cb.message || 'N/A'}</td>
+        <td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteLead('erp_callbacks', ${origIndex})"><i class="fa-solid fa-trash"></i></button></td>
       </tr>
     `;
   });
@@ -596,7 +600,9 @@ function loadContactMessages() {
   }
   
   listBody.innerHTML = '';
-  messages.reverse().forEach(msg => {
+  const total = messages.length;
+  messages.reverse().forEach((msg, i) => {
+    const origIndex = total - 1 - i;
     listBody.innerHTML += `
       <tr>
         <td>${msg.date}</td>
@@ -607,30 +613,112 @@ function loadContactMessages() {
           <span style="font-weight:600; font-size:0.85rem;">${msg.subject || 'General'}</span>
         </td>
         <td style="max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${msg.message || 'N/A'}">${msg.message || 'N/A'}</td>
+        <td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteLead('admin_contact_messages', ${origIndex})"><i class="fa-solid fa-trash"></i></button></td>
       </tr>
     `;
   });
 }
 
+function loadQuickCallbacks() {
+  const listBody = document.getElementById('quick-callbacks-list');
+  if(!listBody) return;
+  
+  let leads = JSON.parse(localStorage.getItem('admin_quick_callbacks')) || [];
+  
+  if(leads.length === 0) {
+    listBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--admin-muted); padding:40px;">No quick callbacks yet.</td></tr>';
+    return;
+  }
+  
+  listBody.innerHTML = '';
+  const total = leads.length;
+  leads.slice().reverse().forEach((lead, i) => {
+    const origIndex = total - 1 - i;
+    listBody.innerHTML += `
+      <tr>
+        <td style="white-space:nowrap; color:var(--admin-muted); font-size:0.85rem;">${lead.date || 'N/A'}</td>
+        <td>
+          <div style="font-weight:600; color:var(--admin-accent);">${lead.name}</div>
+        </td>
+        <td>
+          <div style="font-size:0.85rem;"><i class="fa-solid fa-phone" style="color:var(--admin-muted)"></i> ${lead.phone}</div>
+          <div style="font-size:0.85rem;"><i class="fa-solid fa-envelope" style="color:var(--admin-muted)"></i> ${lead.email}</div>
+        </td>
+        <td style="max-width: 250px; font-size:0.85rem;">
+          <div style="margin-bottom:4px;"><strong>Addr:</strong> ${lead.address}</div>
+          <div style="color:var(--admin-muted);">${lead.message ? 'Msg: ' + lead.message : 'No message'}</div>
+        </td>
+        <td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteLead('admin_quick_callbacks', ${origIndex})"><i class="fa-solid fa-trash"></i></button></td>
+      </tr>
+    `;
+  });
+}
+
+function deleteLead(storageKey, index) {
+  if(!confirm("Are you sure you want to delete this entry?")) return;
+  
+  let data = JSON.parse(localStorage.getItem(storageKey)) || [];
+  if (index >= 0 && index < data.length) {
+    data.splice(index, 1);
+    localStorage.setItem(storageKey, JSON.stringify(data));
+    
+    // Refresh the corresponding table
+    if (storageKey === 'erp_callbacks') loadCallbacks();
+    if (storageKey === 'admin_contact_messages') loadContactMessages();
+    if (storageKey === 'admin_quick_callbacks') loadQuickCallbacks();
+  }
+}
+
 // --- EXAMINATION RESULTS ---
+function addSubjectField() {
+  const container = document.getElementById('dynamic-subjects-container');
+  const div = document.createElement('div');
+  div.className = 'subject-input-group';
+  div.style.display = 'flex';
+  div.style.gap = '10px';
+  div.innerHTML = `
+    <input type="text" class="admin-input subject-name" placeholder="Subject Name" style="flex:2;" />
+    <input type="number" class="admin-input subject-marks" placeholder="Marks" style="flex:1;" />
+    <button class="btn-admin" style="background:#ef4444; padding:0 10px;" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
+  `;
+  container.appendChild(div);
+}
+
 function publishResult() {
-  const roll = document.getElementById('res-roll').value;
-  const name = document.getElementById('res-name').value;
+  const roll = document.getElementById('res-roll').value.trim();
+  const name = document.getElementById('res-name').value.trim();
   const cls = document.getElementById('res-class').value;
   
-  const mEng = Number(document.getElementById('res-english').value);
-  const mMath = Number(document.getElementById('res-math').value);
-  const mSci = Number(document.getElementById('res-science').value);
-  const mSoc = Number(document.getElementById('res-social').value);
-  const mHin = Number(document.getElementById('res-hindi').value);
+  if(!roll || !name) {
+    return alert("Please enter Roll Number and Student Name.");
+  }
+
+  const subjectInputs = document.querySelectorAll('#dynamic-subjects-container .subject-input-group');
+  let marks = {};
+  let total = 0;
+  let subjectCount = 0;
+  let valid = true;
   
-  if(!roll || !name || isNaN(mEng) || isNaN(mMath) || isNaN(mSci) || isNaN(mSoc) || isNaN(mHin)) {
-    return alert("Please fill all fields with valid numbers.");
+  subjectInputs.forEach(group => {
+    const sName = group.querySelector('.subject-name').value.trim();
+    const sMarks = Number(group.querySelector('.subject-marks').value);
+    
+    if (sName && !isNaN(sMarks)) {
+      marks[sName] = sMarks;
+      total += sMarks;
+      subjectCount++;
+    } else if (sName || group.querySelector('.subject-marks').value !== "") {
+      valid = false; // partially filled field
+    }
+  });
+  
+  if (!valid || subjectCount === 0) {
+    return alert("Please fill all provided subject names and marks correctly.");
   }
 
   showLoader('Publishing Result', 'Calculating percentage...', 1000, () => {
-    const total = mEng + mMath + mSci + mSoc + mHin;
-    const percent = (total / 5).toFixed(2);
+    const maxTotal = subjectCount * 100;
+    const percent = ((total / maxTotal) * 100).toFixed(2);
     let status = percent >= 33 ? 'PASS' : 'FAIL';
     
     let results = JSON.parse(localStorage.getItem('erp_results')) || {};
@@ -638,25 +726,44 @@ function publishResult() {
       roll: roll,
       name: name,
       class: cls,
-      marks: {
-        english: mEng, math: mMath, science: mSci, social: mSoc, hindi: mHin
-      },
+      marks: marks,
       total: total,
+      maxTotal: maxTotal,
       percentage: percent,
       status: status,
       date: new Date().toLocaleDateString('en-GB')
     };
     
     localStorage.setItem('erp_results', JSON.stringify(results));
-    alert(`Result published! Total: ${total}/500 (${percent}%). Status: ${status}`);
+    alert(`Result published! Total: ${total}/${maxTotal} (${percent}%). Status: ${status}`);
     
     document.getElementById('res-roll').value = '';
     document.getElementById('res-name').value = '';
-    document.getElementById('res-english').value = '';
-    document.getElementById('res-math').value = '';
-    document.getElementById('res-science').value = '';
-    document.getElementById('res-social').value = '';
-    document.getElementById('res-hindi').value = '';
+    
+    // reset subjects to default 5 empty fields
+    const container = document.getElementById('dynamic-subjects-container');
+    container.innerHTML = `
+      <div class="subject-input-group" style="display:flex; gap:10px;">
+        <input type="text" class="admin-input subject-name" value="English" placeholder="Subject Name" style="flex:2;" />
+        <input type="number" class="admin-input subject-marks" placeholder="Marks" style="flex:1;" />
+      </div>
+      <div class="subject-input-group" style="display:flex; gap:10px;">
+        <input type="text" class="admin-input subject-name" value="Mathematics" placeholder="Subject Name" style="flex:2;" />
+        <input type="number" class="admin-input subject-marks" placeholder="Marks" style="flex:1;" />
+      </div>
+      <div class="subject-input-group" style="display:flex; gap:10px;">
+        <input type="text" class="admin-input subject-name" value="Science" placeholder="Subject Name" style="flex:2;" />
+        <input type="number" class="admin-input subject-marks" placeholder="Marks" style="flex:1;" />
+      </div>
+      <div class="subject-input-group" style="display:flex; gap:10px;">
+        <input type="text" class="admin-input subject-name" value="Social Studies" placeholder="Subject Name" style="flex:2;" />
+        <input type="number" class="admin-input subject-marks" placeholder="Marks" style="flex:1;" />
+      </div>
+      <div class="subject-input-group" style="display:flex; gap:10px;">
+        <input type="text" class="admin-input subject-name" value="Hindi" placeholder="Subject Name" style="flex:2;" />
+        <input type="number" class="admin-input subject-marks" placeholder="Marks" style="flex:1;" />
+      </div>
+    `;
   });
 }
 

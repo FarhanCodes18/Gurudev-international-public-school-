@@ -354,3 +354,264 @@
     animation: none;
   }
 }
+
+/* ============================================================
+   INTERACTIVE MAPS — RESPONSIVE OVERRIDES
+   ============================================================ */
+
+/* Transport Bus Map */
+@media (max-width: 768px) {
+  #bus-route-canvas { height: 200px !important; }
+  .bm-info-panel { flex-direction: column; }
+  .bm-stop-card, .bm-bus-status { min-width: 100%; }
+  .bm-title { font-size: 1.6rem; }
+  .bm-tabs { gap: 6px; }
+  .bm-tab { padding: 6px 14px; font-size: 0.78rem; }
+}
+@media (max-width: 480px) {
+  #bus-route-canvas { height: 160px !important; }
+  .bm-title { font-size: 1.3rem; }
+  .bm-stop-name { font-size: 1.1rem; }
+  .bm-canvas-wrap { padding: 12px; }
+  .bm-tabs { flex-wrap: wrap; }
+  .bm-tab { font-size: 0.72rem; padding: 5px 10px; }
+}
+
+/* Computer Lab Network Map */
+@media (max-width: 768px) {
+  #lab-network-canvas { height: 220px !important; }
+  .lm-info-panel { flex-direction: column; }
+  .lm-node-card, .lm-network-status { min-width: 100%; }
+  .lm-title { font-size: 1.6rem; }
+  .lm-metrics { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 480px) {
+  #lab-network-canvas { height: 180px !important; }
+  .lm-title { font-size: 1.3rem; }
+  .lm-node-name { font-size: 1.1rem; }
+  .lm-canvas-wrap { padding: 12px; }
+  .lm-metrics { grid-template-columns: 1fr 1fr; gap: 10px; }
+}
+
+/* ============================================================
+   QUICK CALLBACK / POPUP MODAL — RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  .qc-modal-content {
+    flex-direction: column !important;
+    width: 96% !important;
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+  .qc-modal-left { display: none !important; }
+  .qc-modal-right { padding: 24px !important; border-radius: 20px !important; }
+}
+@media (max-width: 480px) {
+  .qc-modal-right { padding: 16px !important; }
+  .qc-modal-right h2 { font-size: 1.3rem !important; }
+}
+
+/* ============================================================
+   ADMISSION BANNER — RESPONSIVE
+   ============================================================ */
+@media (max-width: 576px) {
+  .admission-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+  .admission-actions { justify-content: center; flex-wrap: wrap; }
+  .admission-actions .btn { width: 100%; max-width: 300px; }
+}
+
+/* ============================================================
+   PAGE-LEVEL GLOBAL FIXES
+   ============================================================ */
+
+/* Prevent any element from causing horizontal overflow */
+@media (max-width: 768px) {
+  html, body { overflow-x: hidden; max-width: 100vw; }
+  img, video, iframe, canvas, svg { max-width: 100%; height: auto; }
+  table { word-break: break-word; }
+
+  /* Touch-friendly minimum tap targets */
+  a, button, [role="button"], input[type="submit"], input[type="button"] {
+    min-height: 44px;
+  }
+
+  /* About content on all inner pages */
+  .about-content { grid-template-columns: 1fr !important; }
+  .about-image-main img { height: 280px !important; }
+
+  /* Page hero */
+  .page-hero { padding: 80px 0 40px; }
+  .page-hero-title { font-size: clamp(1.6rem, 6vw, 2.2rem) !important; }
+
+  /* Services & Feature grids on inner pages */
+  .services-grid { grid-template-columns: 1fr !important; }
+  .features-grid { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 480px) {
+  .about-image-main img { height: 220px !important; }
+
+  /* Stat cards on inner pages */
+  .stat-card { padding: 20px 12px; }
+  .stat-number { font-size: 2rem; }
+  .stat-icon { width: 44px; height: 44px; font-size: 1.2rem; }
+}
+
+/* ============================================================
+   MANDATORY DISCLOSURE — TABLE RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  .disclosure-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .disclosure-table { min-width: 480px; }
+  .disclosure-table th, .disclosure-table td { padding: 10px 12px; font-size: 0.85rem; }
+}
+
+/* ============================================================
+   EXAMINATION RESULT PAGE — RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  .result-card { padding: 20px !important; }
+  .result-header-info { flex-direction: column !important; gap: 12px !important; }
+  .marks-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .marks-table { min-width: 320px; }
+  .result-footer { flex-direction: column !important; gap: 12px !important; }
+}
+
+/* ============================================================
+   GALLERY LIGHTBOX — RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  .gallery-lightbox-content { width: 96% !important; max-height: 80vh !important; }
+  .gallery-lightbox-close { top: 10px !important; right: 10px !important; }
+}
+
+/* ============================================================
+   STUDENT PORTAL / ERP AUTH — RESPONSIVE
+   ============================================================ */
+@media (max-width: 480px) {
+  .erp-auth-card { padding: 24px 16px !important; width: 95%; }
+  .erp-auth-card.wide { max-width: 100%; }
+}
+
+/* ============================================================
+   FOOTER — COMPLETE RESPONSIVE OVERHAUL
+   ============================================================ */
+
+/* Fix the broken arrow character using safe unicode escape */
+.footer-link::before { content: '\203a'; }
+
+/* 1200px — 4 cols total (brand takes full first row) */
+@media (max-width: 1200px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 32px;
+  }
+  .footer-brand { grid-column: 1 / -1; }
+  .footer-brand-inner { display: flex; gap: 40px; align-items: flex-start; }
+  .footer-desc { max-width: 400px; margin-bottom: 0; }
+}
+
+/* 992px — 2x2 grid for link columns */
+@media (max-width: 992px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+  .footer-brand { grid-column: 1 / -1; }
+}
+
+/* 768px — Fully stacked, accordion-style */
+@media (max-width: 768px) {
+  .footer { padding-bottom: 90px; } /* Space for floating buttons */
+  .footer-main { padding: 50px 0 32px; }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .footer-brand {
+    grid-column: auto;
+    padding-bottom: 28px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 4px;
+  }
+
+  /* Brand row: logo + description side by side on tablet */
+  .footer-brand > .footer-logo {
+    margin-bottom: 14px;
+  }
+
+  /* Link columns: collapsible accordion on mobile */
+  .footer-col {
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    overflow: hidden;
+  }
+
+  .footer-col-title {
+    padding: 16px 0;
+    margin-bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
+  }
+  .footer-col-title::after {
+    content: '\002B'; /* + */
+    font-size: 1.2rem;
+    color: var(--accent, #d4af37);
+    font-weight: 300;
+    transition: transform 0.3s ease;
+  }
+  .footer-col.open .footer-col-title::after {
+    content: '\2212'; /* - */
+  }
+
+  .footer-links, .footer-contact-items-wrap {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, padding 0.35s ease;
+    padding-bottom: 0;
+  }
+  .footer-col.open .footer-links,
+  .footer-col.open .footer-contact-items-wrap {
+    max-height: 400px;
+    padding-bottom: 16px;
+  }
+
+  .footer-link {
+    padding: 7px 0;
+    font-size: 0.88rem;
+  }
+  .footer-contact-item {
+    padding: 6px 0;
+    font-size: 0.85rem;
+  }
+
+  /* Bottom bar */
+  .footer-bottom {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+    padding: 18px 0;
+  }
+  .footer-copyright { font-size: 0.78rem; }
+
+  /* Social icons — bigger on mobile */
+  .footer-social { gap: 12px; }
+  .footer-social-icon { width: 44px; height: 44px; font-size: 1rem; }
+}
+
+/* 480px — Compact final adjustments */
+@media (max-width: 480px) {
+  .footer-logo-emblem { width: 44px; height: 44px; font-size: 1rem; }
+  .footer-logo-text .name { font-size: 0.82rem; }
+  .footer-desc { font-size: 0.82rem; }
+  .footer-social-icon { width: 40px; height: 40px; }
+}

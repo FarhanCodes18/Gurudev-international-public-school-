@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="css/admin.css" />
   <!-- Chart.js for Student Analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="icon" type="image/png" href="assets/icons/gurudev_school-removebg-preview.png" />
 </head>
 <body>
   
@@ -25,12 +26,15 @@
     <p id="loader-desc" style="color:var(--admin-muted); font-size:0.9rem; margin-top:5px;">Please wait</p>
   </div>
 
+  <!-- Mobile Sidebar Overlay -->
+  <div class="admin-sidebar-overlay" id="admin-sidebar-overlay" onclick="closeSidebarMobile()"></div>
+
   <div class="admin-layout">
     
     <!-- SIDEBAR -->
-    <aside class="admin-sidebar">
+    <aside class="admin-sidebar" id="admin-sidebar">
       <div class="sidebar-header">
-        <div class="sidebar-logo"><i class="fa-solid fa-bolt"></i></div>
+        <img src="assets/icons/gurudev_school-removebg-preview.png" alt="Logo" class="sidebar-logo-img" />
         <div>
           <div class="sidebar-title">Superpower Panel</div>
           <div class="sidebar-subtitle">IDEAL ADMIN</div>
@@ -62,9 +66,14 @@
     <main class="admin-main">
       <!-- HEADER -->
       <header class="admin-header">
-        <div class="header-search">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" placeholder="Search across all modules..." />
+        <div style="display:flex; align-items:center; gap:14px;">
+          <button class="admin-sidebar-toggle" id="admin-sidebar-toggle" onclick="toggleSidebarMobile()" aria-label="Toggle Sidebar">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div class="header-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search across all modules..." />
+          </div>
         </div>
         <div class="header-actions">
           <button class="icon-btn"><i class="fa-regular fa-bell"></i><span class="badge" id="pending-leaves-badge">0</span></button>
@@ -96,11 +105,11 @@
             <div class="table-header">
               <div class="table-title">Recent Admin Activity</div>
             </div>
-            <table class="admin-table">
+            <div class="table-responsive"><table class="admin-table">
               <tbody id="activity-feed">
                 <tr><td colspan="3" style="text-align:center; color:var(--admin-muted); padding:20px;">No recent activity.</td></tr>
               </tbody>
-            </table>
+            </table></div>
           </div>
         </section>
 
@@ -159,22 +168,22 @@
               <div class="table-title">Attendance Register <span id="register-subtitle" style="font-size:0.8rem; color:var(--admin-muted); font-weight:500; margin-left:10px;"></span></div>
               <button class="btn-admin" style="padding:8px 16px; font-size:0.8rem;" onclick="saveAttendance()">Save Attendance</button>
             </div>
-            <table class="admin-table">
+            <div class="table-responsive"><table class="admin-table">
               <thead><tr><th>Student Name</th><th>Student ID</th><th>Status</th></tr></thead>
               <tbody id="attendance-list">
                 <!-- Populated by JS -->
               </tbody>
-            </table>
+            </table></div>
           </div>
 
           <div class="table-container" style="margin-top: 30px;">
             <div class="table-header"><div class="table-title">Pending Leave Requests</div></div>
-            <table class="admin-table">
+            <div class="table-responsive"><table class="admin-table">
               <thead><tr><th>Student Name</th><th>Student ID</th><th>Reason</th><th>Dates</th><th>Actions</th></tr></thead>
               <tbody id="admin-leave-requests">
                 <!-- Populated by JS -->
               </tbody>
-            </table>
+            </table></div>
           </div>
         </section>
 
@@ -236,21 +245,32 @@
           <div class="page-header"><div><h2 class="page-title">Admissions & Callbacks</h2><p class="page-desc">View all online application forms submitted from the website.</p></div></div>
           <div class="table-container">
             <div class="table-header"><div class="table-title">Recent Applications</div><button class="btn-admin" style="padding:8px 16px; font-size:0.8rem;" onclick="loadCallbacks()"><i class="fa-solid fa-rotate-right"></i> Refresh</button></div>
-            <table class="admin-table">
-              <thead><tr><th>Date</th><th>Student Name</th><th>Phone</th><th>Class Applied</th><th>Message</th></tr></thead>
+            <div class="table-responsive"><table class="admin-table">
+              <thead><tr><th>Date</th><th>Student Name</th><th>Phone</th><th>Class Applied</th><th>Message</th><th>Action</th></tr></thead>
               <tbody id="callbacks-list">
-                <tr><td colspan="5" style="text-align:center; color:var(--admin-muted); padding:40px;">No online applications yet.</td></tr>
+                <tr><td colspan="6" style="text-align:center; color:var(--admin-muted); padding:40px;">No online applications yet.</td></tr>
               </tbody>
-            </table>
+            </table></div>
           </div>
           <div class="table-container" style="margin-top: 30px;">
             <div class="table-header"><div class="table-title">Contact Us Inquiries</div><button class="btn-admin" style="padding:8px 16px; font-size:0.8rem;" onclick="loadContactMessages()"><i class="fa-solid fa-rotate-right"></i> Refresh</button></div>
-            <table class="admin-table">
-              <thead><tr><th>Date</th><th>Name</th><th>Phone</th><th>Email & Subject</th><th>Message</th></tr></thead>
+            <div class="table-responsive"><table class="admin-table">
+              <thead><tr><th>Date</th><th>Name</th><th>Phone</th><th>Email & Subject</th><th>Message</th><th>Action</th></tr></thead>
               <tbody id="contact-messages-list">
-                <tr><td colspan="5" style="text-align:center; color:var(--admin-muted); padding:40px;">No contact inquiries yet.</td></tr>
+                <tr><td colspan="6" style="text-align:center; color:var(--admin-muted); padding:40px;">No contact inquiries yet.</td></tr>
               </tbody>
-            </table>
+            </table></div>
+          </div>
+          
+          <!-- QUICK CALLBACK LEADS -->
+          <div class="table-container" style="margin-top: 30px;">
+            <div class="table-header"><div class="table-title">Quick Callbacks (Leads)</div><button class="btn-admin" style="padding:8px 16px; font-size:0.8rem;" onclick="loadQuickCallbacks()"><i class="fa-solid fa-rotate-right"></i> Refresh</button></div>
+            <div class="table-responsive"><table class="admin-table">
+              <thead><tr><th>Date</th><th>Student Details</th><th>Contact Info</th><th>Address & Message</th><th>Action</th></tr></thead>
+              <tbody id="quick-callbacks-list">
+                <tr><td colspan="5" style="text-align:center; color:var(--admin-muted); padding:40px;">No quick callbacks yet.</td></tr>
+              </tbody>
+            </table></div>
           </div>
         </section>
 
@@ -263,13 +283,31 @@
               <div class="admin-form-group" style="margin-bottom:0;"><label>Student Name</label><input type="text" id="res-name" class="admin-input" /></div>
               <div class="admin-form-group" style="margin-bottom:0;"><label>Class</label><select id="res-class" class="admin-select"><option>9</option><option>10</option><option>11</option><option>12</option></select></div>
             </div>
-            <h4 style="color:var(--admin-muted); margin-bottom:15px; font-size:0.85rem; text-transform:uppercase;">Subject Marks (Out of 100)</h4>
-            <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:15px; margin-bottom:24px;">
-              <div><input type="number" id="res-english" class="admin-input" placeholder="English" /></div>
-              <div><input type="number" id="res-math" class="admin-input" placeholder="Math" /></div>
-              <div><input type="number" id="res-science" class="admin-input" placeholder="Science" /></div>
-              <div><input type="number" id="res-social" class="admin-input" placeholder="Social" /></div>
-              <div><input type="number" id="res-hindi" class="admin-input" placeholder="Hindi" /></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+              <h4 style="color:var(--admin-muted); font-size:0.85rem; text-transform:uppercase; margin:0;">Subject Marks (Out of 100)</h4>
+              <button class="btn-admin" style="padding:6px 12px; font-size:0.8rem; background:var(--admin-secondary);" onclick="addSubjectField()"><i class="fa-solid fa-plus"></i> Add Subject</button>
+            </div>
+            <div id="dynamic-subjects-container" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:15px; margin-bottom:24px;">
+              <div class="subject-input-group" style="display:flex; gap:10px;">
+                <input type="text" class="admin-input subject-name" value="English" placeholder="Subject Name" style="flex:2;" />
+                <input type="number" class="admin-input subject-marks" placeholder="Marks" style="flex:1;" />
+              </div>
+              <div class="subject-input-group" style="display:flex; gap:10px;">
+                <input type="text" class="admin-input subject-name" value="Mathematics" placeholder="Subject Name" style="flex:2;" />
+                <input type="number" class="admin-input subject-marks" placeholder="Marks" style="flex:1;" />
+              </div>
+              <div class="subject-input-group" style="display:flex; gap:10px;">
+                <input type="text" class="admin-input subject-name" value="Science" placeholder="Subject Name" style="flex:2;" />
+                <input type="number" class="admin-input subject-marks" placeholder="Marks" style="flex:1;" />
+              </div>
+              <div class="subject-input-group" style="display:flex; gap:10px;">
+                <input type="text" class="admin-input subject-name" value="Social Studies" placeholder="Subject Name" style="flex:2;" />
+                <input type="number" class="admin-input subject-marks" placeholder="Marks" style="flex:1;" />
+              </div>
+              <div class="subject-input-group" style="display:flex; gap:10px;">
+                <input type="text" class="admin-input subject-name" value="Hindi" placeholder="Subject Name" style="flex:2;" />
+                <input type="number" class="admin-input subject-marks" placeholder="Marks" style="flex:1;" />
+              </div>
             </div>
             <button class="btn-admin" onclick="publishResult()"><i class="fa-solid fa-cloud-arrow-up"></i> Publish Result</button>
           </div>
@@ -290,7 +328,7 @@
             <div class="table-header">
               <div class="table-title">All Student Records</div>
             </div>
-            <table class="admin-table">
+            <div class="table-responsive"><table class="admin-table">
               <thead>
                 <tr>
                   <th>Profile</th>
@@ -304,7 +342,7 @@
               <tbody id="all-students-list">
                 <!-- Populated by JS -->
               </tbody>
-            </table>
+            </table></div>
           </div>
         </section>
 
@@ -453,5 +491,34 @@
   </div>
 
   <script src="js/admin.js"></script>
+  <script>
+    // Mobile Sidebar Toggle
+    function toggleSidebarMobile() {
+      const sidebar = document.getElementById('admin-sidebar');
+      const overlay = document.getElementById('admin-sidebar-overlay');
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('show');
+    }
+    function closeSidebarMobile() {
+      const sidebar = document.getElementById('admin-sidebar');
+      const overlay = document.getElementById('admin-sidebar-overlay');
+      sidebar.classList.remove('open');
+      overlay.classList.remove('show');
+    }
+    // Close sidebar on nav item click (mobile UX)
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) closeSidebarMobile();
+      });
+    });
+    // Close on resize to desktop
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 1024) closeSidebarMobile();
+    });
+  </script>
 </body>
 </html>
+
+
+
+

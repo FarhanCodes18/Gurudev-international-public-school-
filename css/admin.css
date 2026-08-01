@@ -58,12 +58,15 @@ body {
   display: flex; align-items: center; gap: 15px;
 }
 .sidebar-logo {
-  width: 44px; height: 44px;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.2rem; color: white;
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+  width: 54px;
+  height: 54px;
+  background: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
 }
 .sidebar-title { font-weight: 800; font-size: 1.25rem; line-height: 1.1; color: var(--admin-heading); letter-spacing: -0.5px; }
 .sidebar-subtitle { font-size: 0.8rem; color: var(--admin-muted); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
@@ -279,3 +282,118 @@ body {
   background: rgba(0,0,0,0.3) !important;
   border: 1px solid var(--admin-border) !important;
 }
+
+/* ============================================================
+   ADMIN PANEL  MOBILE RESPONSIVE OVERRIDES
+   ============================================================ */
+
+/* Mobile hamburger toggle for admin sidebar */
+.admin-sidebar-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--admin-heading);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: 0.2s;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+.admin-sidebar-toggle:hover { background: var(--admin-surface-hover); }
+
+/* Overlay for mobile sidebar */
+.admin-sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 99;
+}
+.admin-sidebar-overlay.show { display: block; }
+
+@media (max-width: 1024px) {
+  /* Admin layout: sidebar becomes off-canvas */
+  .admin-layout { overflow: hidden; position: relative; }
+
+  .admin-sidebar {
+    position: fixed;
+    left: -290px;
+    top: 0; bottom: 0;
+    z-index: 100;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+  }
+  .admin-sidebar.open { left: 0; }
+
+  .admin-main { width: 100%; }
+
+  /* Show toggle button */
+  .admin-sidebar-toggle { display: flex; }
+
+  /* Header adjusts */
+  .admin-header { padding: 0 20px; }
+  .header-search input { width: 200px; }
+  .header-search input:focus { width: 240px; }
+
+  /* Content area */
+  .admin-content { padding: 20px; }
+
+  /* Stat grid: 2 columns on tablet */
+  .admin-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Dashboard grid: stack on smaller screens */
+  .admin-dashboard-grid { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 768px) {
+  .admin-header { height: 64px; padding: 0 16px; }
+  .header-search { display: none; }
+  .admin-content { padding: 16px; }
+
+  /* Tables: add horizontal scroll */
+  .admin-table-wrapper,
+  .admin-section-body { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .admin-table { min-width: 600px; }
+
+  /* Stats: 2x2 grid */
+  .admin-stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px; }
+
+  /* Section cards: reduce padding */
+  .admin-section { padding: 16px; margin-bottom: 16px; }
+  .admin-section-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+
+  /* Results form: full width fields */
+  .result-form-grid { grid-template-columns: 1fr !important; }
+  .subjects-container { grid-template-columns: 1fr !important; }
+
+  /* Gallery grid */
+  .gallery-admin-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Modals: full width on mobile */
+  .modal-content, .admin-modal-content { width: 95% !important; padding: 20px !important; }
+
+  /* Ensure all buttons have minimum tap targets */
+  .btn-admin, .btn-danger, .btn-success, .btn-warning {
+    min-height: 44px;
+    padding: 10px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-stats-grid { grid-template-columns: 1fr !important; }
+  .admin-section-header .btn-admin { width: 100%; justify-content: center; }
+  .admin-header .header-right { gap: 10px; }
+  .admin-table { font-size: 0.82rem; }
+  .admin-table th, .admin-table td { padding: 10px 8px; }
+}
+
+/* Logo Image */
+.sidebar-logo-img { height: 85%; width: 85%; object-fit: contain; }
+
+
+.erp-auth-logo-img { width: 90%; height: 90%; object-fit: contain; }
+

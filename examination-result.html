@@ -34,12 +34,13 @@
     
     .result-footer { padding: 25px; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
     .total-box { text-align: left; }
-    .total-box span { display: block; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 5px; }
+    .total-box > span { display: block; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 5px; }
     .total-box strong { font-size: 1.8rem; color: var(--primary); line-height: 1; }
     
     .status-pass { background: #dcfce7; color: #16a34a; padding: 8px 20px; border-radius: 30px; font-weight: 800; font-size: 1.2rem; display: inline-block; }
     .status-fail { background: #fee2e2; color: #dc2626; padding: 8px 20px; border-radius: 30px; font-weight: 800; font-size: 1.2rem; display: inline-block; }
   </style>
+  <link rel="icon" type="image/png" href="assets/icons/gurudev_school-removebg-preview.png" />
 </head>
 <body>
   <div class="header">
@@ -63,7 +64,7 @@
         <p>Roll No: <span id="res-roll" style="color:var(--text-primary);"></span> &nbsp;|&nbsp; Class: <span id="res-class" style="color:var(--text-primary);"></span> &nbsp;|&nbsp; Date: <span id="res-date" style="color:var(--text-primary);"></span></p>
       </div>
       
-      <table class="marks-table">
+      <div class="marks-table-wrap"><table class="marks-table">
         <thead>
           <tr>
             <th style="text-align:left;">Subject</th>
@@ -72,18 +73,14 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td style="text-align:left; color:var(--text-secondary); font-weight:500;">English</td><td>100</td><td id="m-eng">0</td></tr>
-          <tr><td style="text-align:left; color:var(--text-secondary); font-weight:500;">Mathematics</td><td>100</td><td id="m-math">0</td></tr>
-          <tr><td style="text-align:left; color:var(--text-secondary); font-weight:500;">Science</td><td>100</td><td id="m-sci">0</td></tr>
-          <tr><td style="text-align:left; color:var(--text-secondary); font-weight:500;">Social Studies</td><td>100</td><td id="m-soc">0</td></tr>
-          <tr><td style="text-align:left; color:var(--text-secondary); font-weight:500;">Hindi</td><td>100</td><td id="m-hin">0</td></tr>
+          <!-- Rows dynamically populated by JS -->
         </tbody>
-      </table>
+      </table></div>
       
       <div class="result-footer">
         <div class="total-box">
           <span>Total / Percentage</span>
-          <strong><span id="m-total">0</span>/500 (<span id="m-pct">0</span>%)</strong>
+          <strong id="m-total-display">0/500 (<span id="m-pct">0</span>%)</strong>
         </div>
         <div id="m-status" class="status-pass">PASS</div>
       </div>
@@ -114,14 +111,29 @@
         document.getElementById('res-class').innerText = res.class;
         document.getElementById('res-date').innerText = res.date;
         
-        document.getElementById('m-eng').innerText = res.marks.english;
-        document.getElementById('m-math').innerText = res.marks.math;
-        document.getElementById('m-sci').innerText = res.marks.science;
-        document.getElementById('m-soc').innerText = res.marks.social;
-        document.getElementById('m-hin').innerText = res.marks.hindi;
+        // Dynamically build the marks table
+        const tbody = document.querySelector('.marks-table tbody');
+        tbody.innerHTML = '';
         
-        document.getElementById('m-total').innerText = res.total;
-        document.getElementById('m-pct').innerText = res.percentage;
+        // Handle both old schema and new dynamic schema
+        let marksObj = res.marks;
+        if (marksObj.english !== undefined && !marksObj['English']) {
+          // It's the old schema, convert to nice names for display
+          marksObj = {
+            'English': marksObj.english,
+            'Mathematics': marksObj.math,
+            'Science': marksObj.science,
+            'Social Studies': marksObj.social,
+            'Hindi': marksObj.hindi
+          };
+        }
+        
+        for (const [subject, marks] of Object.entries(marksObj)) {
+          tbody.innerHTML += `<tr><td style="text-align:left; color:var(--text-secondary); font-weight:500;">${subject}</td><td>100</td><td>${marks}</td></tr>`;
+        }
+        
+        const maxTotal = res.maxTotal || 500;
+        document.getElementById('m-total-display').innerHTML = `${res.total}/${maxTotal} (<span id="m-pct">${res.percentage}</span>%)`;
         
         const statEl = document.getElementById('m-status');
         statEl.innerText = res.status;

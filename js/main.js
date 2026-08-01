@@ -493,4 +493,103 @@
     });
   }
 
+  // ============================================================
+  // GLOBAL QUICK CALLBACK POPUP
+  // ============================================================
+  setTimeout(() => {
+    // Inject Modal HTML
+    const modalHTML = `
+      <div id="quick-callback-modal">
+        <div class="qc-modal-content">
+          <button class="qc-close" id="qc-close-btn"><i class="fa-solid fa-xmark"></i></button>
+          
+          <div class="qc-left">
+            <div class="qc-left-content">
+              <h3>Admissions Open 2026-27</h3>
+              <p>Secure your child's future at Gurudev International Public School.</p>
+              <ul>
+                <li><i class="fa-solid fa-check"></i> Experienced Faculty</li>
+                <li><i class="fa-solid fa-check"></i> Modern Infrastructure</li>
+                <li><i class="fa-solid fa-check"></i> Holistic Development</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="qc-right">
+            <div class="qc-header">
+              <h4>Admission Support</h4>
+              <h2>Get A Quick Call Back</h2>
+              <p>Fill details for course guidance, scholarship, and fees.</p>
+            </div>
+            <form id="quick-callback-form" class="qc-form">
+              <div class="qc-form-row" style="display:none;">
+                <input type="hidden" id="qc-program" value="N/A" />
+                <input type="hidden" id="qc-branch" value="N/A" />
+              </div>
+              <div class="qc-form-row">
+                <input type="text" id="qc-name" class="qc-input" placeholder="Full Name *" required />
+                <input type="tel" id="qc-phone" class="qc-input" placeholder="Phone Number *" required />
+              </div>
+              <input type="email" id="qc-email" class="qc-input" placeholder="Email Address *" required />
+              <input type="text" id="qc-address" class="qc-input" placeholder="Address *" required />
+              <input type="text" id="qc-message" class="qc-input" placeholder="Message (optional)" />
+              <button type="submit" class="qc-submit">Request Callback</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    const modal = document.getElementById('quick-callback-modal');
+    const closeBtn = document.getElementById('qc-close-btn');
+    const form = document.getElementById('quick-callback-form');
+    
+    // Show Modal
+    setTimeout(() => modal.classList.add('active'), 50);
+    
+    // Close Logic
+    closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.remove('active');
+    });
+    
+    // Form Submission
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const lead = {
+        date: new Date().toLocaleDateString('en-GB'),
+        program: document.getElementById('qc-program').value,
+        branch: document.getElementById('qc-branch').value,
+        name: document.getElementById('qc-name').value,
+        phone: document.getElementById('qc-phone').value,
+        email: document.getElementById('qc-email').value,
+        address: document.getElementById('qc-address').value,
+        message: document.getElementById('qc-message').value
+      };
+      
+      let leads = JSON.parse(localStorage.getItem('admin_quick_callbacks')) || [];
+      leads.push(lead);
+      localStorage.setItem('admin_quick_callbacks', JSON.stringify(leads));
+      
+      alert("Thank you! Our admission counselor will call you shortly.");
+      modal.classList.remove('active');
+    });
+    
+  }, 2000); // 2-second delay
+
+  /* ===========================
+     MOBILE FOOTER ACCORDION
+  =========================== */
+  const footerTitles = document.querySelectorAll('.footer-col-title');
+  footerTitles.forEach(title => {
+    title.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        const parentCol = title.closest('.footer-col');
+        parentCol.classList.toggle('open');
+      }
+    });
+  });
+
 })();

@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    GURUDEV INTERNATIONAL PUBLIC SCHOOL â€” MASTER STYLESHEET
    Author: Premium Web Design Studio
    Version: 1.0.0
@@ -169,7 +169,7 @@ input, textarea, select {
   top: 0;
   left: 0;
   pointer-events: none;
-  z-index: 9998;
+  z-index: 9999999;
   transform: translate(-50%, -50%);
   transition: transform 0.1s ease;
 }
@@ -183,7 +183,7 @@ input, textarea, select {
   top: 0;
   left: 0;
   pointer-events: none;
-  z-index: 9997;
+  z-index: 9999998;
   transform: translate(-50%, -50%);
   transition: transform 0.15s ease, width 0.3s ease, height 0.3s ease, border-color 0.3s ease;
 }
@@ -628,25 +628,29 @@ input, textarea, select {
 }
 
 .logo-emblem {
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  width: 65px;
+  height: 65px;
+  background: #ffffff;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-accent);
-  font-size: 1.4rem;
-  font-weight: 900;
-  color: var(--accent);
-  box-shadow: 0 4px 15px rgba(11, 61, 145, 0.3);
-  border: 2px solid rgba(212, 175, 55, 0.3);
-  transition: var(--transition-normal);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(0,0,0,0.05);
+  overflow: hidden;
 }
 
 .navbar-logo:hover .logo-emblem {
-  transform: rotate(5deg) scale(1.05);
-  box-shadow: 0 6px 25px rgba(11, 61, 145, 0.5);
+  width: 65px;
+  height: 65px;
+  background: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(0,0,0,0.05);
+  overflow: hidden;
 }
 
 .logo-text { line-height: 1.1; }
@@ -2293,18 +2297,16 @@ textarea.form-control { resize: vertical; min-height: 120px; }
 }
 
 .footer-logo-emblem {
-  width: 52px;
-  height: 52px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  width: 65px;
+  height: 65px;
+  background: #ffffff;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-accent);
-  font-size: 1.2rem;
-  font-weight: 900;
-  color: var(--accent);
-  border: 2px solid rgba(212, 175, 55, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(0,0,0,0.05);
+  overflow: hidden;
 }
 
 .footer-logo-text .name {
@@ -2388,7 +2390,7 @@ textarea.form-control { resize: vertical; min-height: 120px; }
 }
 
 .footer-link::before {
-  content: 'â€º';
+  content: '›';
   color: var(--accent);
   font-size: 1rem;
   transition: transform var(--transition-fast);
@@ -3444,3 +3446,180 @@ textarea.form-control { resize: vertical; min-height: 120px; }
 }
 
 /* Base states applied via JS */
+
+/* ============================================================
+   GLOBAL QUICK CALLBACK POPUP
+   ============================================================ */
+#quick-callback-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(5px);
+  z-index: 999999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+#quick-callback-modal.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.qc-modal-content {
+  background: #f1f5f9;
+  width: 90%;
+  max-width: 900px;
+  border-radius: 24px;
+  position: relative;
+  transform: translateY(30px);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  display: flex;
+  overflow: hidden;
+}
+
+#quick-callback-modal.active .qc-modal-content {
+  transform: translateY(0);
+}
+
+.qc-left {
+  flex: 1;
+  background: url('../assets/images/hero-1.jpg') center/cover;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  padding: 40px;
+}
+
+.qc-left::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(5, 14, 31, 0.95) 0%, rgba(11, 61, 145, 0.6) 60%, rgba(11, 61, 145, 0.2) 100%);
+  z-index: 1;
+}
+
+.qc-left-content {
+  position: relative;
+  z-index: 2;
+  color: white;
+}
+
+.qc-left-content h3 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+  color: var(--accent);
+}
+
+.qc-left-content p {
+  font-size: 1rem;
+  margin-bottom: 20px;
+  line-height: 1.5;
+  color: rgba(255,255,255,0.9);
+}
+
+.qc-left-content ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.qc-left-content ul li {
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.qc-left-content ul li i {
+  color: var(--accent);
+}
+
+.qc-right {
+  flex: 1.2;
+  padding: 50px 40px;
+  background: #f1f5f9;
+}
+
+.qc-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0,0,0,0.1);
+  color: #334155;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  z-index: 10;
+}
+
+.qc-close:hover { background: rgba(0,0,0,0.8); color: white; }
+
+.qc-header { margin-bottom: 25px; }
+.qc-header h4 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--primary); margin-bottom: 5px; font-weight: 700; }
+.qc-header h2 { font-size: 2rem; color: #0f172a; margin-bottom: 10px; font-weight: 800; }
+.qc-header p { color: #64748b; font-size: 1rem; }
+
+.qc-form { display: flex; flex-direction: column; gap: 16px; }
+.qc-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.qc-input { 
+  width: 100%; padding: 14px 20px; 
+  border: 1px solid #cbd5e1; border-radius: 12px; 
+  background: white; font-size: 0.95rem; 
+  font-family: inherit; transition: border-color 0.3s;
+  color: #334155;
+}
+.qc-input:focus { outline: none; border-color: var(--primary); }
+.qc-submit {
+  background: #0f172a;
+  color: white;
+  border: none;
+  padding: 16px;
+  border-radius: 12px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.3s;
+}
+.qc-submit:hover { background: var(--primary); }
+
+@media(max-width: 768px) {
+  .qc-modal-content { flex-direction: column; width: 95%; padding: 0; }
+  .qc-left { display: none; }
+  .qc-right { padding: 40px 20px; }
+  .qc-header h2 { font-size: 1.6rem; }
+}
+
+@media(max-width: 600px) {
+  .qc-form-row { grid-template-columns: 1fr; }
+}
+
+/* Responsive Tables */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 20px;
+}
+
+
+/* Logo Images */
+.logo-image { height: 85%; width: 85%; object-fit: contain; }
+.footer-logo-image { height: 85%; width: 85%; object-fit: contain; }
+.loader-logo-img { height: 90px; width: auto; object-fit: contain; margin-bottom: 20px; background: #ffffff; padding: 10px; border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+.drawer-logo-img { height: 60px; width: auto; object-fit: contain; background: #ffffff; padding: 5px; border-radius: 50%; }
+
