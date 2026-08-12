@@ -84,10 +84,10 @@ body {
   color: var(--admin-heading);
 }
 .nav-item.active {
-  background: var(--admin-accent-light);
+  background: linear-gradient(90deg, var(--admin-accent-light), transparent);
   color: var(--admin-accent-hover);
   font-weight: 600;
-  box-shadow: inset 2px 0 0 var(--admin-accent);
+  box-shadow: inset 4px 0 0 var(--admin-accent);
 }
 .nav-item i { width: 22px; font-size: 1.1rem; text-align: center; color: var(--admin-muted); transition: 0.3s; }
 .nav-item:hover i { color: var(--admin-heading); transform: scale(1.1); }
@@ -162,7 +162,11 @@ body {
   background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.06), transparent 40%);
   opacity: 0; transition: opacity 0.4s; pointer-events: none;
 }
-.stat-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); border-color: rgba(255,255,255,0.15); }
+.stat-card:hover { 
+  transform: translateY(-8px); 
+  box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 20px var(--admin-accent-glow); 
+  border-color: rgba(255,255,255,0.25); 
+}
 .stat-card:hover::before { opacity: 1; }
 .stat-icon {
   width: 72px; height: 72px; border-radius: 20px;
@@ -188,7 +192,7 @@ body {
   margin-bottom: 30px;
 }
 .table-container { padding: 0; overflow: hidden; }
-.table-header { padding: 24px 32px; border-bottom: 1px solid var(--admin-border); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); }
+.table-header { padding: 24px 32px; border-bottom: 1px solid var(--admin-border); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); backdrop-filter: blur(10px); }
 .table-title { font-size: 1.2rem; font-weight: 700; color: var(--admin-heading); }
 
 /* DATA TABLES */

@@ -154,6 +154,36 @@
   });
 
   /* ===========================
+     RENDER DYNAMIC REVIEWS
+  =========================== */
+  const reviewsTrack = document.getElementById('dynamic-reviews-track');
+  if(reviewsTrack) {
+    let reviews = JSON.parse(localStorage.getItem('admin_student_reviews')) || [];
+    let approvedReviews = reviews.filter(r => r.status === 'approved');
+    if(approvedReviews.length > 0) {
+      let html = '';
+      approvedReviews.forEach(r => {
+        html += `
+          <div class="testimonial-card">
+            <div class="stars">${'★'.repeat(Number(r.rating))}${'☆'.repeat(5 - Number(r.rating))}</div>
+            <div class="testimonial-quote">"</div>
+            <p class="testimonial-text">${r.text}</p>
+            <div class="testimonial-author">
+              <div class="testimonial-info" style="margin-left:0;">
+                <strong>${r.name}</strong>
+                <span>${r.role}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      reviewsTrack.innerHTML = html;
+    } else {
+      reviewsTrack.innerHTML = '<div class="testimonial-card" style="opacity:0.5;"><p class="testimonial-text">No reviews yet. Be the first to share your feedback!</p></div>';
+    }
+  }
+
+  /* ===========================
      TESTIMONIALS SLIDER
   =========================== */
   const testSlider = document.querySelector('.testimonials-slider');
@@ -171,14 +201,16 @@
     }
 
     function goToTest(index) {
+      if(total === 0) return;
       const perPage = getPerPage();
       const max     = Math.max(0, total - perPage);
       current = Math.max(0, Math.min(index, max));
-      const cardWidth = cards[0].offsetWidth + 24; // + gap
-      track.style.transform = `translateX(${-current * cardWidth}px)`;
+      const cardWidth = cards[0] ? cards[0].offsetWidth + 24 : 0; // + gap
+      if(track && cardWidth > 0) track.style.transform = `translateX(${-current * cardWidth}px)`;
     }
 
     autoInterval = setInterval(() => {
+      if(total === 0) return;
       const perPage = getPerPage();
       const max     = Math.max(0, total - perPage);
       current = current >= max ? 0 : current + 1;
@@ -188,6 +220,7 @@
     testSlider.addEventListener('mouseenter', () => clearInterval(autoInterval));
     testSlider.addEventListener('mouseleave', () => {
       autoInterval = setInterval(() => {
+        if(total === 0) return;
         const perPage = getPerPage();
         const max     = Math.max(0, total - perPage);
         current = current >= max ? 0 : current + 1;
@@ -197,6 +230,10 @@
 
     window.addEventListener('resize', () => goToTest(current));
   }
+
+  // (Reviews block moved up)
+
+  // (News rendering moved to renderNewsAndEvents() at end of file)
 
   /* ===========================
      SMOOTH SCROLL (Anchor Links)
@@ -488,15 +525,59 @@
       
       localStorage.setItem('admin_contact_messages', JSON.stringify(messages));
       
+      // Also send via mailto
+      window.location.href = `mailto:admin@gurudevinternational.edu.in?subject=${encodeURIComponent(subject || 'Website Contact Form')}&body=${encodeURIComponent("Name: " + name + "\nPhone: " + phone + "\nEmail: " + email + "\n\nMessage:\n" + message)}`;
+      
       alert("Thank you! Your message has been sent. We will get back to you shortly.");
       contactForm.reset();
+    });
+  }
+
+  // Handle Feedback Form Submission
+  const feedbackForm = document.getElementById('feedback-form');
+  if(feedbackForm) {
+    feedbackForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('fb-name').value;
+      const role = document.getElementById('fb-role').value;
+      const rating = document.getElementById('fb-rating').value;
+      const message = document.getElementById('fb-message').value;
+      
+      let reviews = JSON.parse(localStorage.getItem('admin_student_reviews')) || [];
+      reviews.push({
+        id: Date.now(),
+        name,
+        role,
+        rating,
+        text: message,
+        status: 'pending',
+        date: new Date().toLocaleDateString('en-GB')
+      });
+      localStorage.setItem('admin_student_reviews', JSON.stringify(reviews));
+      
+      const modalContent = document.querySelector('#feedback-modal .modal-content');
+      if (modalContent) {
+        modalContent.innerHTML = `
+          <div style="text-align:center; padding: 40px 20px;">
+            <i class="fa-solid fa-circle-check" style="font-size: 4rem; color: #16a34a; margin-bottom: 20px;"></i>
+            <h3 style="margin-bottom: 15px; color: var(--heading-color);">Thank You!</h3>
+            <p style="color: var(--text-color); margin-bottom: 30px;">Your feedback has been successfully submitted and is pending admin approval.</p>
+            <button class="btn btn-primary" onclick="document.getElementById('feedback-modal').classList.remove('active'); setTimeout(() => window.location.reload(), 300);">Close</button>
+          </div>
+        `;
+      } else {
+        alert("Thank you for your feedback! It has been submitted to the admin for approval.");
+        feedbackForm.reset();
+        document.getElementById('feedback-modal').classList.remove('active');
+      }
     });
   }
 
   // ============================================================
   // GLOBAL QUICK CALLBACK POPUP
   // ============================================================
-  setTimeout(() => {
+  if (!sessionStorage.getItem('quickCallbackShown')) {
+    setTimeout(() => {
     // Inject Modal HTML
     const modalHTML = `
       <div id="quick-callback-modal">
@@ -546,7 +627,10 @@
     const form = document.getElementById('quick-callback-form');
     
     // Show Modal
-    setTimeout(() => modal.classList.add('active'), 50);
+    setTimeout(() => {
+      modal.classList.add('active');
+      sessionStorage.setItem('quickCallbackShown', 'true');
+    }, 50);
     
     // Close Logic
     closeBtn.addEventListener('click', () => modal.classList.remove('active'));
@@ -577,7 +661,8 @@
       modal.classList.remove('active');
     });
     
-  }, 2000); // 2-second delay
+    }, 2000); // 2-second delay
+  }
 
   /* ===========================
      MOBILE FOOTER ACCORDION
@@ -591,5 +676,55 @@
       }
     });
   });
+
+  /* ===========================
+     (Removed duplicate faculty carousel logic)
+  =========================== */
+
+  /* ===========================
+     DYNAMIC NEWS & EVENTS
+  =========================== */
+  function renderNewsAndEvents() {
+    const grids = [
+      document.getElementById('dynamic-news-grid'),
+      document.getElementById('news-page-grid')
+    ];
+    
+    let newsList = JSON.parse(localStorage.getItem('admin_news_events')) || [];
+    
+    grids.forEach(grid => {
+      if(!grid) return;
+      grid.innerHTML = '';
+      
+      if(newsList.length === 0) {
+        grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-color); padding: 40px;">No news or events published yet. Check back later!</div>';
+        return;
+      }
+      
+      newsList.forEach((news, idx) => {
+        // Limit to 3 on homepage, show all on news page
+        if(grid.id === 'dynamic-news-grid' && idx >= 3) return;
+        
+        const photo = news.image || 'assets/images/hero-3.jpg';
+        grid.innerHTML += `
+          <article class='news-card' data-aos='fade-up' data-aos-delay='${(idx % 3 + 1) * 100}'>
+            <div class='news-image'>
+              <img src='${photo}' alt='${news.title}' loading='lazy' style='object-fit:cover; width:100%; height:100%;' />
+              <span class='news-category'>${news.category}</span>
+            </div>
+            <div class='news-body'>
+              <div class='news-meta'>
+                <span class='news-meta-item'><i class='fa-regular fa-calendar'></i> ${news.date}</span>
+              </div>
+              <h3 class='news-title'>${news.title}</h3>
+              <p class='news-excerpt'>${news.excerpt}</p>
+              <a href='news.html' class='news-read-more'>Read More <i class='fa-solid fa-arrow-right'></i></a>
+            </div>
+          </article>
+        `;
+      });
+    });
+  }
+  renderNewsAndEvents();
 
 })();

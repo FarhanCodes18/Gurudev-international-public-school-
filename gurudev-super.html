@@ -34,7 +34,9 @@
     <!-- SIDEBAR -->
     <aside class="admin-sidebar" id="admin-sidebar">
       <div class="sidebar-header">
-        <img src="assets/icons/gurudev_school-removebg-preview.png" alt="Logo" class="sidebar-logo-img" />
+        <div class="sidebar-logo">
+          <img src="assets/icons/gurudev_school-removebg-preview.png" alt="Logo" class="sidebar-logo-img" />
+        </div>
         <div>
           <div class="sidebar-title">Superpower Panel</div>
           <div class="sidebar-subtitle">IDEAL ADMIN</div>
@@ -207,6 +209,16 @@
             <div class="admin-form-group"><label>Stream & Score / Subtitle</label><input type="text" id="gallery-score" class="admin-input" placeholder="e.g. Class XII Science - 98.2%" /></div>
             <div class="admin-form-group"><label>Upload Photo</label><input type="file" id="gallery-photo" class="admin-input" accept="image/*" /></div>
             <button class="btn-admin" onclick="uploadGallery()"><i class="fa-solid fa-cloud-arrow-up"></i> Upload & Sync to Homepage</button>
+            
+            <div class="table-container" style="margin-top: 30px; border:none; padding:0; box-shadow:none;">
+              <div class="table-header" style="background:transparent; padding:0 0 15px 0;"><div class="table-title">Uploaded Achievers</div></div>
+              <div class="table-responsive"><table class="admin-table">
+                <thead><tr><th>Photo</th><th>Name</th><th>Score</th><th>Action</th></tr></thead>
+                <tbody id="achievers-list">
+                  <tr><td colspan="4" style="text-align:center; color:var(--admin-muted);">No achievers uploaded yet.</td></tr>
+                </tbody>
+              </table></div>
+            </div>
           </div>
           
           <div class="form-card" style="margin-top: 20px;">
@@ -215,14 +227,33 @@
             <div class="admin-form-group"><label>Gallery Description / Event Name</label><input type="text" id="school-gallery-desc" class="admin-input" placeholder="e.g. Annual Sports Day 2026" /></div>
             <div class="admin-form-group"><label>Upload Photo</label><input type="file" id="school-gallery-photo" class="admin-input" accept="image/*" /></div>
             <button class="btn-admin" onclick="uploadSchoolGallery()"><i class="fa-solid fa-images"></i> Upload to Gallery</button>
+            
+            <div class="table-container" style="margin-top: 30px; border:none; padding:0; box-shadow:none;">
+              <div class="table-header" style="background:transparent; padding:0 0 15px 0;"><div class="table-title">Uploaded School Photos</div></div>
+              <div class="table-responsive"><table class="admin-table">
+                <thead><tr><th>Photo</th><th>Description</th><th>Date</th><th>Action</th></tr></thead>
+                <tbody id="school-gallery-list">
+                  <tr><td colspan="4" style="text-align:center; color:var(--admin-muted);">No photos uploaded yet.</td></tr>
+                </tbody>
+              </table></div>
+            </div>
           </div>
         </section>
 
-        <!-- NOTICES & E-LIBRARY -->
+        <!-- NOTICES, NEWS & E-LIBRARY -->
         <section id="view-notices" class="view-section">
-          <div class="page-header"><div><h2 class="page-title">Notices & E-Library</h2><p class="page-desc">Publish digital notices and library books directly to the live website.</p></div></div>
+          <div class="page-header"><div><h2 class="page-title">News, Notices & E-Library</h2><p class="page-desc">Publish news, events, digital notices, and library books directly to the live website.</p></div></div>
           
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:24px;">
+            <div class="form-card">
+              <h3 style="margin-bottom: 15px;">Publish News & Events</h3>
+              <div class="admin-form-group"><label>Category</label><select id="news-category" class="admin-select"><option>Events</option><option>Achievement</option><option>Sports</option></select></div>
+              <div class="admin-form-group"><label>News Title</label><input type="text" id="news-title" class="admin-input" placeholder="e.g. Annual Prize Distribution" /></div>
+              <div class="admin-form-group"><label>Excerpt / Short Details</label><textarea id="news-excerpt" class="admin-input" style="height:60px;" placeholder="Short description..."></textarea></div>
+              <div class="admin-form-group"><label>Upload Photo</label><input type="file" id="news-photo" class="admin-input" accept="image/*" /></div>
+              <button class="btn-admin" onclick="publishNews()"><i class="fa-solid fa-newspaper"></i> Publish News</button>
+            </div>
+
             <div class="form-card">
               <h3 style="margin-bottom: 15px;">Publish Notice</h3>
               <div class="admin-form-group"><label>Notice Title</label><input type="text" id="notice-title" class="admin-input" placeholder="e.g. Holiday on Monday" /></div>
@@ -237,6 +268,16 @@
               <div class="admin-form-group"><label>PDF Link</label><input type="text" id="lib-link" class="admin-input" placeholder="https://..." /></div>
               <button class="btn-admin" onclick="publishLibraryItem()"><i class="fa-solid fa-book-medical"></i> Add to Library</button>
             </div>
+          </div>
+          
+          <div class="table-container" style="margin-top: 30px;">
+            <div class="table-header"><div class="table-title">Published News & Events</div></div>
+            <div class="table-responsive"><table class="admin-table">
+              <thead><tr><th>Date</th><th>Category</th><th>Title</th><th>Excerpt</th><th>Action</th></tr></thead>
+              <tbody id="news-list">
+                <tr><td colspan="5" style="text-align:center; color:var(--admin-muted);">No news published yet.</td></tr>
+              </tbody>
+            </table></div>
           </div>
         </section>
 
@@ -315,8 +356,27 @@
         
         <!-- STUDENT REVIEWS -->
         <section id="view-reviews" class="view-section">
-          <div class="page-header"><div><h2 class="page-title">Student Reviews</h2><p class="page-desc">Manage reviews displayed on the website.</p></div></div>
-          <div class="form-card"><p style="color:var(--admin-muted);">No pending reviews for approval.</p></div>
+          <div class="page-header"><div><h2 class="page-title">Student Reviews</h2><p class="page-desc">Manage feedback submitted by students and parents. Only approved reviews appear on the website.</p></div></div>
+          
+          <div class="table-container" style="margin-bottom:30px;">
+            <div class="table-header"><div class="table-title">Pending Reviews (Requires Approval)</div></div>
+            <div class="table-responsive"><table class="admin-table">
+              <thead><tr><th>Date</th><th>Name & Role</th><th>Rating</th><th>Feedback</th><th>Actions</th></tr></thead>
+              <tbody id="pending-reviews-list">
+                <tr><td colspan="5" style="text-align:center; color:var(--admin-muted);">No pending reviews.</td></tr>
+              </tbody>
+            </table></div>
+          </div>
+          
+          <div class="table-container">
+            <div class="table-header"><div class="table-title">Approved Reviews (Live on Website)</div></div>
+            <div class="table-responsive"><table class="admin-table">
+              <thead><tr><th>Date</th><th>Name & Role</th><th>Rating</th><th>Feedback</th><th>Actions</th></tr></thead>
+              <tbody id="approved-reviews-list">
+                <tr><td colspan="5" style="text-align:center; color:var(--admin-muted);">No approved reviews.</td></tr>
+              </tbody>
+            </table></div>
+          </div>
         </section>
 
         <!-- REGISTERED STUDENTS -->
@@ -488,6 +548,13 @@
       </div>
       
     </div>
+  </div>
+
+  <!-- LOADER OVERLAY (required by showLoader function) -->
+  <div class="admin-loader-overlay" id="admin-loader">
+    <div class="admin-spinner"></div>
+    <h3 id="loader-title" style="color:var(--admin-heading); margin-top:10px; font-weight:700;">Loading...</h3>
+    <p id="loader-desc" style="color:var(--admin-muted); font-size:0.9rem;">Please wait...</p>
   </div>
 
   <script src="js/admin.js"></script>

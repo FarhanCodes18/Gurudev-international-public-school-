@@ -85,14 +85,77 @@
             <div class="school-tagline">Public School</div>
           </div>
         </a>
-        <ul class="navbar-menu">
-          <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
-          <li class="nav-item"><a href="about.html" class="nav-link">About</a></li>
-          <li class="nav-item"><a href="campus.html" class="nav-link">Campus</a></li>
-          <li class="nav-item"><a href="academics.html" class="nav-link">Academics</a></li>
-          <li class="nav-item"><a href="admission.html" class="nav-link">Admission</a></li>
-          <li class="nav-item"><a href="faculty.html" class="nav-link">Faculty</a></li>
-          <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>
+        <ul class="navbar-menu" role="list">
+
+          <li class="nav-item">
+            <a href="index.html" class="nav-link active">Home</a>
+          </li>
+
+          <!-- About Dropdown -->
+          <li class="nav-item">
+            <a href="about.html" class="nav-link">About <i class="fa-solid fa-chevron-down arrow"></i></a>
+            <div class="dropdown">
+              <a href="about.html"           class="dropdown-item"><i class="fa-solid fa-school"></i> School Overview</a>
+              <a href="chairman-message.html" class="dropdown-item"><i class="fa-solid fa-user-tie"></i> Chairman's Message</a>
+              <a href="director-message.html" class="dropdown-item"><i class="fa-solid fa-user-tie"></i> Director's Message</a>
+              <a href="principal-message.html" class="dropdown-item"><i class="fa-solid fa-user-graduate"></i> Principal's Message</a>
+              <a href="mission-vision.html"  class="dropdown-item"><i class="fa-solid fa-bullseye"></i> Mission & Vision</a>
+            </div>
+          </li>
+
+          <!-- Campus Mega Menu -->
+          <li class="nav-item">
+            <a href="campus.html" class="nav-link">Campus <i class="fa-solid fa-chevron-down arrow"></i></a>
+            <div class="mega-menu">
+              <div class="mega-menu-grid">
+                <div>
+                  <div class="mega-menu-col-title">Labs & Tech</div>
+                  <a href="computer-lab.html"  class="mega-menu-item"><i class="fa-solid fa-computer"></i> Computer Lab</a>
+                  <a href="science-lab.html"   class="mega-menu-item"><i class="fa-solid fa-flask"></i> Science Lab</a>
+                  <a href="robotics-lab.html"  class="mega-menu-item"><i class="fa-solid fa-robot"></i> Robotics Lab</a>
+                </div>
+                <div>
+                  <div class="mega-menu-col-title">Facilities</div>
+                  <a href="library.html"    class="mega-menu-item"><i class="fa-solid fa-book"></i> Library</a>
+                  <a href="sports.html"     class="mega-menu-item"><i class="fa-solid fa-futbol"></i> Sports</a>
+                  <a href="transport.html"  class="mega-menu-item"><i class="fa-solid fa-bus"></i> Transport</a>
+                </div>
+                <div>
+                  <div class="mega-menu-col-title">More</div>
+                  <a href="gallery.html"   class="mega-menu-item"><i class="fa-solid fa-images"></i> Gallery</a>
+                  <a href="campus.html"    class="mega-menu-item"><i class="fa-solid fa-panorama"></i> Virtual Tour</a>
+                </div>
+              </div>
+            </div>
+          </li>
+
+          <li class="nav-item">
+            <a href="academics.html" class="nav-link">Academics</a>
+          </li>
+
+          <li class="nav-item">
+            <a href="admission.html" class="nav-link">Admission</a>
+          </li>
+
+          <li class="nav-item">
+            <a href="faculty.html" class="nav-link">Faculty <i class="fa-solid fa-chevron-down arrow"></i></a>
+            <div class="dropdown">
+              <a href="faculty.html"  class="dropdown-item"><i class="fa-solid fa-chalkboard-teacher"></i> Our Faculty</a>
+              <a href="career.html"   class="dropdown-item"><i class="fa-solid fa-briefcase"></i> Careers</a>
+            </div>
+          </li>
+
+          <!-- More Dropdown -->
+          <li class="nav-item">
+            <a href="#" class="nav-link">More <i class="fa-solid fa-chevron-down arrow"></i></a>
+            <div class="dropdown">
+              <a href="services.html"             class="dropdown-item"><i class="fa-solid fa-gear"></i> Services</a>
+              <a href="news.html"                 class="dropdown-item"><i class="fa-solid fa-newspaper"></i> News & Events</a>
+              <a href="mandatory-disclosure.html" class="dropdown-item"><i class="fa-solid fa-file-text"></i> Mandatory Disclosure</a>
+              <a href="contact.html"              class="dropdown-item"><i class="fa-solid fa-location-dot"></i> Contact</a>
+            </div>
+          </li>
+
         </ul>
         <div class="navbar-actions">
           <a href="admission.html" class="btn-nav btn-nav-primary"><i class="fa-solid fa-star"></i> Apply Now</a>
@@ -110,13 +173,33 @@
       <button class="drawer-close"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <nav class="drawer-nav">
-      <a href="index.html" class="drawer-nav-link">Home</a>
-      <a href="about.html" class="drawer-nav-link">About</a>
-      <a href="campus.html" class="drawer-nav-link">Campus</a>
-      <a href="academics.html" class="drawer-nav-link">Academics</a>
-      <a href="admission.html" class="drawer-nav-link">Admission</a>
-      <a href="faculty.html" class="drawer-nav-link">Faculty</a>
-      <a href="contact.html" class="drawer-nav-link">Contact</a>
+      <a href="index.html"    class="drawer-nav-link active">Home</a>
+      <a href="#"             class="drawer-nav-link" data-toggle="about">About Us <i class="fa-solid fa-chevron-right arrow"></i></a>
+      <div class="drawer-submenu">
+        <a href="about.html"           class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> School Overview</a>
+        <a href="chairman-message.html" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Chairman's Message</a>
+        <a href="director-message.html" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Director's Message</a>
+        <a href="principal-message.html" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Principal's Message</a>
+        <a href="mission-vision.html"  class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Mission & Vision</a>
+      </div>
+      <a href="#"             class="drawer-nav-link" data-toggle="campus">Our Campus <i class="fa-solid fa-chevron-right arrow"></i></a>
+      <div class="drawer-submenu">
+        <a href="campus.html"        class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Overview</a>
+        <a href="computer-lab.html"  class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Computer Lab</a>
+        <a href="science-lab.html"   class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Science Lab</a>
+        <a href="robotics-lab.html"  class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Robotics Lab</a>
+        <a href="library.html"       class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Library</a>
+        <a href="sports.html"        class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Sports</a>
+        <a href="transport.html"     class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Transport</a>
+      </div>
+      <a href="academics.html"  class="drawer-nav-link">Academics</a>
+      <a href="admission.html"  class="drawer-nav-link">Admission</a>
+      <a href="faculty.html"    class="drawer-nav-link">Faculty</a>
+      <a href="career.html"     class="drawer-nav-link">Careers</a>
+      <a href="gallery.html"    class="drawer-nav-link">Gallery</a>
+      <a href="services.html"   class="drawer-nav-link">Services</a>
+      <a href="news.html"       class="drawer-nav-link">News & Events</a>
+      <a href="contact.html"    class="drawer-nav-link">Contact</a>
     </nav>
     <div class="drawer-footer">
       <a href="admission.html" class="btn btn-gold"><i class="fa-solid fa-star"></i> Apply Now</a>

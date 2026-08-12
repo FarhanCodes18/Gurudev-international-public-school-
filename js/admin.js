@@ -154,19 +154,34 @@ document.addEventListener('DOMContentLoaded', () => {
   loadCallbacks();
   loadContactMessages();
   loadQuickCallbacks();
+  
+  // Load Galleries initially
+  renderAchieversGalleryList();
+  renderSchoolGalleryList();
+  
+  // Load News and Reviews
+  renderNewsList();
+  renderReviewsList();
 });
 
 // --- GLOBAL LOADER TOOL ---
 function showLoader(title, desc, duration, callback) {
   const overlay = document.getElementById('admin-loader');
-  document.getElementById('loader-title').innerText = title;
-  document.getElementById('loader-desc').innerText = desc;
-  overlay.classList.add('active');
+  const titleEl = document.getElementById('loader-title');
+  const descEl = document.getElementById('loader-desc');
   
-  setTimeout(() => {
-    overlay.classList.remove('active');
-    if(callback) callback();
-  }, duration);
+  if(overlay && titleEl && descEl) {
+    titleEl.innerText = title;
+    descEl.innerText = desc;
+    overlay.classList.add('active');
+    setTimeout(() => {
+      overlay.classList.remove('active');
+      if(callback) callback();
+    }, duration);
+  } else {
+    // Elements missing — skip animation, just run callback
+    if(callback) setTimeout(callback, 100);
+  }
 }
 
 // --- CMS FUNCTIONS ---
@@ -182,6 +197,31 @@ function updateMarquee() {
   }
 }
 
+// --- IMAGE COMPRESSOR (Resizes & compresses for localStorage) ---
+function compressImage(file, maxWidth, quality, callback) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      let w = img.width;
+      let h = img.height;
+      if(w > maxWidth) {
+        h = Math.round(h * maxWidth / w);
+        w = maxWidth;
+      }
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      const compressed = canvas.toDataURL('image/jpeg', quality);
+      callback(compressed);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 // Gallery Upload & Sync
 function uploadGallery() {
   const name = document.getElementById('gallery-name').value;
@@ -193,28 +233,28 @@ function uploadGallery() {
   }
 
   const file = fileInput.files[0];
-  const reader = new FileReader();
   
-  reader.onload = function(e) {
-    const base64Image = e.target.result;
+  compressImage(file, 800, 0.7, function(compressedImage) {
     let gallery = JSON.parse(localStorage.getItem('admin_achievers_gallery') || '[]');
     
-    // Add to front of array
-    gallery.unshift({ name, score, image: base64Image });
+    gallery.unshift({ name, score, image: compressedImage });
     
-    // Keep max 10 to match the 10 slider placeholders
     if(gallery.length > 10) gallery.pop();
     
     showLoader('Uploading Photo', 'Optimizing and syncing to the Homepage Slider...', 2000, () => {
-      localStorage.setItem('admin_achievers_gallery', JSON.stringify(gallery));
-      alert('Photo synced to the Homepage successfully! Go check the slider.');
+      try {
+        localStorage.setItem('admin_achievers_gallery', JSON.stringify(gallery));
+        alert('Photo synced to the Homepage successfully! Go check the slider.');
+      } catch(e) {
+        alert('Storage full! Delete some old photos first.');
+        console.warn('localStorage quota exceeded:', e);
+      }
       document.getElementById('gallery-name').value = '';
       document.getElementById('gallery-score').value = '';
       fileInput.value = '';
+      renderAchieversGalleryList();
     });
-  };
-  
-  reader.readAsDataURL(file);
+  });
 }
 
 // School Gallery Upload & Sync
@@ -228,24 +268,90 @@ function uploadSchoolGallery() {
 
   const desc = descInput ? descInput.value : '';
   const file = fileInput.files[0];
-  const reader = new FileReader();
   
-  reader.onload = function(e) {
-    const base64Image = e.target.result;
+  compressImage(file, 800, 0.7, function(compressedImage) {
     let gallery = JSON.parse(localStorage.getItem('admin_school_gallery') || '[]');
     
-    // Add to front of array
-    gallery.unshift({ image: base64Image, desc: desc, date: new Date().toLocaleDateString() });
+    gallery.unshift({ image: compressedImage, desc: desc, date: new Date().toLocaleDateString() });
     
     showLoader('Uploading Photo', 'Optimizing and syncing to the School Gallery...', 2000, () => {
-      localStorage.setItem('admin_school_gallery', JSON.stringify(gallery));
-      alert('Photo synced to the School Gallery successfully!');
+      try {
+        localStorage.setItem('admin_school_gallery', JSON.stringify(gallery));
+        alert('Photo synced to the School Gallery successfully!');
+      } catch(e) {
+        alert('Storage full! Delete some old photos first.');
+      }
       fileInput.value = '';
       if(descInput) descInput.value = '';
+      renderSchoolGalleryList();
     });
-  };
+  });
+}
+
+// Render Achievers List
+function renderAchieversGalleryList() {
+  const listBody = document.getElementById('achievers-list');
+  if(!listBody) return;
   
-  reader.readAsDataURL(file);
+  let gallery = JSON.parse(localStorage.getItem('admin_achievers_gallery') || '[]');
+  
+  if(gallery.length === 0) {
+    listBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--admin-muted);">No achievers uploaded yet.</td></tr>';
+    return;
+  }
+  
+  listBody.innerHTML = '';
+  gallery.forEach((item, index) => {
+    listBody.innerHTML += `
+      <tr>
+        <td><img src="${item.image}" style="width:50px; height:50px; object-fit:cover; border-radius:8px;" alt="Achiever"></td>
+        <td style="font-weight:600; color:var(--admin-heading);">${item.name}</td>
+        <td style="color:var(--admin-muted);">${item.score}</td>
+        <td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteAchiever(${index})"><i class="fa-solid fa-trash"></i></button></td>
+      </tr>
+    `;
+  });
+}
+
+function deleteAchiever(index) {
+  if(!confirm("Are you sure you want to delete this achiever?")) return;
+  let gallery = JSON.parse(localStorage.getItem('admin_achievers_gallery') || '[]');
+  gallery.splice(index, 1);
+  localStorage.setItem('admin_achievers_gallery', JSON.stringify(gallery));
+  renderAchieversGalleryList();
+}
+
+// Render School Gallery List
+function renderSchoolGalleryList() {
+  const listBody = document.getElementById('school-gallery-list');
+  if(!listBody) return;
+  
+  let gallery = JSON.parse(localStorage.getItem('admin_school_gallery') || '[]');
+  
+  if(gallery.length === 0) {
+    listBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--admin-muted);">No photos uploaded yet.</td></tr>';
+    return;
+  }
+  
+  listBody.innerHTML = '';
+  gallery.forEach((item, index) => {
+    listBody.innerHTML += `
+      <tr>
+        <td><img src="${item.image}" style="width:80px; height:50px; object-fit:cover; border-radius:8px;" alt="Gallery Image"></td>
+        <td style="font-weight:600; color:var(--admin-heading);">${item.desc || 'N/A'}</td>
+        <td style="color:var(--admin-muted);">${item.date || 'N/A'}</td>
+        <td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteSchoolGallery(${index})"><i class="fa-solid fa-trash"></i></button></td>
+      </tr>
+    `;
+  });
+}
+
+function deleteSchoolGallery(index) {
+  if(!confirm("Are you sure you want to delete this photo?")) return;
+  let gallery = JSON.parse(localStorage.getItem('admin_school_gallery') || '[]');
+  gallery.splice(index, 1);
+  localStorage.setItem('admin_school_gallery', JSON.stringify(gallery));
+  renderSchoolGalleryList();
 }
 
 // Bulk SMS Blaster
@@ -1019,5 +1125,151 @@ function deleteStudent(mobile) {
     } else {
       alert("Student not found.");
     }
+  }
+}
+
+// --- NEWS & EVENTS ---
+function publishNews() {
+  const category = document.getElementById('news-category').value;
+  const title = document.getElementById('news-title').value;
+  const excerpt = document.getElementById('news-excerpt').value;
+  const fileInput = document.getElementById('news-photo');
+  
+  if(!title || !excerpt) return alert("Please fill all fields.");
+
+  let file = fileInput ? fileInput.files[0] : null;
+  if(!file) {
+    saveNews({ category, title, excerpt, image: null });
+    return;
+  }
+  
+  compressImage(file, 800, 0.7, function(compressedImage) {
+    saveNews({ category, title, excerpt, image: compressedImage });
+  });
+}
+
+function saveNews(newsItem) {
+  showLoader('Publishing News', 'Syncing to website...', 1000, () => {
+    let news = JSON.parse(localStorage.getItem('admin_news_events')) || [];
+    newsItem.id = Date.now();
+    newsItem.date = new Date().toLocaleDateString('en-GB');
+    news.unshift(newsItem);
+    try {
+      localStorage.setItem('admin_news_events', JSON.stringify(news));
+    } catch(e) {
+      // If image is too large for localStorage, save without image
+      console.warn('Image too large, saving without image:', e);
+      newsItem.image = null;
+      localStorage.setItem('admin_news_events', JSON.stringify(news));
+    }
+    alert('News published successfully!');
+    document.getElementById('news-title').value = '';
+    document.getElementById('news-excerpt').value = '';
+    if(document.getElementById('news-photo')) document.getElementById('news-photo').value = '';
+    renderNewsList();
+  });
+}
+
+function renderNewsList() {
+  const list = document.getElementById('news-list');
+  if(!list) return;
+  
+  let news = JSON.parse(localStorage.getItem('admin_news_events')) || [];
+  if(news.length === 0) {
+    list.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted);">No news published yet.</td></tr>';
+    return;
+  }
+  
+  list.innerHTML = '';
+  news.forEach((n, idx) => {
+    list.innerHTML += `
+      <tr>
+        <td>${n.date}</td>
+        <td><span style="background:var(--admin-primary); color:white; padding:2px 8px; border-radius:12px; font-size:0.75rem;">${n.category}</span></td>
+        <td style="font-weight:600;">${n.title}</td>
+        <td style="color:var(--admin-muted); max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${n.excerpt}</td>
+        <td><button class="btn-admin" style="background:var(--admin-danger); padding:4px 8px; font-size:0.8rem;" onclick="deleteNews(${idx})"><i class="fa-solid fa-trash"></i></button></td>
+      </tr>
+    `;
+  });
+}
+
+function deleteNews(idx) {
+  if(!confirm("Delete this news item?")) return;
+  let news = JSON.parse(localStorage.getItem('admin_news_events')) || [];
+  news.splice(idx, 1);
+  localStorage.setItem('admin_news_events', JSON.stringify(news));
+  renderNewsList();
+}
+
+// --- STUDENT REVIEWS ---
+function renderReviewsList() {
+  const pendingList = document.getElementById('pending-reviews-list');
+  const approvedList = document.getElementById('approved-reviews-list');
+  if(!pendingList || !approvedList) return;
+  
+  let reviews = JSON.parse(localStorage.getItem('admin_student_reviews')) || [];
+  
+  let pending = reviews.filter(r => r.status === 'pending');
+  let approved = reviews.filter(r => r.status === 'approved');
+  
+  if(pending.length === 0) {
+    pendingList.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted);">No pending reviews.</td></tr>';
+  } else {
+    pendingList.innerHTML = '';
+    pending.forEach(r => {
+      pendingList.innerHTML += `
+        <tr>
+          <td>${r.date}</td>
+          <td><strong>${r.name}</strong><br><small style="color:var(--admin-muted);">${r.role}</small></td>
+          <td style="color:gold;">${'★'.repeat(Number(r.rating))}</td>
+          <td>${r.text}</td>
+          <td>
+            <button class="btn-admin" style="background:#16a34a; padding:4px 8px; font-size:0.8rem; margin-right:5px;" onclick="approveReview(${r.id})"><i class="fa-solid fa-check"></i></button>
+            <button class="btn-admin" style="background:var(--admin-danger); padding:4px 8px; font-size:0.8rem;" onclick="deleteReview(${r.id})"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>
+      `;
+    });
+  }
+  
+  if(approved.length === 0) {
+    approvedList.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted);">No approved reviews.</td></tr>';
+  } else {
+    approvedList.innerHTML = '';
+    approved.forEach(r => {
+      approvedList.innerHTML += `
+        <tr>
+          <td>${r.date}</td>
+          <td><strong>${r.name}</strong><br><small style="color:var(--admin-muted);">${r.role}</small></td>
+          <td style="color:gold;">${'★'.repeat(Number(r.rating))}</td>
+          <td>${r.text}</td>
+          <td>
+            <button class="btn-admin" style="background:var(--admin-danger); padding:4px 8px; font-size:0.8rem;" onclick="deleteReview(${r.id})"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>
+      `;
+    });
+  }
+}
+
+function approveReview(id) {
+  let reviews = JSON.parse(localStorage.getItem('admin_student_reviews')) || [];
+  let idx = reviews.findIndex(r => r.id === id);
+  if(idx > -1) {
+    reviews[idx].status = 'approved';
+    localStorage.setItem('admin_student_reviews', JSON.stringify(reviews));
+    renderReviewsList();
+  }
+}
+
+function deleteReview(id) {
+  if(!confirm("Are you sure you want to delete this review?")) return;
+  let reviews = JSON.parse(localStorage.getItem('admin_student_reviews')) || [];
+  let idx = reviews.findIndex(r => r.id === id);
+  if(idx > -1) {
+    reviews.splice(idx, 1);
+    localStorage.setItem('admin_student_reviews', JSON.stringify(reviews));
+    renderReviewsList();
   }
 }

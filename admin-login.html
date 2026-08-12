@@ -8,19 +8,29 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-color: #f3f4f6;
-      --card-dark: #191224;
-      --text-muted: #a1a1aa;
+      --bg-color: #0f172a;
+      --card-dark: rgba(15, 23, 42, 0.8);
+      --text-muted: #94a3b8;
       --primary-blue: #3b82f6;
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Inter', sans-serif;
-      background-color: var(--bg-color);
+      background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #0f172a);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
+      color: white;
+    }
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
     .login-wrapper {
       width: 100%;
@@ -28,17 +38,20 @@
       padding: 20px;
     }
     .login-card {
-      background: white;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
       border-radius: 24px;
       overflow: hidden;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
       display: flex;
       flex-direction: column;
     }
     .login-header {
-      background: var(--card-dark);
-      color: white;
+      background: rgba(0, 0, 0, 0.2);
       padding: 40px 30px;
+      border-bottom: 1px solid var(--glass-border);
     }
     .logo-icon {
       width: 48px;
@@ -51,6 +64,11 @@
       font-size: 1.2rem;
       margin-bottom: 24px;
       color: #cbd5e1;
+    }
+    .erp-auth-logo-img {
+      width: 90%;
+      height: 90%;
+      object-fit: contain;
     }
     .subtitle {
       font-size: 0.75rem;
@@ -105,18 +123,20 @@
     .form-control {
       width: 100%;
       padding: 14px 16px 14px 45px;
-      border: 1px solid #e2e8f0;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--glass-border);
       border-radius: 12px;
       font-size: 1rem;
       font-family: inherit;
-      color: #334155;
+      color: white;
       font-weight: 500;
       outline: none;
       transition: 0.3s;
     }
     .form-control:focus {
       border-color: var(--primary-blue);
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+      background: rgba(0, 0, 0, 0.4);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.3);
     }
     
     .forgot-link {
@@ -133,7 +153,7 @@
     .btn-submit {
       width: 100%;
       padding: 16px;
-      background: #111827;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
       color: white;
       border: none;
       border-radius: 12px;
@@ -147,18 +167,19 @@
       transition: 0.2s;
     }
     .btn-submit:hover {
-      background: black;
+      background: linear-gradient(135deg, #60a5fa, #3b82f6);
       transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4);
     }
     
     .login-footer {
-      background: #f8fafc;
+      background: rgba(0, 0, 0, 0.2);
       padding: 20px;
       text-align: center;
-      border-top: 1px solid #f1f5f9;
+      border-top: 1px solid var(--glass-border);
       font-size: 0.8rem;
       font-weight: 500;
-      color: #94a3b8;
+      color: var(--text-muted);
     }
     
     .error-msg {
@@ -191,7 +212,7 @@
             <label class="form-label">USERNAME</label>
             <div class="input-wrapper">
               <i class="fa-regular fa-envelope"></i>
-              <input type="text" id="admin-user" class="form-control" value="idealpublicschool47@gmail.com" />
+              <input type="text" id="admin-user" class="form-control" value="gurudev@gmail.com" />
             </div>
           </div>
           
@@ -199,7 +220,7 @@
             <label class="form-label">PASSWORD</label>
             <div class="input-wrapper">
               <i class="fa-solid fa-lock"></i>
-              <input type="password" id="admin-pass" class="form-control" value="admin123" />
+              <input type="password" id="admin-pass" class="form-control" value="Gurudev@2008" />
               <i class="fa-regular fa-eye right-icon" onclick="togglePassword()"></i>
             </div>
           </div>
@@ -228,7 +249,7 @@
       const user = document.getElementById('admin-user').value;
       const pass = document.getElementById('admin-pass').value;
       
-      if(user === 'idealpublicschool47@gmail.com' && pass === 'admin123') {
+      if(user === 'gurudev@gmail.com' && pass === 'Gurudev@2008') {
         // Create session
         localStorage.setItem('admin_session', 'active');
         window.location.href = 'gurudev-super.html';

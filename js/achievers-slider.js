@@ -22,19 +22,28 @@ document.addEventListener('DOMContentLoaded', () => {
       const sliderContainer = document.getElementById('achievers-slider-container-main');
       if (comingSoonBlock) comingSoonBlock.style.display = 'none';
       if (sliderContainer) sliderContainer.style.display = 'flex';
-    }
-    
-    livePhotos.forEach((photoObj, idx) => {
-      if(cards[idx]) {
-        cards[idx].innerHTML = `
-          <img src="${photoObj.image}" style="width:100%; height:180px; object-fit:cover;" alt="${photoObj.name}">
-          <div class="achiever-info" style="padding:15px; text-align:center; background:linear-gradient(135deg, var(--bg-dark), var(--primary-dark)); color:white; flex-grow:1;">
-            <h3 style="font-size:1.1rem; margin-bottom:5px;">${photoObj.name}</h3>
-            <p style="font-size:0.8rem; color:var(--accent);">${photoObj.score}</p>
+      
+      // Clear all placeholder cards
+      track.innerHTML = '';
+      
+      // Add only the real uploaded cards
+      livePhotos.forEach(photoObj => {
+        const card = document.createElement('div');
+        card.className = 'achiever-card';
+        card.style.cssText = 'position:absolute; width:260px; height:380px; background:var(--secondary); border-radius:16px; box-shadow:var(--shadow-xl); overflow:hidden; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); display:flex; flex-direction:column;';
+        card.innerHTML = `
+          <img src="${photoObj.image}" style="position:absolute; width:100%; height:100%; object-fit:cover; left:0; top:0; z-index:1;" alt="${photoObj.name}">
+          <div class="achiever-info" style="position:absolute; bottom:0; left:0; width:100%; box-sizing:border-box; padding:80px 15px 20px; text-align:center; background:linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 50%, transparent 100%); color:white; z-index:2; transition:all 0.5s ease;">
+            <h3 style="font-size:1.15rem; margin-bottom:5px; font-weight:700; text-transform:uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.8); line-height:1.3;">${photoObj.name}</h3>
+            <p style="font-size:0.95rem; color:#ef4444; font-weight:700; margin:0;">${photoObj.score}</p>
           </div>
         `;
-      }
-    });
+        track.appendChild(card);
+      });
+      
+      // Update our cards array so the slider logic uses the new cards
+      cards = Array.from(track.querySelectorAll('.achiever-card'));
+    }
   }
 
   let currentIndex = Math.floor(cards.length / 2); // Start in middle
@@ -59,24 +68,24 @@ document.addEventListener('DOMContentLoaded', () => {
         scale = 1;
         card.classList.add('active');
       } else if (diff === 1) {
-        translateX = 220; // px
-        scale = 0.8;
-        opacity = 0.8;
+        translateX = 180; // px
+        scale = 0.85;
+        opacity = 0.85;
         blur = 2;
       } else if (diff === -1) {
-        translateX = -220;
-        scale = 0.8;
-        opacity = 0.8;
+        translateX = -180;
+        scale = 0.85;
+        opacity = 0.85;
         blur = 2;
       } else if (diff >= 2) {
-        translateX = 380 + ((diff - 2) * 50);
-        scale = 0.6;
-        opacity = 0.4;
+        translateX = 320 + ((diff - 2) * 50);
+        scale = 0.7;
+        opacity = 0.5;
         blur = 4;
       } else if (diff <= -2) {
-        translateX = -380 - ((Math.abs(diff) - 2) * 50);
-        scale = 0.6;
-        opacity = 0.4;
+        translateX = -320 - ((Math.abs(diff) - 2) * 50);
+        scale = 0.7;
+        opacity = 0.5;
         blur = 4;
       }
 
@@ -89,6 +98,18 @@ document.addEventListener('DOMContentLoaded', () => {
       card.style.zIndex = zIndex;
       card.style.opacity = opacity;
       card.style.filter = `blur(${blur}px)`;
+      
+      // Handle the text fade animation for the active card
+      const infoDiv = card.querySelector('.achiever-info');
+      if (infoDiv) {
+        if (diff === 0) {
+          infoDiv.style.opacity = '1';
+          infoDiv.style.transform = 'translateY(0)';
+        } else {
+          infoDiv.style.opacity = '0';
+          infoDiv.style.transform = 'translateY(20px)';
+        }
+      }
     });
   }
 

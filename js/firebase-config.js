@@ -8,12 +8,12 @@ import { getStorage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-s
 // You can find these in your Firebase Console > Project Settings > General
 // ============================================================================
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyD778gbyVVrez8R__xnvVNRMAZjAqEhVgQ",
+  authDomain: "gurudev-international.firebaseapp.com",
+  projectId: "gurudev-international",
+  storageBucket: "gurudev-international.firebasestorage.app",
+  messagingSenderId: "683044437533",
+  appId: "1:683044437533:web:d9aae17592bfa2701910f4"
 };
 
 let app, auth, db, storage;
