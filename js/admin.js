@@ -193,6 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadCallbacks();
   loadContactMessages();
   loadQuickCallbacks();
+  loadComplaints();
   
   // Load Galleries initially
   renderAchieversGalleryList();
@@ -774,6 +775,57 @@ function loadContactMessages() {
   });
 }
 
+function loadComplaints() {
+  const listBody = document.getElementById('complaints-list');
+  if(!listBody) return;
+  
+  let complaints = JSON.parse(localStorage.getItem('admin_complaints')) || [];
+  
+  if(complaints.length === 0) {
+    listBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted); padding:40px;">No complaints found.</td></tr>';
+    return;
+  }
+  
+  listBody.innerHTML = '';
+  const total = complaints.length;
+  complaints.reverse().forEach((msg, i) => {
+    const origIndex = total - 1 - i;
+    const isResolved = msg.status === 'Resolved';
+    const statusHtml = isResolved 
+      ? '<span style="color:#10b981; font-weight:700; font-size:0.85rem; padding:4px 8px; background:#dcfce7; border-radius:4px; display:inline-block; margin-right:5px;"><i class="fa-solid fa-check-double"></i> Resolved</span>'
+      : `<button class="btn-admin" style="background:#10b981; padding:6px 12px; font-size:0.8rem; margin-right:5px;" onclick="resolveComplaint(${origIndex})"><i class="fa-solid fa-check"></i> Mark Resolved</button>`;
+      
+    listBody.innerHTML += `
+      <tr style="${isResolved ? 'opacity:0.6;' : ''}">
+        <td>${msg.date || 'N/A'}</td>
+        <td><strong>${msg.Name || 'Anonymous'}</strong></td>
+        <td><a href="tel:${msg.Contact}" style="color:var(--admin-accent); text-decoration:none;">${msg.Contact || 'N/A'}</a></td>
+        <td style="max-width:350px; white-space:pre-wrap; word-break:break-word;">${msg.Message || 'N/A'}</td>
+        <td>
+          ${statusHtml}
+          <button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteLead('admin_complaints', ${origIndex})"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+window.resolveComplaint = function(index) {
+  let complaints = JSON.parse(localStorage.getItem('admin_complaints')) || [];
+  if (complaints[index]) {
+    complaints[index].status = 'Resolved';
+    localStorage.setItem('admin_complaints', JSON.stringify(complaints));
+    loadComplaints();
+    
+    // Check if showLoader/showCustomAlert exists for nice feedback
+    if (typeof showCustomAlert === 'function') {
+      showCustomAlert("Resolved!", "The complaint has been marked as resolved.", "success");
+    } else {
+      alert("Complaint marked as resolved.");
+    }
+  }
+}
+
 function loadQuickCallbacks() {
   const listBody = document.getElementById('quick-callbacks-list');
   if(!listBody) return;
@@ -821,6 +873,9 @@ function deleteLead(storageKey, index) {
     if (storageKey === 'erp_callbacks') loadCallbacks();
     if (storageKey === 'admin_contact_messages') loadContactMessages();
     if (storageKey === 'admin_quick_callbacks') loadQuickCallbacks();
+    if (storageKey === 'admin_complaints') loadComplaints();
+    
+    updatePendingInquiriesCount();
   }
 }
 
@@ -1437,6 +1492,8 @@ window.viewStudentDocs = function(mobile) {
   const st = users[mobile];
   if(!st) return;
   
+  window.currentDocMobile = mobile; // Save for download all
+  
   document.getElementById('doc-modal-student-name').innerText = `${st.name} (ID: ${st.studentId || 'N/A'})`;
   
   const docTypes = [
@@ -1473,6 +1530,34 @@ window.viewStudentDocs = function(mobile) {
   });
   
   document.getElementById('doc-viewer-modal').classList.add('active');
+}
+
+window.downloadAllStudentDocs = function() {
+  if (!window.currentDocMobile) return;
+  const users = JSON.parse(localStorage.getItem('erp_users')) || {};
+  const st = users[window.currentDocMobile];
+  if (!st || !st.documents) return alert("No documents found for this student.");
+
+  let docs = st.documents;
+  let downloadedCount = 0;
+
+  for (let docName in docs) {
+    if (docs.hasOwnProperty(docName) && docs[docName]) {
+      const link = document.createElement("a");
+      link.href = docs[docName];
+      link.download = `${st.name}_${docName}.jpg`.replace(/[^a-zA-Z0-9_\.]/g, '_');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      downloadedCount++;
+    }
+  }
+
+  if (downloadedCount > 0) {
+    showLoader("Downloading...", "Your files are downloading. Please check your downloads folder.", 1500, null);
+  } else {
+    alert("No documents are uploaded yet.");
+  }
 }
 
 // --- NEWS & EVENTS ---

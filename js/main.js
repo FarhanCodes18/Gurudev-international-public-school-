@@ -1,10 +1,112 @@
 /* ============================================================
-   MAIN.JS â€” Core: Navbar, Scroll, Cursor, FAQ, Ripple,
+   MAIN.JS — Core: Navbar, Scroll, Cursor, FAQ, Ripple,
               Back-to-Top, Floating Buttons, Testimonials
    ============================================================ */
 
 (function() {
   'use strict';
+
+  // --- CUSTOM ALERT FUNCTION ---
+  function showCustomAlert(title, message, type = 'success') {
+    const existingBox = document.getElementById('custom-alert-box');
+    const existingOverlay = document.getElementById('custom-alert-overlay');
+    if (existingBox) existingBox.remove();
+    if (existingOverlay) existingOverlay.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'custom-alert-overlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:9999;opacity:0;transition:0.3s;';
+
+    const alertBox = document.createElement('div');
+    alertBox.id = 'custom-alert-box';
+    alertBox.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.9);background:#ffffff;padding:30px;border-radius:16px;box-shadow:0 20px 40px rgba(0,0,0,0.2);z-index:10000;text-align:center;min-width:300px;max-width:90%;opacity:0;transition:all 0.3s cubic-bezier(0.175,0.885,0.32,1.275);';
+
+    const iconColor = type === 'success' ? '#10b981' : '#ef4444';
+    const iconClass = type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation';
+
+    alertBox.innerHTML = `
+      <div style="font-size:3.5rem;color:${iconColor};margin-bottom:15px;"><i class="fa-solid ${iconClass}"></i></div>
+      <h3 style="font-family:'Outfit',sans-serif;font-size:1.6rem;color:#1e293b;margin-bottom:10px;font-weight:700;">${title}</h3>
+      <p style="font-family:'Poppins',sans-serif;font-size:0.95rem;color:#475569;margin-bottom:25px;line-height:1.5;">${message}</p>
+      <button id="custom-alert-btn" style="background:${iconColor};color:white;border:none;padding:12px 36px;border-radius:8px;font-size:1rem;font-family:'Outfit',sans-serif;font-weight:600;cursor:pointer;transition:0.2s;box-shadow:0 4px 12px ${iconColor}40;">Okay</button>
+    `;
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(alertBox);
+
+    requestAnimationFrame(() => {
+      overlay.style.opacity = '1';
+      alertBox.style.opacity = '1';
+      alertBox.style.transform = 'translate(-50%,-50%) scale(1)';
+    });
+
+    const closeAlert = () => {
+      overlay.style.opacity = '0';
+      alertBox.style.opacity = '0';
+      alertBox.style.transform = 'translate(-50%,-50%) scale(0.9)';
+      setTimeout(() => { overlay.remove(); alertBox.remove(); }, 300);
+    };
+
+    document.getElementById('custom-alert-btn').addEventListener('click', closeAlert);
+    overlay.addEventListener('click', closeAlert);
+  }
+
+  // --- UNIVERSAL FORMSPREE & ADMIN PANEL HANDLER ---
+  document.addEventListener('submit', function(e) {
+    if (e.target && e.target.tagName === 'FORM') {
+      const form = e.target;
+      const actionUrl = form.getAttribute('action');
+      
+      // Only intercept forms going to Formspree
+      if (actionUrl && actionUrl.includes('formspree')) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        
+        // 1. Save to Admin Panel LocalStorage
+        const fd = new FormData(form);
+        const data = Object.fromEntries(fd.entries());
+        data.date = new Date().toLocaleDateString('en-GB');
+        
+        let key = 'admin_general_forms';
+        if (form.id === 'contact-form') key = 'admin_contact_messages';
+        else if (form.id === 'admission-form') key = 'erp_callbacks';
+        else if (form.id === 'quick-callback-form') key = 'admin_quick_callbacks';
+        else if (form.id === 'complaint-form') key = 'admin_complaints';
+        
+        try {
+           let list = JSON.parse(localStorage.getItem(key)) || [];
+           list.push(data);
+           localStorage.setItem(key, JSON.stringify(list));
+        } catch(err) { console.error("Error saving to admin panel", err); }
+
+        // 2. Submit to Formspree via AJAX
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const origText = submitBtn ? submitBtn.innerHTML : 'Send';
+        if (submitBtn) submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+
+        fetch(actionUrl, {
+          method: 'POST',
+          body: fd,
+          headers: { 'Accept': 'application/json' }
+        }).then(response => {
+          if (response.ok) {
+            showCustomAlert("Success!", "Thank you for contacting us! We will get back to you shortly.", "success");
+            form.reset();
+            if (form.id === 'quick-callback-form') {
+               const modal = document.getElementById('quick-callback-modal');
+               if (modal) modal.classList.remove('active');
+            }
+          } else {
+            showCustomAlert("Oops!", "There was a problem submitting your form. Please try again.", "error");
+          }
+        }).catch(error => {
+          showCustomAlert("Network Error", "Failed to send message. Please check your internet connection.", "error");
+        }).finally(() => {
+          if (submitBtn) submitBtn.innerHTML = origText;
+        });
+      }
+    }
+  }, true); // true = capture phase to run before other buggy listeners
 
   /* ===========================
      SCROLL PROGRESS BAR
@@ -819,200 +921,7 @@ function initCSESwiper() {
   }
 }
 
-              <ul>
-                <li><i class="fa-solid fa-check"></i> Experienced Faculty</li>
-                <li><i class="fa-solid fa-check"></i> Modern Infrastructure</li>
-                <li><i class="fa-solid fa-check"></i> Holistic Development</li>
-              </ul>
-            </div>
-          </div>
-          
-          <div class="qc-right">
-            <div class="qc-header">
-              <h4>Admission Support</h4>
-              <h2>Get A Quick Call Back</h2>
-              <p>Fill details for course guidance, scholarship, and fees.</p>
-            </div>
-            <form id="quick-callback-form" class="qc-form" action="https://formspree.io/f/mppardbk" method="POST">
-              <div class="qc-form-row" style="display:none;">
-                <input type="hidden" id="qc-program" name="program" value="N/A" />
-                <input type="hidden" id="qc-branch" name="branch" value="N/A" />
-              </div>
-              <div class="qc-form-row">
-                <input type="text" id="qc-name" name="name" class="qc-input" placeholder="Full Name *" required />
-                <input type="tel" id="qc-phone" name="phone" class="qc-input" placeholder="Phone Number *" required />
-              </div>
-              <input type="email" id="qc-email" name="email" class="qc-input" placeholder="Email Address *" required />
-              <input type="text" id="qc-address" name="address" class="qc-input" placeholder="Address *" required />
-              <input type="text" id="qc-message" name="message" class="qc-input" placeholder="Message (optional)" />
-              <button type="submit" class="qc-submit">Request Callback</button>
-            </form>
-          </div>
-        </div>
-      </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-    
-    const modal = document.getElementById('quick-callback-modal');
-    const closeBtn = document.getElementById('qc-close-btn');
-    const form = document.getElementById('quick-callback-form');
-    
-    // Show Modal
-    setTimeout(() => {
-      modal.classList.add('active');
-    }, 50);
-    
-    // Close Logic
-    closeBtn.addEventListener('click', () => modal.classList.remove('active'));
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) modal.classList.remove('active');
-    });
-    
-    // Form Submission
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      
-      const lead = {
-        date: new Date().toLocaleDateString('en-GB'),
-        program: document.getElementById('qc-program').value,
-        branch: document.getElementById('qc-branch').value,
-        name: document.getElementById('qc-name').value,
-        phone: document.getElementById('qc-phone').value,
-        email: document.getElementById('qc-email').value,
-        address: document.getElementById('qc-address').value,
-        message: document.getElementById('qc-message').value
-      };
-      
-      let leads = JSON.parse(localStorage.getItem('admin_quick_callbacks')) || [];
-      leads.push(lead);
-      localStorage.setItem('admin_quick_callbacks', JSON.stringify(leads));
-      
-      const actionUrl = form.getAttribute('action');
-      const submitBtn = form.querySelector('button[type="submit"]');
-      const originalText = submitBtn ? submitBtn.innerHTML : '';
-      if(submitBtn) submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
 
-      if (actionUrl && actionUrl !== '#') {
-        const formData = new FormData(form);
-        fetch(actionUrl, {
-          method: 'POST',
-          body: formData,
-          headers: { 'Accept': 'application/json' }
-        }).then(response => {
-          alert("Thank you! Our admission counselor will call you shortly.");
-          form.reset();
-          if(submitBtn) submitBtn.innerHTML = originalText;
-          modal.classList.remove('active');
-        }).catch(error => {
-          alert("Error sending request. Please try again.");
-          if(submitBtn) submitBtn.innerHTML = originalText;
-        });
-      } else {
-        alert("Thank you! Our admission counselor will call you shortly.");
-        form.reset();
-        if(submitBtn) submitBtn.innerHTML = originalText;
-        modal.classList.remove('active');
-      }
-    });
-    
-  }, 2000); // 2-second delay
-
-  /* ===========================
-     MOBILE FOOTER ACCORDION
-  =========================== */
-  const footerTitles = document.querySelectorAll('.footer-col-title');
-  footerTitles.forEach(title => {
-    title.addEventListener('click', () => {
-      if (window.innerWidth <= 768) {
-        const parentCol = title.closest('.footer-col');
-        parentCol.classList.toggle('open');
-      }
-    });
-  });
-
-  /* ===========================
-     (Removed duplicate faculty carousel logic)
-  =========================== */
-
-  /* ===========================
-     DYNAMIC NEWS & EVENTS
-  =========================== */
-  function renderNewsAndEvents() {
-    const grids = [
-      document.getElementById('dynamic-news-grid'),
-      document.getElementById('news-page-grid')
-    ];
-    
-    let newsList = JSON.parse(localStorage.getItem('admin_news_events')) || [];
-    
-    grids.forEach(grid => {
-      if(!grid) return;
-      grid.innerHTML = '';
-      
-      if(newsList.length === 0) {
-        grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-color); padding: 40px;">No news or events published yet. Check back later!</div>';
-        return;
-      }
-      
-      newsList.forEach((news, idx) => {
-        // Limit to 3 on homepage, show all on news page
-        if(grid.id === 'dynamic-news-grid' && idx >= 3) return;
-        
-        const photo = news.image || 'assets/images/hero-3.jpg';
-        grid.innerHTML += `
-          <article class='news-card' data-aos='fade-up' data-aos-delay='${(idx % 3 + 1) * 100}'>
-            <div class='news-image'>
-              <img src='${photo}' alt='${news.title}' loading='lazy' style='object-fit:cover; width:100%; height:100%;' />
-              <span class='news-category'>${news.category}</span>
-            </div>
-            <div class='news-body'>
-              <div class='news-meta'>
-                <span class='news-meta-item'><i class='fa-regular fa-calendar'></i> ${news.date}</span>
-              </div>
-              <h3 class='news-title'>${news.title}</h3>
-              <p class='news-excerpt'>${news.excerpt}</p>
-              <a href='news.html' class='news-read-more'>Read More <i class='fa-solid fa-arrow-right'></i></a>
-            </div>
-          </article>
-        `;
-      });
-    });
-  }
-  renderNewsAndEvents();
-
-})();
-
-
-
-// CSE Faculty Swiper Initialization
-function initCSESwiper() {
-  if (document.querySelector('.cseSwiper')) {
-    new Swiper('.cseSwiper', {
-      slidesPerView: 1,
-      spaceBetween: 20,
-      loop: true,
-      speed: 800,
-      watchSlidesProgress: true,
-      autoplay: {
-        delay: 2000,
-        disableOnInteraction: false,
-      },
-      pagination: {
-        el: '.swiper-pagination',
-        clickable: true,
-      },
-      navigation: {
-        nextEl: '.cse-next',
-        prevEl: '.cse-prev',
-      },
-      breakpoints: {
-        576: { slidesPerView: 2, spaceBetween: 20 },
-        768: { slidesPerView: 3, spaceBetween: 30 },
-        1024: { slidesPerView: 4, spaceBetween: 30 },
-      }
-    });
-  }
-}
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initCSESwiper);

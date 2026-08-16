@@ -20,6 +20,68 @@ if (!currentUserData) {
   }
 }
 
+// --- PROFILE PHOTO UPLOAD (CIRCULAR CROP) ---
+window.updateProfilePhoto = function(input) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    
+    // Change icon temporarily
+    const label = input.parentElement;
+    const icon = label.querySelector('i');
+    if (icon) icon.className = 'fa-solid fa-spinner fa-spin';
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const size = Math.min(img.width, img.height);
+        
+        // Final image size (max 300px to save storage)
+        const targetSize = Math.min(size, 300);
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = targetSize;
+        canvas.height = targetSize;
+        const ctx = canvas.getContext('2d');
+        
+        // Circular clip
+        ctx.beginPath();
+        ctx.arc(targetSize/2, targetSize/2, targetSize/2, 0, Math.PI*2, true);
+        ctx.closePath();
+        ctx.clip();
+        
+        // Draw image centered and cropped
+        const startX = (img.width - size) / 2;
+        const startY = (img.height - size) / 2;
+        ctx.drawImage(img, startX, startY, size, size, 0, 0, targetSize, targetSize);
+        
+        // Save as PNG to maintain transparency of the corners
+        const compressedData = canvas.toDataURL('image/png');
+        
+        try {
+          let allUsers = JSON.parse(localStorage.getItem('erp_users')) || {};
+          if (allUsers[user.mobile]) {
+            allUsers[user.mobile].photoURL = compressedData;
+            localStorage.setItem('erp_users', JSON.stringify(allUsers));
+            
+            user.photoURL = compressedData;
+            localStorage.setItem('erp_current_user', JSON.stringify(user));
+            
+            document.getElementById('topProfileImg').src = compressedData;
+          }
+        } catch(err) {
+          console.error(err);
+          alert("Storage full! Please delete some old documents first.");
+        }
+        
+        if (icon) icon.className = 'fa-solid fa-camera';
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
 // 2. Logout Logic
 const btnLogout = document.getElementById('btnLogout');
 if (btnLogout) {
@@ -311,24 +373,83 @@ const modules = [
       window.uploadStudentDoc = function(input, docName) {
         if(input.files && input.files[0]) {
           const file = input.files[0];
+          
+          // Show loading state on the button
+          const label = input.parentElement;
+          const originalText = label.innerHTML;
+          label.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+          
           const reader = new FileReader();
           reader.onload = function(e) {
-            let allUsers = JSON.parse(localStorage.getItem('erp_users')) || {};
-            let uIdx = allUsers.findIndex(u => u.phone === user.mobile);
-            if(uIdx > -1) {
-              if(!allUsers[uIdx].documents) allUsers[uIdx].documents = {};
-              allUsers[uIdx].documents[docName] = e.target.result;
-              localStorage.setItem('erp_users', JSON.stringify(allUsers));
+            const img = new Image();
+            img.onload = function() {
+              const canvas = document.createElement('canvas');
+              let width = img.width;
+              let height = img.height;
+              const max_size = 1000;
+
+              if (width > height) {
+                if (width > max_size) {
+                  height *= max_size / width;
+                  width = max_size;
+                }
+              } else {
+                if (height > max_size) {
+                  width *= max_size / height;
+                  height = max_size;
+                }
+              }
+
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
               
-              // Update local session
-              user = allUsers[uIdx];
-              localStorage.setItem('erp_current_user', JSON.stringify(user));
-              
-              // Refresh Modal
-              document.getElementById('modalBody').innerHTML = modules[7].render();
-            }
+              // Compress the image aggressively to save localStorage space
+              const compressedData = canvas.toDataURL('image/jpeg', 0.6);
+
+              try {
+                let allUsers = JSON.parse(localStorage.getItem('erp_users')) || {};
+                if(allUsers[user.mobile]) {
+                  // Fix array vs object conflict from registration
+                  if(!allUsers[user.mobile].documents || Array.isArray(allUsers[user.mobile].documents)) {
+                      allUsers[user.mobile].documents = {}; 
+                  }
+                  
+                  allUsers[user.mobile].documents[docName] = compressedData;
+                  localStorage.setItem('erp_users', JSON.stringify(allUsers));
+                  
+                  // Update local session
+                  user = allUsers[user.mobile];
+                  localStorage.setItem('erp_current_user', JSON.stringify(user));
+                  
+                  // Refresh Modal
+                  document.getElementById('modalBody').innerHTML = modules[7].render();
+                }
+              } catch(err) {
+                 console.error(err);
+                 alert("Upload failed! Storage space is full or the image is still too large. Try a smaller file.");
+                 label.innerHTML = originalText;
+              }
+            };
+            img.src = e.target.result;
           };
           reader.readAsDataURL(file);
+        }
+      };
+
+      window.deleteStudentDoc = function(docName) {
+        if(confirm("Are you sure you want to delete this document?")) {
+           let allUsers = JSON.parse(localStorage.getItem('erp_users')) || {};
+           if(allUsers[user.mobile] && allUsers[user.mobile].documents) {
+              delete allUsers[user.mobile].documents[docName];
+              localStorage.setItem('erp_users', JSON.stringify(allUsers));
+              
+              user = allUsers[user.mobile];
+              localStorage.setItem('erp_current_user', JSON.stringify(user));
+              
+              document.getElementById('modalBody').innerHTML = modules[7].render();
+           }
         }
       };
       
@@ -345,18 +466,22 @@ const modules = [
       
       let html = `<div style="background:#fef3c7; border:1px solid #fde68a; padding:12px; border-radius:8px; margin-bottom:20px; font-size:0.85rem; color:#d97706; display:flex; gap:10px; align-items:start;">
         <i class="fa-solid fa-triangle-exclamation" style="margin-top:2px;"></i>
-        <div>Once a document is uploaded, it will be <strong>locked</strong> and cannot be deleted or changed. Please upload clear photos.</div>
+        <div>Please upload clear and readable photos of your documents. You can delete and re-upload them if you make a mistake.</div>
       </div>`;
       
       const docs = user.documents || {};
       
       docTypes.forEach(doc => {
         let isUploaded = !!docs[doc];
+        let docImage = docs[doc];
         html += `
           <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; margin-bottom:12px;">
-            <div style="font-weight:600; color:#334155; font-size:0.95rem;">${doc}</div>
+            <div style="font-weight:600; color:#334155; font-size:0.95rem;">
+              ${doc}
+              ${isUploaded ? `<div style="margin-top:8px;"><img src="${docImage}" style="max-height:60px; border-radius:6px; border:1px solid #cbd5e1;"></div>` : ''}
+            </div>
             ${isUploaded ? 
-              `<div style="display:flex; align-items:center; gap:8px; color:#10b981; font-weight:700; font-size:0.85rem; padding:6px 12px; background:#dcfce7; border-radius:8px;"><i class="fa-solid fa-lock"></i> Locked</div>` : 
+              `<button class="btn-admin-outline" style="color:#ef4444; border-color:#ef4444; padding:6px 12px; font-size:0.85rem;" onclick="window.deleteStudentDoc('${doc}')"><i class="fa-solid fa-trash"></i> Delete</button>` : 
               `<label class="btn btn-outline-primary" style="padding:6px 12px; font-size:0.85rem; cursor:pointer; margin:0;">
                 <i class="fa-solid fa-upload"></i> Select Photo
                 <input type="file" accept="image/*" style="display:none;" onchange="window.uploadStudentDoc(this, '${doc}')">

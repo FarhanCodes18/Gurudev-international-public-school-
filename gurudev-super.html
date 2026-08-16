@@ -62,7 +62,8 @@
         <a class="nav-item" data-view="notices"><i class="fa-solid fa-bullhorn"></i> Notices & E-Library</a>
         <a class="nav-item" data-view="calendar"><i class="fa-solid fa-calendar-days"></i> School Calendar</a>
         <a class="nav-item" data-view="admissions"><i class="fa-solid fa-file-signature"></i> Admissions & Callbacks</a>
-        <a class="nav-item" data-view="results"><i class="fa-solid fa-square-poll-vertical"></i> Results & Complaints</a>
+        <a class="nav-item" data-view="results"><i class="fa-solid fa-square-poll-vertical"></i> Results & Reviews</a>
+        <a class="nav-item" data-view="complaints"><i class="fa-solid fa-triangle-exclamation"></i> Complaint Queries</a>
         <a class="nav-item" data-view="reviews"><i class="fa-solid fa-star"></i> Student Reviews</a>
         <a class="nav-item" data-view="students"><i class="fa-solid fa-user-group"></i> Registered Students</a>
         <a class="nav-item" data-view="sms"><i class="fa-solid fa-comment-sms"></i> Bulk SMS Blaster</a>
@@ -71,6 +72,7 @@
         <a class="nav-item" data-view="certificate"><i class="fa-solid fa-award"></i> Certificate Maker</a>
         <a class="nav-item" data-view="transport"><i class="fa-solid fa-bus"></i> Transport Routes</a>
         <a class="nav-item" data-view="faculty"><i class="fa-solid fa-chalkboard-user"></i> Faculty Manager</a>
+        <a class="nav-item" data-view="birthdays"><i class="fa-solid fa-cake-candles"></i> Student Birthdays</a>
       </div>
       
       <div style="padding: 20px; border-top: 1px solid var(--admin-border);">
@@ -115,7 +117,7 @@
             <div class="stat-card"><div class="stat-icon stat-success"><i class="fa-solid fa-indian-rupee-sign"></i></div><div class="stat-info"><h3>Total Collected</h3><div class="value">₹0</div></div></div>
             <div class="stat-card"><div class="stat-icon stat-warning"><i class="fa-solid fa-file-invoice"></i></div><div class="stat-info"><h3>Pending Dues</h3><div class="value">₹0</div></div></div>
             <div class="stat-card"><div class="stat-icon stat-primary"><i class="fa-solid fa-user-graduate"></i></div><div class="stat-info"><h3>Total Students</h3><div class="value" id="dash-total-students">0</div></div></div>
-            <div class="stat-card"><div class="stat-icon stat-danger"><i class="fa-solid fa-envelope"></i></div><div class="stat-info"><h3>Pending Inquiries</h3><div class="value">0</div></div></div>
+            <div class="stat-card"><div class="stat-icon stat-danger"><i class="fa-solid fa-envelope"></i></div><div class="stat-info"><h3>Pending Inquiries</h3><div class="value" id="dash-pending-inquiries">0</div></div></div>
           </div>
           <div class="table-container">
             <div class="table-header">
@@ -616,7 +618,26 @@
           </div>
         </section>
 
-        <!-- REGISTERED STUDENTS -->
+        
+        <!-- COMPLAINT QUERIES -->
+        <section id="view-complaints" class="view-section">
+          <div class="page-header"><div><h2 class="page-title"><i class="fa-solid fa-triangle-exclamation" style="color:var(--admin-danger);"></i> Complaint Queries</h2><p class="page-desc">Manage all complaints submitted from the website's Complaint Box.</p></div></div>
+          
+          <div class="table-container">
+            <div class="table-header">
+              <div class="table-title">Recent Complaints</div>
+              <button class="btn-admin" style="padding:8px 16px; font-size:0.8rem;" onclick="loadComplaints()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+            </div>
+            <div class="table-responsive"><table class="admin-table">
+              <thead><tr><th>Date</th><th>Name</th><th>Contact</th><th>Complaint Details</th><th>Action</th></tr></thead>
+              <tbody id="complaints-list">
+                <tr><td colspan="5" style="text-align:center; color:var(--admin-muted); padding:40px;">No complaints found.</td></tr>
+              </tbody>
+            </table></div>
+          </div>
+        </section>
+        
+<!-- REGISTERED STUDENTS -->
         <section id="view-students" class="view-section">
           <div class="page-header">
             <div><h2 class="page-title">Registered Students</h2><p class="page-desc">Manage all student accounts stored in the local ERP database.</p></div>
@@ -708,9 +729,12 @@
           <div style="background:var(--admin-surface); padding:30px; border-radius:var(--radius-xl); width:100%;max-width:100%;max-width:800px; max-width:90%; position:relative; box-shadow:var(--shadow-lg); border: 1px solid var(--admin-border); max-height:90vh; display:flex; flex-direction:column;">
             <button onclick="document.getElementById('doc-viewer-modal').classList.remove('active')" style="position:absolute; top:20px; right:20px; background:transparent; border:none; font-size:1.4rem; color:var(--admin-muted); cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
             
-            <div style="margin-bottom:20px;">
-              <h2 style="color:var(--admin-heading); font-size:1.4rem; font-weight:800; margin-bottom:5px;">Document Vault</h2>
-              <p id="doc-modal-student-name" style="color:var(--admin-accent); font-weight:700; font-family:monospace; margin:0;"></p>
+            <div style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:flex-end;">
+              <div>
+                <h2 style="color:var(--admin-heading); font-size:1.4rem; font-weight:800; margin-bottom:5px;">Document Vault</h2>
+                <p id="doc-modal-student-name" style="color:var(--admin-accent); font-weight:700; font-family:monospace; margin:0;"></p>
+              </div>
+              <button class="btn-admin" style="padding:8px 16px; font-size:0.9rem; background:var(--admin-success);" onclick="downloadAllStudentDocs()"><i class="fa-solid fa-download"></i> Download All</button>
             </div>
             
             <div id="doc-modal-grid" style="overflow-y:auto; flex:1; display:grid; grid-template-columns:1fr 1fr; gap:20px; padding-right:10px;">
@@ -943,6 +967,25 @@
                 </tbody>
               </table>
             </div>
+          </div>
+        </section>
+
+    
+        <!-- STUDENT BIRTHDAYS -->
+        <section id="view-birthdays" class="view-section">
+          <div class="page-header"><div><h2 class="page-title"><i class="fa-solid fa-cake-candles" style="color:var(--admin-accent);"></i> Student Birthdays</h2><p class="page-desc">Track all student birthdays. Special alerts will notify you of today's birthdays!</p></div></div>
+          
+          <div class="table-container">
+            <div class="table-header">
+              <div class="table-title">Birthday List</div>
+              <button class="btn-admin" style="padding:8px 16px; font-size:0.8rem;" onclick="loadBirthdays()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+            </div>
+            <div class="table-responsive"><table class="admin-table">
+              <thead><tr><th>Student Name</th><th>Class</th><th>Mobile</th><th>Date of Birth</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody id="birthdays-list">
+                <tr><td colspan="6" style="text-align:center; color:var(--admin-muted); padding:40px;">Loading birthdays...</td></tr>
+              </tbody>
+            </table></div>
           </div>
         </section>
 
@@ -1310,6 +1353,123 @@
     }
 
   </script>
+
+  <script>
+    function updatePendingInquiriesCount() {
+      let count = 0;
+      try {
+        const contacts = JSON.parse(localStorage.getItem('admin_contact_messages')) || [];
+        const admissions = JSON.parse(localStorage.getItem('erp_callbacks')) || [];
+        const quick = JSON.parse(localStorage.getItem('admin_quick_callbacks')) || [];
+        const general = JSON.parse(localStorage.getItem('admin_general_forms')) || [];
+        const complaints = JSON.parse(localStorage.getItem('admin_complaints')) || [];
+        count = contacts.length + admissions.length + quick.length + general.length + complaints.length;
+      } catch(e) {}
+      
+      const dashEl = document.getElementById('dash-pending-inquiries');
+      if (dashEl) dashEl.textContent = count;
+      
+      const admEl = document.getElementById('admissions-pending-inquiries');
+      if (admEl) admEl.textContent = count;
+    }
+    
+    document.addEventListener('DOMContentLoaded', updatePendingInquiriesCount);
+    setInterval(updatePendingInquiriesCount, 2000);
+  </script>
+
+  <script>
+    function loadBirthdays() {
+      const tbody = document.getElementById('birthdays-list');
+      if (!tbody) return;
+      
+      const users = JSON.parse(localStorage.getItem('erp_users')) || {};
+      const students = Object.values(users).filter(u => u.role === 'student' && u.dob);
+      
+      if (students.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--admin-muted); padding:40px;">No students found with Date of Birth.</td></tr>';
+        return;
+      }
+      
+      const today = new Date();
+      const currentMonth = today.getMonth() + 1;
+      const currentDay = today.getDate();
+      
+      students.sort((a, b) => {
+        const dateA = new Date(a.dob);
+        const dateB = new Date(b.dob);
+        if (dateA.getMonth() !== dateB.getMonth()) return dateA.getMonth() - dateB.getMonth();
+        return dateA.getDate() - dateB.getDate();
+      });
+
+      tbody.innerHTML = '';
+      
+      let hasBirthdayToday = false;
+      let birthdayNames = [];
+
+      students.forEach(student => {
+        const dobDate = new Date(student.dob);
+        const dobMonth = dobDate.getMonth() + 1;
+        const dobDay = dobDate.getDate();
+        
+        let statusHtml = '<span class="status-badge" style="background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1;">Upcoming</span>';
+        let isToday = false;
+        
+        if (dobMonth === currentMonth && dobDay === currentDay) {
+          statusHtml = '<span class="status-badge" style="background:#fce7f3; color:#be185d; border:1px solid #fbcfe8;"><i class="fa-solid fa-cake-candles"></i> Today!</span>';
+          isToday = true;
+          hasBirthdayToday = true;
+          birthdayNames.push(student.name);
+        } else if (dobMonth === currentMonth) {
+          statusHtml = '<span class="status-badge" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd;">This Month</span>';
+        }
+        
+        const rowStyle = isToday ? 'background: rgba(225, 29, 72, 0.05); font-weight:600;' : '';
+        const whatsappMsg = `Happy Birthday ${student.name}! 🎉 Wishing you a fantastic day and a great year ahead from Gurudev International Public School.`;
+        const actionBtn = `<button class="btn-admin-outline" style="padding:4px 10px; font-size:0.75rem; display:flex; align-items:center; gap:5px; margin:0;" onclick="window.open('https://wa.me/91${student.mobile}?text=${encodeURIComponent(whatsappMsg)}', '_blank')"><i class="fa-brands fa-whatsapp" style="color:#25D366; font-size:1rem;"></i> Wish</button>`;
+        
+        tbody.innerHTML += `
+          <tr style="${rowStyle}">
+            <td><div class="student-cell"><img src="${student.photoURL || 'assets/images/default-avatar.png'}" onerror="this.src='assets/images/default-avatar.png'"><div><h5>${student.name}</h5><p>${student.studentId || 'N/A'}</p></div></div></td>
+            <td>Class ${student.class}</td>
+            <td>${student.mobile}</td>
+            <td style="font-weight:600;">${dobDate.toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'})}</td>
+            <td>${statusHtml}</td>
+            <td>${actionBtn}</td>
+          </tr>
+        `;
+      });
+      
+      if (window.checkingInitialBirthdays && hasBirthdayToday) {
+        window.checkingInitialBirthdays = false;
+        
+        const todayStr = new Date().toDateString();
+        let alertData = JSON.parse(localStorage.getItem('admin_birthday_alerts')) || { date: '', count: 0 };
+        
+        if (alertData.date !== todayStr) {
+          alertData = { date: todayStr, count: 0 };
+        }
+        
+        if (alertData.count < 2) {
+          alertData.count++;
+          localStorage.setItem('admin_birthday_alerts', JSON.stringify(alertData));
+          
+          setTimeout(() => {
+             if (typeof showCustomAlert === 'function') {
+               showCustomAlert("Birthday Alert! 🎉", `Today is the birthday of ${birthdayNames.join(', ')}! Don't forget to wish them.`, "success");
+             } else {
+               alert(`🎉 Today is the birthday of ${birthdayNames.join(', ')}!`);
+             }
+          }, 1500);
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      window.checkingInitialBirthdays = true;
+      loadBirthdays();
+    });
+  </script>
+
 </body>
 
 </html>

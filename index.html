@@ -263,6 +263,7 @@
               <a href="news.html"                 class="dropdown-item"><i class="fa-solid fa-newspaper"></i> News & Events</a>
               <a href="mandatory-disclosure.html" class="dropdown-item"><i class="fa-solid fa-file-text"></i> Mandatory Disclosure</a>
               <a href="contact.html"              class="dropdown-item"><i class="fa-solid fa-location-dot"></i> Contact</a>
+              <a href="#" onclick="document.getElementById('complaint-modal').classList.add('active'); return false;" class="dropdown-item"><i class="fa-solid fa-envelope-open-text"></i> Complaint Box</a>
             </div>
           </li>
 
@@ -1369,8 +1370,37 @@
         }, 500); // 500ms delay to ensure everything is loaded
       });
     </script>
-  </body>
+  <!-- COMPLAINT BOX MODAL -->
+  <div class="modal-overlay" id="complaint-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:white; padding:30px; border-radius:12px; width:90%; max-width:500px; position:relative; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+      <button onclick="document.getElementById('complaint-modal').classList.remove('active')" style="position:absolute; top:15px; right:15px; background:transparent; border:none; font-size:1.5rem; cursor:pointer; color:#64748b;"><i class="fa-solid fa-xmark"></i></button>
+      <h3 style="margin-bottom:5px; font-family:var(--font-primary); font-size:1.5rem; color:var(--primary);"><i class="fa-solid fa-envelope-open-text"></i> Complaint Box</h3>
+      <p style="color:#64748b; font-size:0.9rem; margin-bottom:20px;">Your complaint will be sent directly to the administration.</p>
+      
+      <!-- Using complaint-form ID so main.js intercepts it and saves to admin_complaints -->
+      <form action="https://formspree.io/f/mppardbk" method="POST" id="complaint-form">
+        <div style="margin-bottom:15px;">
+          <label style="display:block; margin-bottom:5px; font-weight:600; font-size:0.9rem;">Name (Optional)</label>
+          <input type="text" name="Name" placeholder="Enter your name" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; font-family:inherit;">
+        </div>
+        <div style="margin-bottom:15px;">
+          <label style="display:block; margin-bottom:5px; font-weight:600; font-size:0.9rem;">Phone / Email</label>
+          <input type="text" name="Contact" placeholder="For follow-up (optional)" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; font-family:inherit;">
+        </div>
+        <div style="margin-bottom:20px;">
+          <label style="display:block; margin-bottom:5px; font-weight:600; font-size:0.9rem;">Complaint Details *</label>
+          <textarea name="Message" rows="4" placeholder="Describe your issue..." required style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; font-family:inherit; resize:vertical;"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%; border:none; padding:12px; font-size:1rem; cursor:pointer;"><i class="fa-solid fa-paper-plane"></i> Submit Complaint</button>
+      </form>
+    </div>
+  </div>
 
+  <style>
+    #complaint-modal.active { display:flex !important; }
+  </style>
+
+</body>
 </html>
 
 

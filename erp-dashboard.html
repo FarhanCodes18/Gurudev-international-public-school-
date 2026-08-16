@@ -21,7 +21,9 @@
 </script>
 <link rel="stylesheet" href="css/responsive.css" />
 <script class="disable-inspect">document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('keydown', e => { if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) e.preventDefault(); });</script></head>
-<body style="background: #f8f9fa; font-family: var(--font-body); padding-bottom: 50px; min-height: 100vh;">
+<body style="background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%); font-family: var(--font-body); padding-bottom: 50px; min-height: 100vh;">
+  <!-- Mesh overlay -->
+  <div style="position:fixed; top:0; left:0; width:100%; height:100%; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; opacity: 0.3; pointer-events: none; z-index:-1;"></div>
 
   <!-- Top Navbar -->
   <div class="erp-top-nav">
@@ -39,7 +41,10 @@
     <div class="erp-profile-banner">
       <div class="erp-profile-img-wrapper">
         <img src="assets/images/school_building_main.png" id="topProfileImg" alt="Profile">
-        <div class="camera-icon"><i class="fa-solid fa-camera"></i></div>
+        <label class="camera-icon" style="cursor:pointer;" title="Change Profile Photo">
+          <i class="fa-solid fa-camera"></i>
+          <input type="file" id="profilePhotoUpload" accept="image/*" style="display:none;" onchange="window.updateProfilePhoto(this)" />
+        </label>
       </div>
       <div class="erp-profile-info">
         <div class="welcome-text">WELCOME BACK</div>
@@ -60,7 +65,7 @@
 
     <div class="erp-features-grid">
       <!-- 1 -->
-      <div class="feature-card border-yellow">
+      <div class="feature-card border-yellow" style="animation-delay: 0.1s;">
         <div class="icon-box bg-yellow-light text-yellow"><i class="fa-solid fa-trophy"></i></div>
         <div class="text-box">
           <h3>Achievement Badges</h3>
@@ -68,7 +73,7 @@
         </div>
       </div>
       <!-- 2 -->
-      <div class="feature-card border-purple">
+      <div class="feature-card border-purple" style="animation-delay: 0.15s;">
         <div class="icon-box bg-purple-light text-purple"><i class="fa-regular fa-calendar"></i></div>
         <div class="text-box">
           <h3>School Calendar</h3>
@@ -76,7 +81,7 @@
         </div>
       </div>
       <!-- 3 -->
-      <div class="feature-card border-blue">
+      <div class="feature-card border-blue" style="animation-delay: 0.2s;">
         <div class="icon-box bg-blue-light text-blue"><i class="fa-regular fa-calendar-check"></i></div>
         <div class="text-box">
           <h3>My Attendance</h3>
@@ -84,7 +89,7 @@
         </div>
       </div>
       <!-- 4 -->
-      <div class="feature-card border-pink">
+      <div class="feature-card border-pink" style="animation-delay: 0.25s;">
         <div class="icon-box bg-pink-light text-pink"><i class="fa-regular fa-calendar-plus"></i></div>
         <div class="text-box">
           <h3>Apply Leave</h3>
@@ -92,16 +97,15 @@
         </div>
       </div>
       <!-- 5 -->
-      <div class="feature-card border-yellow" onclick="openTransportModal()" style="cursor:pointer;">
+      <div class="feature-card border-yellow" onclick="openTransportModal()" style="cursor:pointer; animation-delay: 0.3s;">
         <div class="icon-box bg-yellow-light text-yellow"><i class="fa-solid fa-bus"></i></div>
         <div class="text-box">
           <h3>Transport Routes</h3>
           <p>Bus & Driver info</p>
         </div>
       </div>
-      
       <!-- 6 -->
-      <div class="feature-card border-red">
+      <div class="feature-card border-red" style="animation-delay: 0.35s;">
         <div class="icon-box bg-red-light text-red"><i class="fa-regular fa-clock"></i></div>
         <div class="text-box">
           <h3>Timetable</h3>
@@ -109,7 +113,7 @@
         </div>
       </div>
       <!-- 7 -->
-      <div class="feature-card border-teal">
+      <div class="feature-card border-teal" style="animation-delay: 0.4s;">
         <div class="icon-box bg-teal-light text-teal"><i class="fa-solid fa-book-open"></i></div>
         <div class="text-box">
           <h3>Assignments</h3>
@@ -117,17 +121,15 @@
         </div>
       </div>
       <!-- 8 -->
-      <div class="feature-card border-orange">
+      <div class="feature-card border-orange" style="animation-delay: 0.45s;">
         <div class="icon-box bg-orange-light text-orange"><i class="fa-regular fa-folder-open"></i></div>
         <div class="text-box">
           <h3>My Documents</h3>
           <p>Upload & View Documents</p>
         </div>
       </div>
-      
-      <!-- Locked / Coming Soon -->
       <!-- 9 -->
-      <div class="feature-card border-indigo" onclick="openIdCardModal()" style="cursor:pointer;">
+      <div class="feature-card border-indigo" onclick="openIdCardModal()" style="cursor:pointer; animation-delay: 0.5s;">
         <div class="icon-box" style="background:#e0e7ff; color:#4f46e5;"><i class="fa-solid fa-id-badge"></i></div>
         <div class="text-box">
           <h3>Digital ID Card</h3>
@@ -135,7 +137,7 @@
         </div>
       </div>
       <!-- 10 -->
-      <div class="feature-card locked-card">
+      <div class="feature-card locked-card" style="animation-delay: 0.55s;">
         <div class="icon-box bg-gray-light text-gray"><i class="fa-solid fa-indian-rupee-sign"></i></div>
         <div class="text-box">
           <h3>Fee Record</h3>
@@ -144,7 +146,7 @@
         <div class="lock-icon"><i class="fa-solid fa-lock"></i></div>
       </div>
       <!-- 11 -->
-      <div class="feature-card locked-card">
+      <div class="feature-card locked-card" style="animation-delay: 0.6s;">
         <div class="icon-box bg-gray-light text-gray"><i class="fa-solid fa-chart-line"></i></div>
         <div class="text-box">
           <h3>My Progress</h3>
@@ -368,5 +370,100 @@
   }
 </script>
 
-</body>
+<!-- Birthday Modal -->
+<div id="birthdayModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.85); z-index:99999; justify-content:center; align-items:center; backdrop-filter: blur(8px);">
+  <div style="background:linear-gradient(135deg, #ffffff, #fef08a); width:95%; max-width:450px; border-radius:24px; text-align:center; padding:40px 20px; box-shadow:0 25px 50px rgba(0,0,0,0.5); position:relative; overflow:hidden; animation: bounceIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+    
+    <!-- Confetti elements using simple CSS -->
+    <div style="position:absolute; top:-20px; left:0; width:100%; height:100%; pointer-events:none; overflow:hidden;" id="confetti-container"></div>
+    
+    <div style="font-size:5rem; color:#e11d48; margin-bottom:10px; animation: pulse 2s infinite;">
+      <i class="fa-solid fa-cake-candles"></i>
+    </div>
+    
+    <h1 style="font-family:var(--font-primary); font-size:2.2rem; color:#0f172a; margin-bottom:10px; font-weight:800;">Happy Birthday!</h1>
+    <h2 id="birthdayStudentName" style="color:#e11d48; font-size:1.8rem; margin-bottom:20px; font-weight:700;">Student Name</h2>
+    
+    <p style="color:#475569; font-size:1.1rem; line-height:1.6; margin-bottom:30px;">
+      Wishing you a fantastic day filled with joy, laughter, and great success!<br>Have a wonderful year ahead! 🎉
+    </p>
+    
+    <button onclick="closeBirthdayModal()" style="background:#e11d48; color:white; border:none; padding:14px 30px; border-radius:30px; font-size:1.1rem; font-weight:700; cursor:pointer; box-shadow:0 8px 20px rgba(225, 29, 72, 0.4); transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+      Thank You!
+    </button>
+  </div>
+</div>
 
+<style>
+  @keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); opacity: 1; }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); }
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+</style>
+
+<script>
+  window.closeBirthdayModal = function() {
+    document.getElementById('birthdayModal').style.display = 'none';
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    try {
+      let user = JSON.parse(localStorage.getItem('erp_current_user'));
+      if(user && user.dob) {
+        const today = new Date();
+        const currentMonth = today.getMonth() + 1;
+        const currentDay = today.getDate();
+        
+        const dobDate = new Date(user.dob);
+        const dobMonth = dobDate.getMonth() + 1;
+        const dobDay = dobDate.getDate();
+        
+        if(dobMonth === currentMonth && dobDay === currentDay && !sessionStorage.getItem('birthdayShown')) {
+          document.getElementById('birthdayStudentName').textContent = user.name;
+          document.getElementById('birthdayModal').style.display = 'flex';
+          sessionStorage.setItem('birthdayShown', 'true');
+          
+          const colors = ['#e11d48', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
+          const container = document.getElementById('confetti-container');
+          for(let i=0; i<60; i++) {
+            const conf = document.createElement('div');
+            conf.style.position = 'absolute';
+            conf.style.width = Math.random() * 10 + 5 + 'px';
+            conf.style.height = Math.random() * 10 + 5 + 'px';
+            conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            conf.style.left = Math.random() * 100 + '%';
+            conf.style.top = -20 + 'px';
+            conf.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+            conf.style.opacity = Math.random() + 0.5;
+            conf.style.transform = 'rotate(' + Math.random() * 360 + 'deg)';
+            
+            const duration = Math.random() * 3 + 2;
+            const delay = Math.random() * 2;
+            conf.animate([
+              { transform: `translate3d(0,0,0) rotate(0deg)`, opacity: 1 },
+              { transform: `translate3d(${Math.random()*200 - 100}px, 600px, 0) rotate(${Math.random()*360}deg)`, opacity: 0 }
+            ], {
+              duration: duration * 1000,
+              delay: delay * 1000,
+              iterations: Infinity
+            });
+            
+            container.appendChild(conf);
+          }
+        }
+      }
+    } catch(e) {
+      console.error("Error checking birthday:", e);
+    }
+  });
+</script>
+
+</body>
+</html>

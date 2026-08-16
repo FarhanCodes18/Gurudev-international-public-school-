@@ -326,9 +326,7 @@ body.erp-auth-page {
 @media(max-width:768px) { .erp-top-nav { margin: 10px; border-radius: 8px;} }
 
 .erp-profile-banner {
-  background: linear-gradient(-45deg, #1e3a8a, #3b82f6, #2563eb, #1e3a8a);
-  background-size: 300% 300%;
-  animation: gradientProfile 10s ease infinite;
+  background: radial-gradient(circle at top right, #3b82f6, #1e3a8a 70%), #1e3a8a;
   border-radius: 24px;
   padding: 40px;
   display: flex;
@@ -339,11 +337,34 @@ body.erp-auth-page {
   box-shadow: 0 15px 35px rgba(37, 99, 235, 0.4);
   position: relative;
   overflow: hidden;
+  z-index: 1;
 }
-@keyframes gradientProfile {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+.erp-profile-banner::before {
+  content: '';
+  position: absolute;
+  top: -50px; left: -50px;
+  width: 300px; height: 300px;
+  background: rgba(139, 92, 246, 0.4);
+  filter: blur(80px);
+  border-radius: 50%;
+  z-index: -1;
+  animation: floatProfile 8s ease-in-out infinite;
+}
+.erp-profile-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -50px; right: -50px;
+  width: 250px; height: 250px;
+  background: rgba(14, 165, 233, 0.4);
+  filter: blur(80px);
+  border-radius: 50%;
+  z-index: -1;
+  animation: floatProfile 10s ease-in-out infinite reverse;
+}
+@keyframes floatProfile {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(20px) scale(1.1); }
+  100% { transform: translateY(0) scale(1); }
 }
 @media(max-width:768px) {
   .erp-profile-banner { flex-direction: column; text-align: center; gap: 20px; padding: 30px 20px; }
@@ -402,31 +423,46 @@ body.erp-auth-page {
   display: flex;
   align-items: center;
   gap: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-  border-left: 6px solid transparent;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  border: 1px solid rgba(0,0,0,0.03);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  animation: fadeUpCard 0.6s ease forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+@keyframes fadeUpCard {
+  to { opacity: 1; transform: translateY(0); }
 }
 .feature-card:hover { 
-  transform: translateY(-8px) scale(1.02); 
-  box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+  transform: translateY(-8px) scale(1.03); 
+  border-color: transparent;
+}
+.feature-card:hover .icon-box {
+  animation: bounceIcon 0.5s ease;
+}
+@keyframes bounceIcon {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
 }
 
-.border-yellow { border-left-color: #f59e0b; }
-.border-purple { border-left-color: #8b5cf6; }
-.border-blue { border-left-color: #3b82f6; }
-.border-pink { border-left-color: #ec4899; }
-.border-red { border-left-color: #ef4444; }
-.border-teal { border-left-color: #14b8a6; }
-.border-orange { border-left-color: #f97316; }
-.border-gray { border-left-color: #64748b; }
+/* Remove blocky left borders, replace with hover glow */
+.feature-card.border-yellow:hover { box-shadow: 0 15px 35px rgba(245, 158, 11, 0.15); }
+.feature-card.border-purple:hover { box-shadow: 0 15px 35px rgba(139, 92, 246, 0.15); }
+.feature-card.border-blue:hover { box-shadow: 0 15px 35px rgba(59, 130, 246, 0.15); }
+.feature-card.border-pink:hover { box-shadow: 0 15px 35px rgba(236, 72, 153, 0.15); }
+.feature-card.border-red:hover { box-shadow: 0 15px 35px rgba(239, 68, 68, 0.15); }
+.feature-card.border-teal:hover { box-shadow: 0 15px 35px rgba(20, 184, 166, 0.15); }
+.feature-card.border-orange:hover { box-shadow: 0 15px 35px rgba(249, 115, 22, 0.15); }
+.feature-card.border-gray:hover { box-shadow: 0 15px 35px rgba(100, 116, 139, 0.15); }
 
 .icon-box {
   width: 56px; height: 56px; border-radius: 16px;
   display: flex; align-items: center; justify-content: center;
   font-size: 1.4rem; flex-shrink: 0;
+  transition: transform 0.3s;
 }
 .bg-yellow-light { background: #fef3c7; } .text-yellow { color: #d97706; }
 .bg-purple-light { background: #f3e8ff; } .text-purple { color: #7e22ce; }
@@ -445,7 +481,7 @@ body.erp-auth-page {
 
 .locked-card {
   background: #f8fafc;
-  border-left: 6px solid #cbd5e1;
+  border: 1px solid #e2e8f0;
 }
 .locked-card .icon-box { filter: grayscale(1); opacity: 0.7; }
 .locked-card .lock-icon {

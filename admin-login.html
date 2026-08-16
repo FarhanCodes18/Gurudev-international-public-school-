@@ -8,62 +8,65 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-color: #0f172a;
-      --card-dark: rgba(15, 23, 42, 0.8);
-      --text-muted: #94a3b8;
-      --primary-blue: #3b82f6;
-      --glass-bg: rgba(255, 255, 255, 0.05);
-      --glass-border: rgba(255, 255, 255, 0.1);
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-muted: #64748b;
+      --text-dark: #0f172a;
+      --primary-red: #e11d48;
+      --primary-red-hover: #be123c;
+      --border-color: rgba(0, 0, 0, 0.08);
+      --input-bg: #f1f5f9;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Inter', sans-serif;
-      background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #0f172a);
-      background-size: 400% 400%;
-      animation: gradientBG 15s ease infinite;
+      background: radial-gradient(circle at top right, rgba(225, 29, 72, 0.05), transparent 40%), var(--bg-color);
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      color: white;
+      color: var(--text-dark);
+      transition: opacity 0.5s ease;
     }
-    @keyframes gradientBG {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    body.fade-out {
+      opacity: 0;
     }
     .login-wrapper {
       width: 100%;
       max-width: 480px;
       padding: 20px;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
+    }
+    .login-wrapper.success-anim {
+      transform: scale(1.05);
+      opacity: 0;
     }
     .login-card {
-      background: var(--glass-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--glass-border);
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
       border-radius: 24px;
       overflow: hidden;
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.06);
       display: flex;
       flex-direction: column;
     }
     .login-header {
-      background: rgba(0, 0, 0, 0.2);
+      background: rgba(225, 29, 72, 0.02);
       padding: 40px 30px;
-      border-bottom: 1px solid var(--glass-border);
+      border-bottom: 1px solid var(--border-color);
+      text-align: center;
     }
     .logo-icon {
-      width: 48px;
-      height: 48px;
-      border: 1px solid rgba(255,255,255,0.2);
+      width: 56px;
+      height: 56px;
+      border: 1px solid var(--border-color);
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.2rem;
-      margin-bottom: 24px;
-      color: #cbd5e1;
+      margin: 0 auto 24px auto;
+      background: #ffffff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
     .erp-auth-logo-img {
       width: 90%;
@@ -75,32 +78,33 @@
       text-transform: uppercase;
       letter-spacing: 2px;
       font-weight: 700;
-      color: #cbd5e1;
+      color: var(--primary-red);
       margin-bottom: 8px;
     }
     .title {
-      font-size: 2rem;
+      font-size: 1.8rem;
       font-weight: 800;
       margin-bottom: 12px;
       letter-spacing: -0.5px;
+      color: var(--text-dark);
     }
     .desc {
       font-size: 0.95rem;
-      color: #94a3b8;
+      color: var(--text-muted);
       line-height: 1.5;
     }
     
     .login-body {
-      padding: 30px;
+      padding: 40px 30px;
     }
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
     .form-label {
       display: block;
       font-size: 0.75rem;
       font-weight: 700;
-      color: #64748b;
+      color: var(--text-muted);
       margin-bottom: 8px;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -113,7 +117,8 @@
       left: 16px;
       top: 50%;
       transform: translateY(-50%);
-      color: #94a3b8;
+      color: var(--text-muted);
+      transition: 0.3s;
     }
     .input-wrapper i.right-icon {
       left: auto;
@@ -123,37 +128,41 @@
     .form-control {
       width: 100%;
       padding: 14px 16px 14px 45px;
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid var(--glass-border);
+      background: var(--input-bg);
+      border: 1px solid var(--border-color);
       border-radius: 12px;
       font-size: 1rem;
       font-family: inherit;
-      color: white;
+      color: var(--text-dark);
       font-weight: 500;
       outline: none;
       transition: 0.3s;
     }
     .form-control:focus {
-      border-color: var(--primary-blue);
-      background: rgba(0, 0, 0, 0.4);
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.3);
+      border-color: var(--primary-red);
+      background: #ffffff;
+      box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.1);
+    }
+    .form-control:focus + i, .form-control:focus ~ i:not(.right-icon) {
+      color: var(--primary-red);
     }
     
     .forgot-link {
       display: block;
       text-align: right;
-      color: var(--primary-blue);
+      color: var(--text-muted);
       font-size: 0.85rem;
       font-weight: 600;
       text-decoration: none;
       margin-bottom: 24px;
+      transition: 0.2s;
     }
-    .forgot-link:hover { text-decoration: underline; }
+    .forgot-link:hover { color: var(--primary-red); }
     
     .btn-submit {
       width: 100%;
       padding: 16px;
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      background: var(--primary-red);
       color: white;
       border: none;
       border-radius: 12px;
@@ -164,31 +173,40 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
-      transition: 0.2s;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
     }
     .btn-submit:hover {
-      background: linear-gradient(135deg, #60a5fa, #3b82f6);
+      background: var(--primary-red-hover);
       transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4);
+      box-shadow: 0 8px 20px rgba(225, 29, 72, 0.4);
     }
+    .btn-submit i.fa-spinner {
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
     
     .login-footer {
-      background: rgba(0, 0, 0, 0.2);
+      background: #f8fafc;
       padding: 20px;
       text-align: center;
-      border-top: 1px solid var(--glass-border);
+      border-top: 1px solid var(--border-color);
       font-size: 0.8rem;
       font-weight: 500;
       color: var(--text-muted);
     }
     
     .error-msg {
+      background: rgba(239, 68, 68, 0.1);
       color: #ef4444;
       font-size: 0.85rem;
-      font-weight: 500;
-      margin-bottom: 15px;
+      font-weight: 600;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
       display: none;
       text-align: center;
+      border: 1px solid rgba(239, 68, 68, 0.2);
     }
   </style>
   <link rel="icon" type="image/png" href="assets/icons/gurudev_school-removebg-preview.png" />
@@ -215,14 +233,14 @@
       </div>
       
       <div class="login-body">
-        <form id="admin-login-form">
+        <form id="admin-login-form" autocomplete="off">
           <div class="error-msg" id="error-msg">Invalid username or password.</div>
           
           <div class="form-group">
             <label class="form-label">USERNAME</label>
             <div class="input-wrapper">
               <i class="fa-regular fa-envelope"></i>
-              <input type="text" id="admin-user" class="form-control" value="gurudev@gmail.com" />
+              <input type="text" id="admin-user" class="form-control" placeholder="Enter admin username" autocomplete="off" />
             </div>
           </div>
           
@@ -230,14 +248,14 @@
             <label class="form-label">PASSWORD</label>
             <div class="input-wrapper">
               <i class="fa-solid fa-lock"></i>
-              <input type="password" id="admin-pass" class="form-control" value="Gurudev@2008" />
+              <input type="password" id="admin-pass" class="form-control" placeholder="Enter password" autocomplete="off" />
               <i class="fa-regular fa-eye right-icon" onclick="togglePassword()"></i>
             </div>
           </div>
           
           <a href="#" class="forgot-link">Forgot Password?</a>
           
-          <button type="submit" class="btn-submit"><i class="fa-solid fa-arrow-right-to-bracket"></i> Sign in</button>
+          <button type="submit" class="btn-submit" id="submit-btn"><i class="fa-solid fa-arrow-right-to-bracket"></i> Sign in</button>
         </form>
       </div>
       
@@ -258,14 +276,42 @@
       e.preventDefault();
       const user = document.getElementById('admin-user').value;
       const pass = document.getElementById('admin-pass').value;
+      const btn = document.getElementById('submit-btn');
+      const errorMsg = document.getElementById('error-msg');
       
-      if(user === 'gurudev@gmail.com' && pass === 'Gurudev@2008') {
-        // Create session
-        localStorage.setItem('admin_session', 'active');
-        window.location.href = 'gurudev-super.html';
-      } else {
-        document.getElementById('error-msg').style.display = 'block';
-      }
+      errorMsg.style.display = 'none';
+      btn.innerHTML = '<i class="fa-solid fa-spinner"></i> Authenticating...';
+      
+      setTimeout(() => {
+        if(user === 'gurudev@gmail.com' && pass === 'Gurudev@2008') {
+          // Success Animation
+          btn.innerHTML = '<i class="fa-solid fa-check"></i> Success';
+          btn.style.background = '#10b981'; // Green color for success
+          
+          setTimeout(() => {
+            const wrapper = document.querySelector('.login-wrapper');
+            wrapper.classList.add('success-anim');
+            document.body.classList.add('fade-out');
+            
+            setTimeout(() => {
+              localStorage.setItem('admin_session', 'active');
+              window.location.href = 'gurudev-super.html';
+            }, 600);
+          }, 500);
+        } else {
+          // Error
+          btn.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket"></i> Sign in';
+          errorMsg.style.display = 'block';
+          document.querySelector('.login-card').animate([
+            { transform: 'translateX(0px)' },
+            { transform: 'translateX(-10px)' },
+            { transform: 'translateX(10px)' },
+            { transform: 'translateX(-10px)' },
+            { transform: 'translateX(10px)' },
+            { transform: 'translateX(0px)' }
+          ], { duration: 400, easing: 'ease-in-out' });
+        }
+      }, 800); // Simulate network delay
     });
   </script>
 </body>
