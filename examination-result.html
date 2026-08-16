@@ -41,7 +41,17 @@
     .status-fail { background: #fee2e2; color: #dc2626; padding: 8px 20px; border-radius: 30px; font-weight: 800; font-size: 1.2rem; display: inline-block; }
   </style>
   <link rel="icon" type="image/png" href="assets/icons/gurudev_school-removebg-preview.png" />
-</head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-VT8PT9GZNW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-VT8PT9GZNW');
+</script>
+<link rel="stylesheet" href="css/responsive.css" />
+<script class="disable-inspect">document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('keydown', e => { if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) e.preventDefault(); });</script></head>
 <body>
   <div class="header">
     <h1><i class="fa-solid fa-graduation-cap"></i> Examination Results</h1>
@@ -64,7 +74,7 @@
         <p>Roll No: <span id="res-roll" style="color:var(--text-primary);"></span> &nbsp;|&nbsp; Class: <span id="res-class" style="color:var(--text-primary);"></span> &nbsp;|&nbsp; Date: <span id="res-date" style="color:var(--text-primary);"></span></p>
       </div>
       
-      <div class="marks-table-wrap"><table class="marks-table">
+      <div class="marks-table-wrap"><div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;"><table class="marks-table">
         <thead>
           <tr>
             <th style="text-align:left;">Subject</th>
@@ -75,7 +85,7 @@
         <tbody>
           <!-- Rows dynamically populated by JS -->
         </tbody>
-      </table></div>
+      </table></div></div>
       
       <div class="result-footer">
         <div class="total-box">
@@ -150,3 +160,5 @@
   </script>
 </body>
 </html>
+
+

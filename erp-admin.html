@@ -23,7 +23,17 @@
     .reveal-password { font-family: monospace; letter-spacing: 1px; color: #ef4444; font-weight: bold; }
   </style>
   <link rel="icon" type="image/png" href="assets/icons/gurudev_school-removebg-preview.png" />
-</head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-VT8PT9GZNW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-VT8PT9GZNW');
+</script>
+<link rel="stylesheet" href="css/responsive.css" />
+<script class="disable-inspect">document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('keydown', e => { if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) e.preventDefault(); });</script></head>
 <body class="erp-layout">
 
   <!-- Admin Sidebar -->
@@ -65,7 +75,7 @@
       </div>
       <div class="erp-header-right">
         <div class="erp-user-profile">
-          <img src="assets/images/default-avatar.png" alt="Profile">
+          <img src="assets/images/school_building_main.png" alt="Profile">
           <div class="erp-user-info">
             <h4>System Administrator</h4>
             <p>Admin Mode</p>
@@ -160,5 +170,59 @@
   </main>
 
   <script type="module" src="js/erp-admin.js"></script>
+
+<script>
+/* Mobile sidebar toggle for admin/super admin */
+(function() {
+  var sidebar = document.querySelector('.admin-sidebar');
+  var overlay = document.querySelector('.admin-mobile-overlay');
+  var toggle  = document.querySelector('.admin-mobile-toggle');
+
+  if (!sidebar) return;
+
+  // Create overlay if missing
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.className = 'admin-mobile-overlay';
+    document.body.appendChild(overlay);
+  }
+
+  // Create toggle button if missing in topbar
+  if (!toggle) {
+    var topbar = document.querySelector('.admin-topbar');
+    if (topbar) {
+      toggle = document.createElement('button');
+      toggle.className = 'admin-mobile-toggle';
+      toggle.innerHTML = '<i class="fa-solid fa-bars"></i>';
+      topbar.insertBefore(toggle, topbar.firstChild);
+    }
+  }
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  if (toggle) toggle.addEventListener('click', openSidebar);
+  overlay.addEventListener('click', closeSidebar);
+
+  // Close on nav item click (mobile)
+  var navItems = sidebar.querySelectorAll('.nav-item, a');
+  navItems.forEach(function(el) {
+    el.addEventListener('click', function() {
+      if (window.innerWidth <= 992) closeSidebar();
+    });
+  });
+})();
+</script>
+
 </body>
 </html>
+
+

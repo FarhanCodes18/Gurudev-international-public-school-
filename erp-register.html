@@ -12,7 +12,21 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/erp.css">
   <link rel="icon" type="image/png" href="assets/icons/gurudev_school-removebg-preview.png" />
-</head>
+  
+  <!-- Cropper.js -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-VT8PT9GZNW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-VT8PT9GZNW');
+</script>
+<link rel="stylesheet" href="css/responsive.css" />
+<script class="disable-inspect">document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('keydown', e => { if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) e.preventDefault(); });</script></head>
 <body class="erp-auth-page">
 
   <div class="erp-auth-shapes">
@@ -35,10 +49,15 @@
           <label class="form-label" for="regName">Full Name *</label>
           <input type="text" id="regName" class="form-control" placeholder="e.g. Rahul Sharma" required>
         </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regFatherName">Father's Name *</label>
+          <input type="text" id="regFatherName" class="form-control" placeholder="e.g. Ramesh Sharma" required>
+        </div>
         
         <div class="form-group">
           <label class="form-label" for="regMobile">Mobile Number *</label>
-          <input type="tel" id="regMobile" class="form-control" placeholder="e.g. 9876543210" required>
+          <input type="tel" id="regMobile" class="form-control" placeholder="e.g. 7770822000" required>
         </div>
 
         <div class="form-group">
@@ -50,6 +69,9 @@
           <label class="form-label" for="regClass">Class *</label>
           <select id="regClass" class="form-control" required>
             <option value="" disabled selected>Select Class</option>
+            <option value="6">Class 6</option>
+            <option value="7">Class 7</option>
+            <option value="8">Class 8</option>
             <option value="9">Class 9</option>
             <option value="10">Class 10</option>
             <option value="11">Class 11</option>
@@ -99,6 +121,22 @@
     </div>
   </div>
 
+  <!-- Cropper Modal -->
+  <div id="cropperModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
+    <div style="background:#fff; padding:20px; border-radius:10px; width:90%; max-width:500px;">
+      <h3 style="margin-bottom:15px; color:var(--text-color);">Crop Photo</h3>
+      <div style="width:100%; max-height:400px; overflow:hidden;">
+        <img id="cropperImage" src="" style="max-width:100%; display:block;">
+      </div>
+      <div style="margin-top:20px; display:flex; gap:10px; justify-content:flex-end;">
+        <button type="button" id="btnCancelCrop" class="btn btn-secondary">Cancel</button>
+        <button type="button" id="btnCrop" class="btn btn-primary">Crop & Save</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="js/erp-auth.js"></script>
 </body>
 </html>
+
+

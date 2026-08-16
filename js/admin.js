@@ -45,15 +45,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const dashTotal = document.getElementById('dash-total-students');
   if(dashTotal) dashTotal.innerText = students.length;
 
-  // --- POPULATE ALL STUDENTS LIST ---
-  const allStudentsTable = document.getElementById('all-students-list');
-  if(allStudentsTable) {
+  window.renderAllStudents = function(filterName = '', filterClass = '') {
+    const allStudentsTable = document.getElementById('all-students-list');
+    if(!allStudentsTable) return;
+    
     allStudentsTable.innerHTML = '';
-    if(students.length === 0) {
-      allStudentsTable.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted); padding: 40px 0;">No student data available.</td></tr>';
+    
+    let filteredStudents = students;
+    if(filterName) {
+        filteredStudents = filteredStudents.filter(s => (s.name||'').toLowerCase().includes(filterName.toLowerCase()));
+    }
+    if(filterClass) {
+        filteredStudents = filteredStudents.filter(s => s.class == filterClass);
+    }
+    
+    if(filteredStudents.length === 0) {
+      allStudentsTable.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--admin-muted); padding: 40px 0;">No student data available for these filters.</td></tr>';
     } else {
-      students.slice().reverse().forEach(st => {
-        const photo = st.photoURL || 'https://ui-avatars.com/api/?name='+st.name+'&background=2563eb&color=fff';
+      filteredStudents.slice().reverse().forEach(st => {
+        const photo = st.photoURL && st.photoURL !== 'assets/images/default-avatar.png' ? st.photoURL : 'https://ui-avatars.com/api/?name='+st.name+'&background=2563eb&color=fff';
+        const passwordDisplay = st.password ? `<span style="font-family:monospace; background:#e2e8f0; padding:2px 6px; border-radius:4px; font-size:0.8rem;">${st.password}</span>` : '<span style="color:#ef4444">Not Set</span>';
         allStudentsTable.innerHTML += `
           <tr>
             <td class="student-cell">
@@ -63,15 +74,43 @@ document.addEventListener('DOMContentLoaded', () => {
             <td style="font-family: monospace; font-weight: 600; color:var(--admin-accent);">${st.studentId}</td>
             <td>${st.class}</td>
             <td>${st.mobile}</td>
+            <td>${passwordDisplay}</td>
             <td><span class="status-badge status-active">Active</span></td>
             <td style="display:flex; gap:8px;">
               <button class="btn-admin-outline" style="padding:6px 12px; font-size:0.75rem;" onclick="viewStudentProfile('${st.mobile}')">View</button>
+              <button class="btn-admin-outline" style="padding:6px 12px; font-size:0.75rem; border-color:var(--admin-primary); color:var(--admin-primary);" onclick="editStudent('${st.mobile}')"><i class="fa-solid fa-pen"></i> Edit</button>
               <button class="btn-admin-outline" style="padding:6px 12px; font-size:0.75rem; border-color:#dc2626; color:#dc2626;" onclick="deleteStudent('${st.mobile}')"><i class="fa-solid fa-trash"></i></button>
             </td>
           </tr>
         `;
       });
     }
+  };
+
+  window.filterRegisteredStudents = function() {
+      const name = document.getElementById('filter-student-name').value;
+      const cls = document.getElementById('filter-student-class').value;
+      renderAllStudents(name, cls);
+  };
+
+  // --- POPULATE CLASS-WISE STATS ---
+  const classWiseStatsContainer = document.getElementById('class-wise-stats');
+  if(classWiseStatsContainer) {
+      let statsHTML = '';
+      const classes = [6, 7, 8, 9, 10, 11, 12];
+      classes.forEach(c => {
+          const count = students.filter(s => s.class == c).length;
+          statsHTML += `<div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:10px 15px; display:flex; flex-direction:column; align-items:center; min-width:80px; flex:1;">
+                           <span style="font-size:0.75rem; color:#64748b; font-weight:700; text-transform:uppercase;">Class ${c}</span>
+                           <span style="font-size:1.4rem; color:var(--admin-primary); font-weight:800; line-height:1.2;">${count}</span>
+                        </div>`;
+      });
+      classWiseStatsContainer.innerHTML = statsHTML;
+  }
+
+  // Initial render
+  if (document.getElementById('all-students-list')) {
+      renderAllStudents();
   }
 
   // --- POPULATE CERTIFICATE SELECTOR ---
@@ -162,6 +201,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load News and Reviews
   renderNewsList();
   renderReviewsList();
+loadAdminNotices();
+  loadAdminLibrary();
+  loadAdminResults();
+  loadAdminCalendar();
+  loadAdminDocuments();
+  loadAdminTimetables();
+  loadAdminAssignments();
 });
 
 // --- GLOBAL LOADER TOOL ---
@@ -466,10 +512,9 @@ function loadAttendanceRegister() {
       listBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--admin-muted); padding:30px;">No records found for ' + classVal + '.</td></tr>';
     } else {
       studentArray.forEach(st => {
-        // Check if attendance already marked for this date
-        let isPresent = false;
-        if(st.attendanceRecords && st.attendanceRecords[dateObj] === 'Present') {
-          isPresent = true;
+        let status = 'Present'; // default if not marked
+        if(st.attendanceRecords && st.attendanceRecords[dateObj]) {
+          status = st.attendanceRecords[dateObj];
         }
 
         listBody.innerHTML += `
@@ -481,8 +526,10 @@ function loadAttendanceRegister() {
             <td>${st.studentId}</td>
             <td>
               <select class="admin-select attendance-status" style="padding:5px; width:120px;">
-                <option value="Present" ${isPresent ? 'selected' : ''}>Present</option>
-                <option value="Absent" ${!isPresent ? 'selected' : ''}>Absent</option>
+                <option value="Present" ${status === 'Present' ? 'selected' : ''}>Present</option>
+                <option value="Absent" ${status === 'Absent' ? 'selected' : ''}>Absent</option>
+                <option value="Holiday" ${status === 'Holiday' ? 'selected' : ''}>Holiday</option>
+                <option value="Sunday" ${status === 'Sunday' ? 'selected' : ''}>Sunday</option>
               </select>
             </td>
           </tr>
@@ -514,10 +561,10 @@ function saveAttendance() {
         }
         users[mobile].attendanceRecords[dateObj] = status;
         
-        // Recalculate total attendance percentage if needed
-        let records = Object.values(users[mobile].attendanceRecords);
+        // Recalculate total attendance percentage
+        let records = Object.values(users[mobile].attendanceRecords).filter(s => s === 'Present' || s === 'Absent');
         let presents = records.filter(s => s === 'Present').length;
-        users[mobile].attendance = Math.round((presents / records.length) * 100);
+        users[mobile].attendance = records.length > 0 ? Math.round((presents / records.length) * 100) : 0;
         
         markedCount++;
       }
@@ -643,6 +690,7 @@ function publishNotice() {
     alert("Notice successfully published to the public portal!");
     document.getElementById('notice-title').value = '';
     document.getElementById('notice-body').value = '';
+    if(typeof loadAdminNotices === 'function') loadAdminNotices();
   });
 }
 
@@ -664,6 +712,7 @@ function publishLibraryItem() {
     alert("Book added to E-Library successfully!");
     document.getElementById('lib-name').value = '';
     document.getElementById('lib-link').value = '';
+    if(typeof loadAdminLibrary === 'function') loadAdminLibrary();
   });
 }
 
@@ -842,6 +891,7 @@ function publishResult() {
     
     localStorage.setItem('erp_results', JSON.stringify(results));
     alert(`Result published! Total: ${total}/${maxTotal} (${percent}%). Status: ${status}`);
+    if(typeof loadAdminResults === 'function') loadAdminResults();
     
     document.getElementById('res-roll').value = '';
     document.getElementById('res-name').value = '';
@@ -873,6 +923,94 @@ function publishResult() {
   });
 }
 
+function uploadBulkResults() {
+  const fileInput = document.getElementById('bulk-result-file');
+  if(!fileInput) return;
+  const file = fileInput.files[0];
+  if (!file) return alert("Please select an Excel or CSV file first.");
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    showLoader('Processing Data', 'Parsing uploaded file...', 500, () => {
+      try {
+        const data = e.target.result;
+        // Parse with SheetJS
+        const workbook = XLSX.read(data, {type: 'binary'});
+        const firstSheet = workbook.SheetNames[0];
+        const rows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
+        
+        if(rows.length === 0) return alert("The uploaded file is empty.");
+        
+        let results = JSON.parse(localStorage.getItem('erp_results')) || {};
+        let addedCount = 0;
+        
+        rows.forEach(row => {
+          // Find standard columns (case-insensitive)
+          const getVal = (key) => {
+            const foundKey = Object.keys(row).find(k => k.trim().toLowerCase() === key.toLowerCase());
+            return foundKey ? row[foundKey] : null;
+          };
+          
+          let roll = getVal('roll');
+          let name = getVal('name');
+          let cls = getVal('class');
+          
+          if(roll && name && cls) {
+            let marks = {};
+            let total = 0;
+            let subjectCount = 0;
+            
+            Object.keys(row).forEach(k => {
+              const lowerK = k.trim().toLowerCase();
+              if(lowerK !== 'roll' && lowerK !== 'name' && lowerK !== 'class') {
+                const sMarks = Number(row[k]);
+                if(!isNaN(sMarks)) {
+                  marks[k.trim()] = sMarks;
+                  total += sMarks;
+                  subjectCount++;
+                }
+              }
+            });
+            
+            if (subjectCount > 0) {
+              const maxTotal = subjectCount * 100;
+              const percent = ((total / maxTotal) * 100).toFixed(2);
+              const status = percent >= 33 ? 'PASS' : 'FAIL';
+              
+              results[String(roll).trim()] = {
+                roll: String(roll).trim(),
+                name: String(name).trim(),
+                class: String(cls).trim(),
+                marks: marks,
+                total: total,
+                maxTotal: maxTotal,
+                percentage: percent,
+                status: status,
+                date: new Date().toLocaleDateString('en-GB')
+              };
+              addedCount++;
+            }
+          }
+        });
+        
+        localStorage.setItem('erp_results', JSON.stringify(results));
+        alert("Successfully uploaded " + addedCount + " student results!");
+        if(typeof loadAdminResults === 'function') loadAdminResults();
+        fileInput.value = '';
+      } catch (err) {
+        console.error(err);
+        alert("Error parsing file. Please ensure it is a valid Excel/CSV file with correct headers.");
+      }
+    });
+  };
+  
+  reader.onerror = function() {
+    alert("Error reading the file.");
+  };
+  
+  reader.readAsBinaryString(file);
+}
+
 // --- BULK SMS BLASTER ---
 function sendBulkSMS() {
   const target = document.getElementById('sms-target').value;
@@ -897,7 +1035,7 @@ function sendBulkSMS() {
       return;
     }
     
-    alert(`SMS API Triggered Successfully!\n\nMessage queued for ${targetStudents.length} recipients.\nTarget: ${target === 'all' ? 'All Students' : 'Class ' + target}`);
+    alert("SMS API Triggered Successfully!\\n\\nMessage queued for " + targetStudents.length + " recipients.\\nTarget: " + (target === 'all' ? 'All Students' : 'Class ' + target));
     document.getElementById('sms-msg').value = '';
   });
 }
@@ -921,7 +1059,7 @@ function populateCertStudents() {
       const opt = document.createElement('option');
       opt.value = u.name; // Use name as value for easy access, or ID
       opt.dataset.name = u.name;
-      opt.textContent = `${u.name} (ID: ${u.id})`;
+      opt.textContent = u.name + " (ID: " + u.id + ")";
       studentSelect.appendChild(opt);
       count++;
     }
@@ -1124,8 +1262,217 @@ function deleteStudent(mobile) {
       window.location.reload(); // Refresh the page to update the table and counters
     } else {
       alert("Student not found.");
-    }
+        }
   }
+}
+
+// Edit Registered Student
+function editStudent(mobile) {
+  let users = JSON.parse(localStorage.getItem('erp_users')) || {};
+  let st = users[mobile];
+  if(st) {
+    let newName = prompt("Edit Student Name:", st.name);
+    if(newName === null) return;
+    let newClass = prompt("Edit Class:", st.class);
+    if(newClass === null) return;
+    let newPassword = prompt("Edit Password:", st.password);
+    if(newPassword === null) return;
+    
+    st.name = newName.trim() || st.name;
+    st.class = newClass.trim() || st.class;
+    st.password = newPassword.trim() || st.password;
+    
+    users[mobile] = st;
+    localStorage.setItem('erp_users', JSON.stringify(users));
+    alert("Student details updated successfully!");
+    window.location.reload();
+  }
+}
+
+// --- SCHOOL CALENDAR ---
+let adminCalDate = new Date();
+
+function loadAdminCalendar() {
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const year = adminCalDate.getFullYear();
+  const month = adminCalDate.getMonth();
+  
+  document.getElementById('admin-calendar-title').innerText = `${monthNames[month]} ${year}`;
+  
+  const grid = document.getElementById('admin-calendar-grid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  
+  let calendarData = JSON.parse(localStorage.getItem('erp_calendar')) || {};
+  
+  // Empty blocks for days before start of month
+  for (let i = 0; i < firstDay; i++) {
+    grid.innerHTML += `<div class="cal-day cal-empty"></div>`;
+  }
+  
+  // Days of month
+  for (let d = 1; d <= daysInMonth; d++) {
+    let dateStr = `${year}-${String(month+1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    let data = calendarData[dateStr];
+    let type = data ? (typeof data === 'string' ? data : data.type) : '';
+    let title = data && data.title ? data.title : '';
+    
+    let cls = 'cal-day';
+    if(type === 'holiday') cls += ' cal-holiday';
+    if(type === 'event') cls += ' cal-event';
+    if(type === 'exam') cls += ' cal-exam';
+    
+    grid.innerHTML += `<div class="${cls}" title="${title}" onclick="toggleCalDay('${dateStr}')">${d}</div>`;
+  }
+}
+
+function changeAdminMonth(step) {
+  adminCalDate.setMonth(adminCalDate.getMonth() + step);
+  loadAdminCalendar();
+}
+
+let currentCalDate = '';
+
+function toggleCalDay(dateStr) {
+  currentCalDate = dateStr;
+  let calendarData = JSON.parse(localStorage.getItem('erp_calendar')) || {};
+  let current = calendarData[dateStr];
+  
+  document.getElementById('cal-modal-date').innerText = dateStr;
+  
+  if (current) {
+    document.getElementById('cal-modal-type').value = current.type;
+    document.getElementById('cal-modal-title').value = current.title || '';
+    document.getElementById('cal-title-group').style.display = 'block';
+  } else {
+    document.getElementById('cal-modal-type').value = '';
+    document.getElementById('cal-modal-title').value = '';
+    document.getElementById('cal-title-group').style.display = 'none';
+  }
+  
+  document.getElementById('calendar-modal').classList.add('active');
+}
+
+window.saveCalendarEvent = function() {
+  let type = document.getElementById('cal-modal-type').value;
+  let title = document.getElementById('cal-modal-title').value.trim();
+  let calendarData = JSON.parse(localStorage.getItem('erp_calendar')) || {};
+  
+  if (!type) {
+    delete calendarData[currentCalDate];
+  } else {
+    calendarData[currentCalDate] = { type: type, title: title };
+  }
+  
+  localStorage.setItem('erp_calendar', JSON.stringify(calendarData));
+  document.getElementById('calendar-modal').classList.remove('active');
+  loadAdminCalendar();
+}
+
+// --- STUDENT DOCUMENTS ---
+function loadAdminDocuments() {
+  const users = JSON.parse(localStorage.getItem('erp_users')) || {};
+  const students = Object.values(users).filter(u => u.role === 'student');
+  renderAdminDocumentsTable(students);
+}
+
+function filterAdminDocuments() {
+  const classFilter = document.getElementById('doc-class-filter').value;
+  const nameQuery = document.getElementById('doc-name-search').value.toLowerCase();
+  
+  const users = JSON.parse(localStorage.getItem('erp_users')) || {};
+  let students = Object.values(users).filter(u => u.role === 'student');
+  
+  if (classFilter) students = students.filter(s => s.class === classFilter);
+  if (nameQuery) students = students.filter(s => s.name && s.name.toLowerCase().includes(nameQuery));
+  
+  renderAdminDocumentsTable(students);
+}
+
+function renderAdminDocumentsTable(students) {
+  const list = document.getElementById('admin-documents-list');
+  if(!list) return;
+  list.innerHTML = '';
+  
+  if(students.length === 0) {
+    list.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--admin-muted); padding: 40px 0;">No students match your filter.</td></tr>';
+    return;
+  }
+  
+  students.forEach(st => {
+    let docs = st.documents || {};
+    let uploadedCount = Object.keys(docs).length;
+    let badgeColor = uploadedCount === 8 ? '#10b981' : (uploadedCount > 0 ? '#f59e0b' : '#ef4444');
+    
+    list.innerHTML += `
+      <tr>
+        <td class="student-cell">
+          <img src="${st.photoURL || 'assets/images/default-avatar.png'}" alt="Photo">
+          <div><h5>${st.name}</h5><p>${st.mobile}</p></div>
+        </td>
+        <td>
+          <strong style="color:var(--admin-accent); font-family:monospace;">${st.studentId || 'N/A'}</strong><br>
+          <span style="font-size:0.85rem; color:var(--admin-muted);">Class ${st.class || 'N/A'}</span>
+        </td>
+        <td>
+          <div style="display:inline-block; padding:4px 10px; border-radius:12px; background:${badgeColor}20; color:${badgeColor}; font-size:0.8rem; font-weight:700;">
+            ${uploadedCount} / 8 Uploaded
+          </div>
+        </td>
+        <td>
+          <button class="btn-admin-outline" style="padding:6px 12px; font-size:0.75rem;" onclick="viewStudentDocs('${st.mobile}')">
+            <i class="fa-regular fa-folder-open"></i> View Vault
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+window.viewStudentDocs = function(mobile) {
+  const users = JSON.parse(localStorage.getItem('erp_users')) || {};
+  const st = users[mobile];
+  if(!st) return;
+  
+  document.getElementById('doc-modal-student-name').innerText = `${st.name} (ID: ${st.studentId || 'N/A'})`;
+  
+  const docTypes = [
+    "Aadhaar Card", "Marksheet (10th/Last Class)", "Samagra ID", 
+    "Domicile Certificate (मूल निवासी)", "Income Certificate (आय प्रमाण पत्र)", 
+    "Caste Certificate (जाति प्रमाण पत्र)", "Transfer Certificate (TC)", "Passport Size Photo"
+  ];
+  
+  const grid = document.getElementById('doc-modal-grid');
+  grid.innerHTML = '';
+  
+  let docs = st.documents || {};
+  
+  docTypes.forEach(docName => {
+    let docData = docs[docName];
+    if (docData) {
+      grid.innerHTML += `
+        <div style="border:1px solid var(--admin-border); border-radius:12px; padding:12px; background:#f8fafc; text-align:center;">
+          <h4 style="font-size:0.85rem; color:var(--admin-heading); margin-bottom:10px;">${docName}</h4>
+          <a href="${docData}" target="_blank" title="Click to view full screen">
+            <img src="${docData}" style="width:100%; height:150px; object-fit:contain; border-radius:8px; border:1px solid #e2e8f0; background:white; cursor:zoom-in;">
+          </a>
+        </div>
+      `;
+    } else {
+      grid.innerHTML += `
+        <div style="border:1px dashed #cbd5e1; border-radius:12px; padding:12px; background:#f1f5f9; display:flex; flex-direction:column; align-items:center; justify-content:center; height:200px;">
+          <i class="fa-solid fa-file-circle-xmark" style="font-size:2rem; color:#94a3b8; margin-bottom:10px;"></i>
+          <h4 style="font-size:0.85rem; color:#64748b; margin:0; text-align:center;">${docName}</h4>
+          <span style="font-size:0.75rem; color:#ef4444; font-weight:700; margin-top:5px;">Not Uploaded</span>
+        </div>
+      `;
+    }
+  });
+  
+  document.getElementById('doc-viewer-modal').classList.add('active');
 }
 
 // --- NEWS & EVENTS ---
@@ -1272,4 +1619,275 @@ function deleteReview(id) {
     localStorage.setItem('admin_student_reviews', JSON.stringify(reviews));
     renderReviewsList();
   }
+}
+
+// --- NOTICES MANAGEMENT ---
+function loadAdminNotices() {
+  const list = document.getElementById('admin-notices-list');
+  if(!list) return;
+  
+  let notices = JSON.parse(localStorage.getItem('erp_notices')) || [];
+  if(notices.length === 0) {
+    list.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--admin-muted);">No notices published yet.</td></tr>';
+    return;
+  }
+  
+  list.innerHTML = '';
+  notices.forEach((n, idx) => {
+    list.innerHTML += `
+      <tr>
+        <td>${n.date}</td>
+        <td style="font-weight:600;">${n.title}</td>
+        <td style="color:var(--admin-muted); max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${n.body}</td>
+        <td><button class="btn-admin" style="background:var(--admin-danger); padding:4px 8px; font-size:0.8rem;" onclick="deleteNotice(${idx})"><i class="fa-solid fa-trash"></i></button></td>
+      </tr>
+    `;
+  });
+}
+
+function deleteNotice(idx) {
+  if(!confirm("Delete this notice?")) return;
+  let notices = JSON.parse(localStorage.getItem('erp_notices')) || [];
+  notices.splice(idx, 1);
+  localStorage.setItem('erp_notices', JSON.stringify(notices));
+  loadAdminNotices();
+}
+
+// --- E-LIBRARY MANAGEMENT ---
+function loadAdminLibrary() {
+  const list = document.getElementById('admin-library-list');
+  if(!list) return;
+  
+  let library = JSON.parse(localStorage.getItem('erp_library')) || [];
+  if(library.length === 0) {
+    list.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted);">No books in E-Library yet.</td></tr>';
+    return;
+  }
+  
+  list.innerHTML = '';
+  library.forEach((book, idx) => {
+    list.innerHTML += `
+      <tr>
+        <td>${book.date}</td>
+        <td><span style="background:var(--admin-primary); color:white; padding:2px 8px; border-radius:12px; font-size:0.75rem;">${book.subject}</span></td>
+        <td style="font-weight:600;">${book.name}</td>
+        <td><a href="${book.link}" target="_blank" style="color:var(--admin-accent); text-decoration:underline;">View Link</a></td>
+        <td><button class="btn-admin" style="background:var(--admin-danger); padding:4px 8px; font-size:0.8rem;" onclick="deleteLibrary(${idx})"><i class="fa-solid fa-trash"></i></button></td>
+      </tr>
+    `;
+  });
+}
+
+function deleteLibrary(idx) {
+  if(!confirm("Delete this book from E-Library?")) return;
+  let library = JSON.parse(localStorage.getItem('erp_library')) || [];
+  library.splice(idx, 1);
+  localStorage.setItem('erp_library', JSON.stringify(library));
+  loadAdminLibrary();
+}
+
+// --- RESULTS MANAGEMENT ---
+function loadAdminResults() {
+  const list = document.getElementById('admin-results-list');
+  if(!list) return;
+  
+  let results = JSON.parse(localStorage.getItem('erp_results')) || {};
+  let rolls = Object.keys(results);
+  
+  if(rolls.length === 0) {
+    list.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--admin-muted);">No results found.</td></tr>';
+    return;
+  }
+  
+  list.innerHTML = '';
+  rolls.forEach(roll => {
+    let r = results[roll];
+    let badgeClass = r.status === 'PASS' ? 'status-active' : 'status-inactive';
+    list.innerHTML += `
+      <tr>
+        <td style="font-weight:bold;">${r.roll}</td>
+        <td>${r.name}</td>
+        <td>${r.class}</td>
+        <td>${r.total} / ${r.maxTotal}</td>
+        <td>${r.percentage}%</td>
+        <td><span class="status-badge ${badgeClass}">${r.status}</span></td>
+        <td><button class="btn-admin" style="background:var(--admin-danger); padding:4px 8px; font-size:0.8rem;" onclick="deleteResult('${r.roll}')"><i class="fa-solid fa-trash"></i></button></td>
+      </tr>
+    `;
+  });
+}
+
+function deleteResult(roll) {
+  if(!confirm("Are you sure you want to delete the result for Roll No: " + roll + "?")) return;
+  let results = JSON.parse(localStorage.getItem('erp_results')) || {};
+  if(results[roll]) {
+    delete results[roll];
+    localStorage.setItem('erp_results', JSON.stringify(results));
+    loadAdminResults();
+  }
+}
+
+
+// --- TIMETABLE & ASSIGNMENTS ---
+function uploadTimetable() {
+  const classVal = document.getElementById('tt-class').value;
+  const fileInput = document.getElementById('tt-file');
+  
+  if(!classVal || fileInput.files.length === 0) {
+    return alert('Please select a class and upload a file.');
+  }
+
+  const file = fileInput.files[0];
+  
+  // Basic simulation of upload: converting small files to base64 for localstorage demo
+  // In production, upload to Firebase Storage and save URL.
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    let timetables = JSON.parse(localStorage.getItem('admin_timetables') || '[]');
+    // Remove old timetable for this class if exists
+    timetables = timetables.filter(t => t.class !== classVal);
+    
+    timetables.unshift({
+      class: classVal,
+      fileData: e.target.result,
+      fileName: file.name,
+      date: new Date().toLocaleDateString('en-GB')
+    });
+    
+    showLoader('Uploading Timetable', 'Syncing to Student Portal...', 1500, () => {
+      try {
+        localStorage.setItem('admin_timetables', JSON.stringify(timetables));
+        alert('Timetable uploaded successfully!');
+        fileInput.value = '';
+        loadAdminTimetables();
+      } catch(e) {
+        alert('File is too large for local storage! Use a smaller file.');
+      }
+    });
+  };
+  reader.readAsDataURL(file);
+}
+
+function loadAdminTimetables() {
+  const listBody = document.getElementById('admin-timetables-list');
+  if(!listBody) return;
+  
+  let timetables = JSON.parse(localStorage.getItem('admin_timetables') || '[]');
+  
+  if(timetables.length === 0) {
+    listBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--admin-muted);">No timetables uploaded yet.</td></tr>';
+    return;
+  }
+  
+  listBody.innerHTML = '';
+  timetables.forEach((item, index) => {
+    listBody.innerHTML += `
+      <tr>
+        <td>${item.date}</td>
+        <td style="font-weight:600;">Class ${item.class}</td>
+        <td><a href="${item.fileData}" target="_blank" style="color:var(--admin-primary);"><i class="fa-solid fa-file"></i> ${item.fileName}</a></td>
+        <td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteTimetable(${index})"><i class="fa-solid fa-trash"></i></button></td>
+      </tr>
+    `;
+  });
+}
+
+function deleteTimetable(index) {
+  if(!confirm("Are you sure you want to delete this timetable?")) return;
+  let timetables = JSON.parse(localStorage.getItem('admin_timetables') || '[]');
+  timetables.splice(index, 1);
+  localStorage.setItem('admin_timetables', JSON.stringify(timetables));
+  loadAdminTimetables();
+}
+
+function publishAssignment() {
+  const classVal = document.getElementById('assign-class').value;
+  const subject = document.getElementById('assign-subject').value;
+  const title = document.getElementById('assign-title').value;
+  const deadline = document.getElementById('assign-deadline').value;
+  const fileInput = document.getElementById('assign-file');
+  
+  if(!classVal || !subject || !title || !deadline) {
+    return alert('Please fill all assignment fields.');
+  }
+
+  const saveAssignmentData = (fileData = null, fileName = null) => {
+    showLoader('Publishing Assignment', 'Notifying Class ' + classVal + '...', 1000, () => {
+      let assignments = JSON.parse(localStorage.getItem('admin_assignments') || '[]');
+      
+      assignments.unshift({
+        class: classVal,
+        subject: subject,
+        title: title,
+        deadline: deadline,
+        dateGiven: new Date().toLocaleDateString('en-GB'),
+        fileData: fileData,
+        fileName: fileName
+      });
+      
+      try {
+        localStorage.setItem('admin_assignments', JSON.stringify(assignments));
+        alert('Assignment published successfully!');
+      } catch (e) {
+        alert('File is too large! Please upload a smaller image.');
+        return;
+      }
+      
+      document.getElementById('assign-subject').value = '';
+      document.getElementById('assign-title').value = '';
+      document.getElementById('assign-deadline').value = '';
+      if(fileInput) fileInput.value = '';
+      
+      loadAdminAssignments();
+    });
+  };
+
+  if(fileInput && fileInput.files.length > 0) {
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      saveAssignmentData(e.target.result, file.name);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    saveAssignmentData();
+  }
+}
+
+function loadAdminAssignments() {
+  const listBody = document.getElementById('admin-assignments-list');
+  if(!listBody) return;
+  
+  let assignments = JSON.parse(localStorage.getItem('admin_assignments') || '[]');
+  
+  if(assignments.length === 0) {
+    listBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--admin-muted);">No assignments published yet.</td></tr>';
+    return;
+  }
+  
+  listBody.innerHTML = '';
+  assignments.forEach((item, index) => {
+    let attachmentHTML = item.fileData ? `<a href="${item.fileData}" target="_blank" style="color:var(--admin-primary); font-size:0.85rem;"><i class="fa-solid fa-paperclip"></i> Attachment</a>` : '';
+    listBody.innerHTML += `
+      <tr>
+        <td>${item.dateGiven}</td>
+        <td style="font-weight:600;">Class ${item.class}</td>
+        <td>${item.subject}</td>
+        <td>
+          <div style="font-weight:600;">${item.title}</div>
+          ${attachmentHTML}
+        </td>
+        <td style="color:#ef4444; font-weight:600;">${item.deadline}</td>
+        <td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteAssignment(${index})"><i class="fa-solid fa-trash"></i></button></td>
+      </tr>
+    `;
+  });
+}
+
+function deleteAssignment(index) {
+  if(!confirm("Are you sure you want to delete this assignment?")) return;
+  let assignments = JSON.parse(localStorage.getItem('admin_assignments') || '[]');
+  assignments.splice(index, 1);
+  localStorage.setItem('admin_assignments', JSON.stringify(assignments));
+  loadAdminAssignments();
 }

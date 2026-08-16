@@ -84,21 +84,121 @@ const modules = [
   {
     selector: '.feature-card:nth-child(2)',
     title: 'School Calendar',
-    render: () => emptyState('fa-regular fa-calendar-xmark', 'No Upcoming Events', 'There are no holidays or events scheduled for this month.')
+    render: () => {
+      if(!window.studentCalDate) window.studentCalDate = new Date();
+      
+      window.renderStudentCalendar = function() {
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const year = window.studentCalDate.getFullYear();
+        const month = window.studentCalDate.getMonth();
+        
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        let calendarData = JSON.parse(localStorage.getItem('erp_calendar')) || {};
+        
+        let gridHTML = '';
+        for (let i = 0; i < firstDay; i++) {
+          gridHTML += `<div class="cal-day cal-empty"></div>`;
+        }
+        
+        for (let d = 1; d <= daysInMonth; d++) {
+          let dateStr = `${year}-${String(month+1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          let data = calendarData[dateStr];
+          let type = data ? (typeof data === 'string' ? data : data.type) : '';
+          let title = data && data.title ? data.title : '';
+          
+          let cls = 'cal-day';
+          if(type === 'holiday') cls += ' cal-holiday';
+          if(type === 'event') cls += ' cal-event';
+          if(type === 'exam') cls += ' cal-exam';
+          
+          gridHTML += `<div class="${cls}" title="${title}" style="cursor:default;">${d}</div>`;
+        }
+        
+        return `
+          <div style="max-width: 600px; margin: 0 auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+              <button class="btn btn-secondary" style="padding:8px 12px;" onclick="window.changeStudentMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+              <h3 style="margin:0; font-family:var(--font-primary); font-size:1.2rem; color:var(--text-color);">${monthNames[month]} ${year}</h3>
+              <button class="btn btn-secondary" style="padding:8px 12px;" onclick="window.changeStudentMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+            
+            <div style="display:grid; grid-template-columns:repeat(7, 1fr); text-align:center; font-weight:bold; color:#64748b; margin-bottom:10px;">
+              <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+            </div>
+            
+            <div style="display:grid; grid-template-columns:repeat(7, 1fr); gap:10px;">
+              ${gridHTML}
+            </div>
+            
+            <div style="display:flex; justify-content:center; gap:20px; margin-top:24px; font-size:0.9rem; font-weight:600; color:#475569;">
+              <div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; border-radius:3px; background:#ef4444;"></div> Holiday</div>
+              <div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; border-radius:3px; background:#22c55e;"></div> Event</div>
+              <div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; border-radius:3px; background:#3b82f6;"></div> Exam</div>
+            </div>
+          </div>
+        `;
+      };
+
+      window.changeStudentMonth = function(step) {
+        window.studentCalDate.setMonth(window.studentCalDate.getMonth() + step);
+        document.getElementById('modalBody').innerHTML = window.renderStudentCalendar();
+      };
+      
+      return window.renderStudentCalendar();
+    }
   },
   {
     selector: '.feature-card:nth-child(3)',
     title: 'My Attendance',
-    render: () => `
-      <div style="text-align:center; padding: 20px;">
-        <div style="font-size: 3rem; font-weight:800; color:#94a3b8;">${user.attendance || 0}%</div>
-        <p style="color:#64748b; font-weight:500;">Overall Attendance</p>
-        <div style="height:12px; background:#e2e8f0; border-radius:10px; margin-top:20px; overflow:hidden;">
-          <div style="height:100%; width:${user.attendance || 0}%; background:var(--primary); border-radius:10px;"></div>
+    render: () => {
+      // Fetch fresh data from local storage
+      let allUsers = JSON.parse(localStorage.getItem('erp_users')) || {};
+      let freshUser = allUsers[user.mobile] || user;
+      
+      let records = freshUser.attendanceRecords || {};
+      let recordKeys = Object.keys(records).sort().reverse(); // Newest first
+      
+      let presents = 0;
+      let total = recordKeys.length;
+      
+      let listHTML = '';
+      if(total === 0) {
+        listHTML = `<p style="color:#94a3b8; font-size:0.85rem; margin-top:16px;"><i class="fa-solid fa-circle-info"></i> Attendance tracking hasn't started for your profile yet.</p>`;
+      } else {
+        recordKeys.forEach(date => {
+          let status = records[date];
+          if(status === 'Present') presents++;
+          
+          let color = status === 'Present' ? '#10b981' : (status === 'Absent' ? '#ef4444' : '#f59e0b');
+          let bg = status === 'Present' ? '#f0fdf4' : (status === 'Absent' ? '#fef2f2' : '#fff7ed');
+          
+          listHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:${bg}; border-left:4px solid ${color}; border-radius:8px; margin-bottom:10px;">
+            <div style="font-weight:600; color:#334155;">${date}</div>
+            <div style="font-weight:700; color:${color}; font-size:0.9rem; text-transform:uppercase;">${status}</div>
+          </div>`;
+        });
+      }
+      
+      let percentage = total > 0 ? Math.round((presents / total) * 100) : 0;
+      
+      return `
+        <div style="text-align:center; padding: 20px 0;">
+          <div style="font-size: 3.5rem; font-weight:800; color:var(--primary); line-height:1;">${percentage}%</div>
+          <p style="color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:1px; font-size:0.85rem; margin-top:5px;">Overall Attendance</p>
+          <div style="height:12px; background:#e2e8f0; border-radius:10px; margin-top:20px; overflow:hidden;">
+            <div style="height:100%; width:${percentage}%; background:var(--primary); border-radius:10px;"></div>
+          </div>
         </div>
-        <p style="color:#94a3b8; font-size:0.85rem; margin-top:16px;"><i class="fa-solid fa-circle-info"></i> Attendance tracking hasn't started for your profile yet.</p>
-      </div>
-    `
+        
+        <div style="margin-top:20px; border-top:1px solid #e2e8f0; padding-top:20px;">
+          <h4 style="margin:0 0 16px 0; color:#0f172a;">Recent Records</h4>
+          <div style="max-height:300px; overflow-y:auto; padding-right:10px;">
+            ${listHTML}
+          </div>
+        </div>
+      `;
+    }
   },
   {
     selector: '.feature-card:nth-child(4)',
@@ -110,12 +210,11 @@ const modules = [
         const end = e.target.elements[1].value;
         const reason = e.target.elements[2].value;
         
-        let users = JSON.parse(localStorage.getItem('erp_users'));
-        let uIdx = users.findIndex(u => u.phone === user.mobile);
+        let users = JSON.parse(localStorage.getItem('erp_users')) || {};
         
-        if(uIdx > -1) {
-          if(!users[uIdx].leaveRequests) users[uIdx].leaveRequests = [];
-          users[uIdx].leaveRequests.push({
+        if(users[user.mobile]) {
+          if(!users[user.mobile].leaveRequests) users[user.mobile].leaveRequests = [];
+          users[user.mobile].leaveRequests.push({
             date: start + ' to ' + end,
             reason: reason,
             status: 'Pending'
@@ -123,7 +222,7 @@ const modules = [
           localStorage.setItem('erp_users', JSON.stringify(users));
           
           // Update local session
-          user = users[uIdx];
+          user = users[user.mobile];
           localStorage.setItem('erp_current_user', JSON.stringify(user));
         }
         
@@ -131,14 +230,21 @@ const modules = [
         modalOverlay.classList.remove('active');
       };
       
+      // Fetch fresh data from database to show latest approval status
+      let allUsers = JSON.parse(localStorage.getItem('erp_users')) || {};
+      let freshUser = allUsers[user.mobile] || user;
+      
       let pastLeavesHTML = '';
-      if(user.leaveRequests && user.leaveRequests.length > 0) {
-        user.leaveRequests.slice().reverse().forEach(l => {
+      if(freshUser.leaveRequests && freshUser.leaveRequests.length > 0) {
+        freshUser.leaveRequests.slice().reverse().forEach(l => {
           let color = l.status === 'Approved' ? '#10b981' : (l.status === 'Rejected' ? '#ef4444' : '#f59e0b');
-          pastLeavesHTML += `<div style="font-size:0.85rem; padding:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:8px;">
-            <div style="font-weight:600; margin-bottom:4px;">${l.date}</div>
-            <div style="color:#64748b; margin-bottom:6px;">${l.reason}</div>
-            <div style="display:inline-block; padding:2px 8px; border-radius:12px; font-size:0.7rem; font-weight:700; color:${color}; background:${color}20;">${l.status}</div>
+          let bg = l.status === 'Approved' ? '#dcfce7' : (l.status === 'Rejected' ? '#fee2e2' : '#fef3c7');
+          pastLeavesHTML += `<div style="font-size:0.85rem; padding:12px; background:#f8fafc; border:1px solid #e2e8f0; border-left: 4px solid ${color}; border-radius:8px; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:4px;">
+              <div style="font-weight:700; color:#334155;">${l.date}</div>
+              <div style="display:inline-block; padding:3px 10px; border-radius:12px; font-size:0.75rem; font-weight:800; color:${color}; background:${bg};">${l.status}</div>
+            </div>
+            <div style="color:#64748b; margin-bottom:2px; font-weight:500;">${l.reason}</div>
           </div>`;
         });
       }
@@ -167,11 +273,6 @@ const modules = [
     }
   },
   {
-    selector: '.feature-card:nth-child(5)',
-    title: 'Transport Routes',
-    render: () => emptyState('fa-solid fa-bus-simple', 'No Route Assigned', 'You are not assigned to any school transport route. Please contact the transport admin.')
-  },
-  {
     selector: '.feature-card:nth-child(6)',
     title: 'Daily Timetable',
     render: () => emptyState('fa-solid fa-clock-rotate-left', 'Timetable Pending', 'Your class timetable has not been uploaded by the coordinator yet.')
@@ -179,28 +280,93 @@ const modules = [
   {
     selector: '.feature-card:nth-child(7)',
     title: 'Assignments',
-    render: () => emptyState('fa-solid fa-clipboard-check', 'Hooray! No Homework', 'You have no pending assignments or worksheets to submit.')
+    render: () => {
+      let allUsers = JSON.parse(localStorage.getItem('erp_users')) || {};
+      let freshUser = allUsers[user.mobile] || user;
+      let assignments = freshUser.assignments || [];
+      
+      if(assignments.length === 0) {
+        return emptyState('fa-solid fa-clipboard-check', 'Hooray! No Homework', 'You have no pending assignments or worksheets to submit.');
+      }
+      
+      let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
+      assignments.forEach(a => {
+         html += `<div style="padding:15px; border:1px solid #e2e8f0; border-radius:8px; display:flex; justify-content:space-between; align-items:center; background:#f8fafc;">
+            <div>
+               <div style="font-weight:700; color:#0f172a;">${a.title}</div>
+               <div style="font-size:0.85rem; color:#64748b; margin-top:2px;">${a.subject} • Due: ${a.dueDate}</div>
+            </div>
+            <div style="font-weight:600; font-size:0.8rem; color:#f59e0b; background:#fef3c7; padding:4px 8px; border-radius:4px;">${a.status}</div>
+         </div>`;
+      });
+      html += '</div>';
+      return html;
+    }
   },
   {
     selector: '.feature-card:nth-child(8)',
     title: 'My Documents',
     render: () => {
-      window.uploadDoc = function(input) {
-        if(input.files.length > 0) {
-          alert(`Simulated Upload: ${input.files[0].name} saved successfully!`);
+      // Helper to convert file to base64
+      window.uploadStudentDoc = function(input, docName) {
+        if(input.files && input.files[0]) {
+          const file = input.files[0];
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            let allUsers = JSON.parse(localStorage.getItem('erp_users')) || {};
+            let uIdx = allUsers.findIndex(u => u.phone === user.mobile);
+            if(uIdx > -1) {
+              if(!allUsers[uIdx].documents) allUsers[uIdx].documents = {};
+              allUsers[uIdx].documents[docName] = e.target.result;
+              localStorage.setItem('erp_users', JSON.stringify(allUsers));
+              
+              // Update local session
+              user = allUsers[uIdx];
+              localStorage.setItem('erp_current_user', JSON.stringify(user));
+              
+              // Refresh Modal
+              document.getElementById('modalBody').innerHTML = modules[7].render();
+            }
+          };
+          reader.readAsDataURL(file);
         }
       };
       
-      return `
-        ${emptyState('fa-regular fa-folder-open', 'No Documents', 'Upload your Aadhaar card, past marksheets, or medical certificates.')}
-        <div style="margin-top:24px;">
-          <label style="display:block; padding:20px; border:2px dashed #cbd5e1; border-radius:12px; text-align:center; cursor:pointer; background:#f8fafc; transition:0.2s;">
-            <i class="fa-solid fa-cloud-arrow-up" style="font-size:1.5rem; color:var(--primary); margin-bottom:8px;"></i><br>
-            <strong>Click to Upload Document</strong>
-            <input type="file" style="display:none;" onchange="window.uploadDoc(this)">
-          </label>
-        </div>
-      `;
+      const docTypes = [
+        "Aadhaar Card",
+        "Marksheet (10th/Last Class)",
+        "Samagra ID",
+        "Domicile Certificate (मूल निवासी)",
+        "Income Certificate (आय प्रमाण पत्र)",
+        "Caste Certificate (जाति प्रमाण पत्र)",
+        "Transfer Certificate (TC)",
+        "Passport Size Photo"
+      ];
+      
+      let html = `<div style="background:#fef3c7; border:1px solid #fde68a; padding:12px; border-radius:8px; margin-bottom:20px; font-size:0.85rem; color:#d97706; display:flex; gap:10px; align-items:start;">
+        <i class="fa-solid fa-triangle-exclamation" style="margin-top:2px;"></i>
+        <div>Once a document is uploaded, it will be <strong>locked</strong> and cannot be deleted or changed. Please upload clear photos.</div>
+      </div>`;
+      
+      const docs = user.documents || {};
+      
+      docTypes.forEach(doc => {
+        let isUploaded = !!docs[doc];
+        html += `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; margin-bottom:12px;">
+            <div style="font-weight:600; color:#334155; font-size:0.95rem;">${doc}</div>
+            ${isUploaded ? 
+              `<div style="display:flex; align-items:center; gap:8px; color:#10b981; font-weight:700; font-size:0.85rem; padding:6px 12px; background:#dcfce7; border-radius:8px;"><i class="fa-solid fa-lock"></i> Locked</div>` : 
+              `<label class="btn btn-outline-primary" style="padding:6px 12px; font-size:0.85rem; cursor:pointer; margin:0;">
+                <i class="fa-solid fa-upload"></i> Select Photo
+                <input type="file" accept="image/*" style="display:none;" onchange="window.uploadStudentDoc(this, '${doc}')">
+              </label>`
+            }
+          </div>
+        `;
+      });
+      
+      return html;
     }
   }
 ];

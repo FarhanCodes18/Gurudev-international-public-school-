@@ -516,3 +516,46 @@ body.erp-auth-page {
 
 .erp-auth-logo-img { width: 90%; height: 90%; object-fit: contain; }
 
+/* Calendar Styles */
+.cal-day {
+  padding: 15px 5px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+  background: #fff;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+.cal-day:hover { border-color: var(--admin-primary); transform: translateY(-2px); }
+.cal-holiday { background: #fef2f2; color: #ef4444; border-color: #fca5a5; }
+.cal-event { background: #f0fdf4; color: #22c55e; border-color: #86efac; }
+.cal-exam { background: #eff6ff; color: #3b82f6; border-color: #93c5fd; }
+.cal-empty { background: transparent; border: none; cursor: default; }
+.cal-empty:hover { transform: none; border: none; }
+
+/* ============================================================
+   ERP.CSS — MOBILE RESPONSIVE ADDITIONS
+   ============================================================ */
+@media (max-width: 768px) {
+  .erp-top-nav > div { flex-wrap: wrap; gap: 10px; }
+  .erp-top-nav h2    { font-size: 1rem; }
+  .erp-profile-banner { flex-direction: column; text-align: center; padding: 20px; }
+  .erp-profile-banner .badges-row { justify-content: center; flex-wrap: wrap; gap: 8px; }
+  .erp-features-grid  { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .erp-modal          { width: 96vw; max-height: 90dvh; }
+  .admin-table th, .admin-table td { padding: 10px 10px; font-size: 0.82rem; }
+  .erp-form-grid      { grid-template-columns: 1fr; gap: 14px; }
+  .erp-auth-card      { padding: 24px 16px; }
+  .cal-day            { padding: 10px 3px; font-size: 0.8rem; }
+}
+@media (max-width: 480px) {
+  .erp-features-grid  { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .feature-card       { padding: 12px 8px; flex-direction: column; text-align: center; gap: 6px; font-size: 0.85rem; }
+  .icon-box           { width: 36px !important; height: 36px !important; }
+  .erp-profile-info h1 { font-size: 1.15rem; }
+  .erp-modal          { border-radius: 16px; }
+}

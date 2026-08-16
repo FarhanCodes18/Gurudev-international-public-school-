@@ -1,165 +1,106 @@
-/* ============================================================
-   ACHIEVERS COVERFLOW SLIDER JS
-   ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
-  const container = document.querySelector('.achievers-slider-container');
   const track = document.getElementById('achieversTrack');
-  const prevBtn = document.getElementById('achieverPrev');
-  const nextBtn = document.getElementById('achieverNext');
-  
-  if (!track || !prevBtn || !nextBtn) return;
+  if (!track) return;
 
-  let cards = Array.from(track.querySelectorAll('.achiever-card'));
-  
-  // --- LIVE SYNC FROM ADMIN PANEL ---
-  const liveGalleryData = localStorage.getItem('admin_achievers_gallery');
-  if(liveGalleryData) {
-    let livePhotos = [];
-    try { livePhotos = JSON.parse(liveGalleryData); } catch(e) {}
-    
-    if (livePhotos.length > 0) {
-      const comingSoonBlock = document.getElementById('achievers-coming-soon');
-      const sliderContainer = document.getElementById('achievers-slider-container-main');
-      if (comingSoonBlock) comingSoonBlock.style.display = 'none';
-      if (sliderContainer) sliderContainer.style.display = 'flex';
-      
-      // Clear all placeholder cards
-      track.innerHTML = '';
-      
-      // Add only the real uploaded cards
-      livePhotos.forEach(photoObj => {
-        const card = document.createElement('div');
-        card.className = 'achiever-card';
-        card.style.cssText = 'position:absolute; width:260px; height:380px; background:var(--secondary); border-radius:16px; box-shadow:var(--shadow-xl); overflow:hidden; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); display:flex; flex-direction:column;';
-        card.innerHTML = `
-          <img src="${photoObj.image}" style="position:absolute; width:100%; height:100%; object-fit:cover; left:0; top:0; z-index:1;" alt="${photoObj.name}">
-          <div class="achiever-info" style="position:absolute; bottom:0; left:0; width:100%; box-sizing:border-box; padding:80px 15px 20px; text-align:center; background:linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 50%, transparent 100%); color:white; z-index:2; transition:all 0.5s ease;">
-            <h3 style="font-size:1.15rem; margin-bottom:5px; font-weight:700; text-transform:uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.8); line-height:1.3;">${photoObj.name}</h3>
-            <p style="font-size:0.95rem; color:#ef4444; font-weight:700; margin:0;">${photoObj.score}</p>
+  // Function to create a slide HTML
+  function createSlide(photoObj) {
+    return `
+      <div class="swiper-slide" style="width:300px; height:450px;">
+        <div class="achiever-card" style="position:relative; width:100%; height:100%; background:#fdf6e3; border-radius:24px; box-shadow:0 10px 30px rgba(0,0,0,0.2); overflow:hidden; border: 2px solid #5c2c2c;">
+          <img src="${photoObj.image}" style="position:absolute; width:100%; height:100%; object-fit:cover; object-position:top center; left:0; top:0; z-index:1;" alt="${photoObj.name}">
+          <img src="assets/icons/gurudev_school-removebg-preview.png" style="position:absolute; top:12px; right:12px; width:45px; height:45px; border-radius:50%; border:2px solid #5c2c2c; background:radial-gradient(circle, rgba(15,23,42,1) 0%, rgba(15,23,42,0.8) 100%); z-index:3; box-shadow:0 4px 10px rgba(0,0,0,0.5); object-fit:contain; padding:3px;" alt="Logo">
+          <div class="achiever-info" style="position:absolute; bottom:0; left:0; width:100%; box-sizing:border-box; padding:120px 20px 25px; text-align:center; background:linear-gradient(to top, rgba(15, 23, 42, 1) 0%, rgba(15, 23, 42, 0.85) 40%, transparent 100%); color:white; z-index:2; transition:all 0.5s ease;">
+            <h3 style="font-size:1.4rem; margin-bottom:8px; font-weight:900; text-transform:uppercase; text-shadow: 2px 2px 5px rgba(0,0,0,0.8); line-height:1.2; letter-spacing:1px;">${photoObj.name}</h3>
+            <p style="font-size:1.15rem; color:#dc2626; font-weight:800; margin:0; text-shadow: 1px 1px 3px rgba(0,0,0,0.5);">${photoObj.score}</p>
           </div>
-        `;
-        track.appendChild(card);
-      });
-      
-      // Update our cards array so the slider logic uses the new cards
-      cards = Array.from(track.querySelectorAll('.achiever-card'));
-    }
+        </div>
+      </div>
+    `;
   }
 
-  let currentIndex = Math.floor(cards.length / 2); // Start in middle
+  // --- LIVE SYNC FROM ADMIN PANEL ---
+  const liveGalleryData = localStorage.getItem('admin_achievers_gallery');
+  let photos = [];
   
-  let autoSlideInterval;
+  if (liveGalleryData) {
+    try { photos = JSON.parse(liveGalleryData); } catch(e) {}
+  }
   
-  function updateSlider() {
-    cards.forEach((card, index) => {
-      card.classList.remove('active');
-      const diff = index - currentIndex;
-      
-      // Calculate transforms
-      let translateX = 0;
-      let scale = 1;
-      let zIndex = 10 - Math.abs(diff);
-      let opacity = 1;
-      let blur = 0;
-      
-      if (diff === 0) {
-        // Active Center Card
-        translateX = 0;
-        scale = 1;
-        card.classList.add('active');
-      } else if (diff === 1) {
-        translateX = 180; // px
-        scale = 0.85;
-        opacity = 0.85;
-        blur = 2;
-      } else if (diff === -1) {
-        translateX = -180;
-        scale = 0.85;
-        opacity = 0.85;
-        blur = 2;
-      } else if (diff >= 2) {
-        translateX = 320 + ((diff - 2) * 50);
-        scale = 0.7;
-        opacity = 0.5;
-        blur = 4;
-      } else if (diff <= -2) {
-        translateX = -320 - ((Math.abs(diff) - 2) * 50);
-        scale = 0.7;
-        opacity = 0.5;
-        blur = 4;
-      }
+  if (photos.length > 0) {
+    const comingSoonBlock = document.getElementById('achievers-coming-soon');
+    const sliderContainer = document.getElementById('achievers-slider-container-main');
+    if (comingSoonBlock) comingSoonBlock.style.display = 'none';
+    if (sliderContainer) sliderContainer.style.display = 'block';
+    
+    // Clear track
+    track.innerHTML = '';
+    
+    // Duplicate photos if less than 4 so that Swiper loop works smoothly
+    let displayPhotos = [...photos];
+    // Append slides
+    displayPhotos.forEach(photoObj => {
+      track.innerHTML += createSlide(photoObj);
+    });
+  } else {
+    // Hide slider and show the static coming soon message block
+    const sliderContainer = document.getElementById('achievers-slider-container-main');
+    if (sliderContainer) sliderContainer.style.display = 'none';
+    const comingSoonBlock = document.getElementById('achievers-coming-soon');
+    if (comingSoonBlock) comingSoonBlock.style.display = 'block';
+  }
 
-      // Responsive mobile tweak
-      if (window.innerWidth <= 768) {
-        translateX = translateX * 0.7; // scale down horizontal spread
-      }
-      
-      card.style.transform = `translateX(${translateX}px) scale(${scale})`;
-      card.style.zIndex = zIndex;
-      card.style.opacity = opacity;
-      card.style.filter = `blur(${blur}px)`;
-      
-      // Handle the text fade animation for the active card
-      const infoDiv = card.querySelector('.achiever-info');
-      if (infoDiv) {
-        if (diff === 0) {
-          infoDiv.style.opacity = '1';
-          infoDiv.style.transform = 'translateY(0)';
-        } else {
-          infoDiv.style.opacity = '0';
-          infoDiv.style.transform = 'translateY(20px)';
+  // Initialize Swiper
+    if (typeof Swiper !== 'undefined') {
+    new Swiper('.achieversSwiper', {
+      effect: 'slide',
+      grabCursor: true,
+      centeredSlides: true,
+      slidesPerView: 1,
+      spaceBetween: 40,
+      loop: photos.length >= 2,
+      autoplay: {
+        delay: 3000,
+        disableOnInteraction: false,
+      },
+      navigation: {
+        nextEl: '.achiever-next',
+        prevEl: '.achiever-prev',
+      },
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+      },
+      on: {
+        slideChangeTransitionStart: function () {
+            // Hide info for all slides
+            const allInfos = this.el.querySelectorAll('.achiever-info');
+            allInfos.forEach(info => {
+                info.style.opacity = '0';
+                info.style.transform = 'translateY(20px)';
+            });
+            // Show info for active slide
+            const activeSlide = this.slides[this.activeIndex];
+            if(activeSlide) {
+                const activeInfo = activeSlide.querySelector('.achiever-info');
+                if(activeInfo) {
+                    activeInfo.style.opacity = '1';
+                    activeInfo.style.transform = 'translateY(0)';
+                }
+            }
+        },
+        init: function() {
+            setTimeout(() => {
+                const activeSlide = this.slides[this.activeIndex];
+                if(activeSlide) {
+                    const activeInfo = activeSlide.querySelector('.achiever-info');
+                    if(activeInfo) {
+                        activeInfo.style.opacity = '1';
+                        activeInfo.style.transform = 'translateY(0)';
+                    }
+                }
+            }, 100);
         }
       }
     });
   }
-
-  function nextSlide() {
-    if (currentIndex < cards.length - 1) {
-      currentIndex++;
-    } else {
-      currentIndex = 0; // Loop back to start
-    }
-    updateSlider();
-  }
-
-  function prevSlide() {
-    if (currentIndex > 0) {
-      currentIndex--;
-    } else {
-      currentIndex = cards.length - 1; // Loop back to end
-    }
-    updateSlider();
-  }
-
-  function startAutoSlide() {
-    stopAutoSlide();
-    autoSlideInterval = setInterval(nextSlide, 3500); // Auto slide every 3.5s
-  }
-
-  function stopAutoSlide() {
-    if (autoSlideInterval) {
-      clearInterval(autoSlideInterval);
-    }
-  }
-
-  nextBtn.addEventListener('click', () => {
-    nextSlide();
-    startAutoSlide(); // Reset timer on manual click
-  });
-
-  prevBtn.addEventListener('click', () => {
-    prevSlide();
-    startAutoSlide(); // Reset timer on manual click
-  });
-
-  // Pause auto-sliding when hovering over the slider container
-  if(container) {
-    container.addEventListener('mouseenter', stopAutoSlide);
-    container.addEventListener('mouseleave', startAutoSlide);
-  }
-
-  // Init
-  updateSlider();
-  startAutoSlide();
-  window.addEventListener('resize', updateSlider);
 });

@@ -363,89 +363,85 @@
     el.textContent = new Date().getFullYear();
   });
 
-
-  // --- Faculty Carousel Progress ---
-  const facultyCarousel = document.getElementById('facultyCarousel');
-  const facultyProgressBar = document.getElementById('facultyProgressBar');
-  
-  if (facultyCarousel && facultyProgressBar) {
-    const updateProgress = () => {
-      const scrollLeft = facultyCarousel.scrollLeft;
-      const maxScroll = facultyCarousel.scrollWidth - facultyCarousel.clientWidth;
-      let scrollPercent = maxScroll > 0 ? (scrollLeft / maxScroll) : 0;
-      
-      const containerWidth = facultyCarousel.parentElement.querySelector('.faculty-progress').clientWidth;
-      const barWidth = facultyProgressBar.clientWidth;
-      
-      const maxTranslate = containerWidth - barWidth;
-      const currentTranslate = scrollPercent * maxTranslate;
-      
-      facultyProgressBar.style.transform = `translateX(${currentTranslate}px)`;
-    };
-
-    facultyCarousel.addEventListener('scroll', updateProgress, { passive: true });
-    window.addEventListener('resize', updateProgress);
-    setTimeout(updateProgress, 100);
-  }
-
-  // --- Auto-slide and Navigation Logic for Faculty Carousel ---
+  // --- Faculty Slider Auto-Scroll & Animation ---
+  const facultyTrack = document.getElementById('facultyTrack');
   const facultyNext = document.getElementById('facultyNext');
   const facultyPrev = document.getElementById('facultyPrev');
-  let facultyAutoSlideInterval;
+  let facultyAutoInterval;
+  let currentFacultyIndex = 0;
 
-  if (facultyCarousel) {
-    const slideNext = () => {
-      // Calculate amount to scroll based on visible width
-      const cardWidth = facultyCarousel.querySelector('.faculty-card').clientWidth + 24; // width + gap
-      if (facultyCarousel.scrollLeft >= facultyCarousel.scrollWidth - facultyCarousel.clientWidth - 10) {
-        // Fade out slightly when looping back for a 'faded animation' effect
-        facultyCarousel.style.opacity = '0.5';
+  if (facultyTrack) {
+    const cards = facultyTrack.querySelectorAll('.faculty-card');
+    const totalCards = cards.length;
+
+    const getVisibleCards = () => {
+      if (window.innerWidth <= 576) return 1;
+      if (window.innerWidth <= 768) return 2;
+      if (window.innerWidth <= 991) return 3;
+      return 4;
+    };
+
+    const updateSliderPosition = () => {
+      const visible = getVisibleCards();
+      const maxIndex = Math.max(0, totalCards - visible);
+      if (currentFacultyIndex > maxIndex) currentFacultyIndex = maxIndex;
+      if (currentFacultyIndex < 0) currentFacultyIndex = 0;
+
+      const card = cards[0];
+      if (card) {
+        // card width + gap (30px defined in CSS)
+        const style = window.getComputedStyle(facultyTrack);
+        const gap = parseInt(style.gap) || 30;
+        const offset = currentFacultyIndex * (card.offsetWidth + gap);
+        facultyTrack.style.transform = `translateX(-${offset}px)`;
+      }
+    };
+
+    const slideNextFaculty = () => {
+      const visible = getVisibleCards();
+      const maxIndex = Math.max(0, totalCards - visible);
+      if (currentFacultyIndex >= maxIndex) {
+        // loop back to start
+        facultyTrack.style.opacity = '0.5';
         setTimeout(() => {
-          facultyCarousel.scrollTo({ left: 0, behavior: 'smooth' });
-          facultyCarousel.style.opacity = '1';
+          currentFacultyIndex = 0;
+          updateSliderPosition();
+          facultyTrack.style.opacity = '1';
         }, 300);
       } else {
-        facultyCarousel.scrollBy({ left: cardWidth, behavior: 'smooth' });
+        currentFacultyIndex++;
+        updateSliderPosition();
       }
     };
 
-    const slidePrev = () => {
-      const cardWidth = facultyCarousel.querySelector('.faculty-card').clientWidth + 24;
-      if (facultyCarousel.scrollLeft <= 0) {
-          facultyCarousel.scrollTo({ left: facultyCarousel.scrollWidth, behavior: 'smooth' });
+    const slidePrevFaculty = () => {
+      if (currentFacultyIndex <= 0) {
+        const visible = getVisibleCards();
+        currentFacultyIndex = Math.max(0, totalCards - visible);
       } else {
-          facultyCarousel.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+        currentFacultyIndex--;
       }
+      updateSliderPosition();
     };
 
-    if (facultyNext) facultyNext.addEventListener('click', () => { slideNext(); resetFacultyAutoSlide(); });
-    if (facultyPrev) facultyPrev.addEventListener('click', () => { slidePrev(); resetFacultyAutoSlide(); });
+    if (facultyNext) facultyNext.addEventListener('click', () => { slideNextFaculty(); resetFacultyAuto(); });
+    if (facultyPrev) facultyPrev.addEventListener('click', () => { slidePrevFaculty(); resetFacultyAuto(); });
 
-    const startFacultyAutoSlide = () => {
-      facultyAutoSlideInterval = setInterval(slideNext, 3500);
+    const startFacultyAuto = () => {
+      facultyAutoInterval = setInterval(slideNextFaculty, 3500);
     };
 
-    const resetFacultyAutoSlide = () => {
-      clearInterval(facultyAutoSlideInterval);
-      startFacultyAutoSlide();
+    const resetFacultyAuto = () => {
+      clearInterval(facultyAutoInterval);
+      startFacultyAuto();
     };
 
-    startFacultyAutoSlide();
+    startFacultyAuto();
+    window.addEventListener('resize', updateSliderPosition);
     
-    // Pause auto-slide on hover to improve UX
-    facultyCarousel.addEventListener('mouseenter', () => clearInterval(facultyAutoSlideInterval));
-    facultyCarousel.addEventListener('mouseleave', startFacultyAutoSlide);
-    if(facultyNext) {
-      facultyNext.addEventListener('mouseenter', () => clearInterval(facultyAutoSlideInterval));
-      facultyNext.addEventListener('mouseleave', startFacultyAutoSlide);
-    }
-    if(facultyPrev) {
-      facultyPrev.addEventListener('mouseenter', () => clearInterval(facultyAutoSlideInterval));
-      facultyPrev.addEventListener('mouseleave', startFacultyAutoSlide);
-    }
-    
-    // Smooth opacity transition for the fading effect
-    facultyCarousel.style.transition = 'opacity 0.4s ease';
+    // Pause on hover
+    facultyTrack.parentElement.addEventListener('mouseenter', () => clearInterval(facultyAutoInterval));
+    facultyTrack.parentElement.addEventListener('mouseleave', startFacultyAuto);
   }
 
   // --- Dynamic Marquee from Admin Panel ---
@@ -496,8 +492,30 @@
       
       localStorage.setItem('erp_callbacks', JSON.stringify(callbacks));
       
-      alert("Application Submitted Successfully! Our admission team will contact you shortly.");
-      admissionForm.reset();
+      const actionUrl = admissionForm.getAttribute('action');
+      const submitBtn = admissionForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn ? submitBtn.innerHTML : '';
+      if(submitBtn) submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+
+      if (actionUrl && actionUrl !== '#') {
+        const formData = new FormData(admissionForm);
+        fetch(actionUrl, {
+          method: 'POST',
+          body: formData,
+          headers: { 'Accept': 'application/json' }
+        }).then(response => {
+          alert("Application Submitted Successfully! Our admission team will contact you shortly.");
+          admissionForm.reset();
+          if(submitBtn) submitBtn.innerHTML = originalText;
+        }).catch(error => {
+          alert("Error submitting application. Please try again.");
+          if(submitBtn) submitBtn.innerHTML = originalText;
+        });
+      } else {
+        alert("Application Submitted Successfully! Our admission team will contact you shortly.");
+        admissionForm.reset();
+        if(submitBtn) submitBtn.innerHTML = originalText;
+      }
     });
   }
 
@@ -525,11 +543,30 @@
       
       localStorage.setItem('admin_contact_messages', JSON.stringify(messages));
       
-      // Also send via mailto
-      window.location.href = `mailto:admin@gurudevinternational.edu.in?subject=${encodeURIComponent(subject || 'Website Contact Form')}&body=${encodeURIComponent("Name: " + name + "\nPhone: " + phone + "\nEmail: " + email + "\n\nMessage:\n" + message)}`;
-      
-      alert("Thank you! Your message has been sent. We will get back to you shortly.");
-      contactForm.reset();
+      const actionUrl = contactForm.getAttribute('action');
+      const submitBtn = contactForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn ? submitBtn.innerHTML : '';
+      if(submitBtn) submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+
+      if (actionUrl && actionUrl !== '#') {
+        const formData = new FormData(contactForm);
+        fetch(actionUrl, {
+          method: 'POST',
+          body: formData,
+          headers: { 'Accept': 'application/json' }
+        }).then(response => {
+          alert("Thank you! Your message has been sent. We will get back to you shortly.");
+          contactForm.reset();
+          if(submitBtn) submitBtn.innerHTML = originalText;
+        }).catch(error => {
+          alert("Error sending message. Please try again.");
+          if(submitBtn) submitBtn.innerHTML = originalText;
+        });
+      } else {
+        alert("Thank you! Your message has been sent. We will get back to you shortly.");
+        contactForm.reset();
+        if(submitBtn) submitBtn.innerHTML = originalText;
+      }
     });
   }
 
@@ -576,8 +613,7 @@
   // ============================================================
   // GLOBAL QUICK CALLBACK POPUP
   // ============================================================
-  if (!sessionStorage.getItem('quickCallbackShown')) {
-    setTimeout(() => {
+  setTimeout(() => {
     // Inject Modal HTML
     const modalHTML = `
       <div id="quick-callback-modal">
@@ -602,18 +638,18 @@
               <h2>Get A Quick Call Back</h2>
               <p>Fill details for course guidance, scholarship, and fees.</p>
             </div>
-            <form id="quick-callback-form" class="qc-form">
+            <form id="quick-callback-form" class="qc-form" action="https://formspree.io/f/mppardbk" method="POST">
               <div class="qc-form-row" style="display:none;">
-                <input type="hidden" id="qc-program" value="N/A" />
-                <input type="hidden" id="qc-branch" value="N/A" />
+                <input type="hidden" id="qc-program" name="program" value="N/A" />
+                <input type="hidden" id="qc-branch" name="branch" value="N/A" />
               </div>
               <div class="qc-form-row">
-                <input type="text" id="qc-name" class="qc-input" placeholder="Full Name *" required />
-                <input type="tel" id="qc-phone" class="qc-input" placeholder="Phone Number *" required />
+                <input type="text" id="qc-name" name="name" class="qc-input" placeholder="Full Name *" required />
+                <input type="tel" id="qc-phone" name="phone" class="qc-input" placeholder="Phone Number *" required />
               </div>
-              <input type="email" id="qc-email" class="qc-input" placeholder="Email Address *" required />
-              <input type="text" id="qc-address" class="qc-input" placeholder="Address *" required />
-              <input type="text" id="qc-message" class="qc-input" placeholder="Message (optional)" />
+              <input type="email" id="qc-email" name="email" class="qc-input" placeholder="Email Address *" required />
+              <input type="text" id="qc-address" name="address" class="qc-input" placeholder="Address *" required />
+              <input type="text" id="qc-message" name="message" class="qc-input" placeholder="Message (optional)" />
               <button type="submit" class="qc-submit">Request Callback</button>
             </form>
           </div>
@@ -629,7 +665,6 @@
     // Show Modal
     setTimeout(() => {
       modal.classList.add('active');
-      sessionStorage.setItem('quickCallbackShown', 'true');
     }, 50);
     
     // Close Logic
@@ -657,12 +692,35 @@
       leads.push(lead);
       localStorage.setItem('admin_quick_callbacks', JSON.stringify(leads));
       
-      alert("Thank you! Our admission counselor will call you shortly.");
-      modal.classList.remove('active');
+      const actionUrl = form.getAttribute('action');
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalText = submitBtn ? submitBtn.innerHTML : '';
+      if(submitBtn) submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+
+      if (actionUrl && actionUrl !== '#') {
+        const formData = new FormData(form);
+        fetch(actionUrl, {
+          method: 'POST',
+          body: formData,
+          headers: { 'Accept': 'application/json' }
+        }).then(response => {
+          alert("Thank you! Our admission counselor will call you shortly.");
+          form.reset();
+          if(submitBtn) submitBtn.innerHTML = originalText;
+          modal.classList.remove('active');
+        }).catch(error => {
+          alert("Error sending request. Please try again.");
+          if(submitBtn) submitBtn.innerHTML = originalText;
+        });
+      } else {
+        alert("Thank you! Our admission counselor will call you shortly.");
+        form.reset();
+        if(submitBtn) submitBtn.innerHTML = originalText;
+        modal.classList.remove('active');
+      }
     });
     
-    }, 2000); // 2-second delay
-  }
+  }, 2000); // 2-second delay
 
   /* ===========================
      MOBILE FOOTER ACCORDION
@@ -728,3 +786,242 @@
   renderNewsAndEvents();
 
 })();
+
+
+
+// CSE Faculty Swiper Initialization
+function initCSESwiper() {
+  if (document.querySelector('.cseSwiper')) {
+    new Swiper('.cseSwiper', {
+      slidesPerView: 1,
+      spaceBetween: 20,
+      loop: true,
+      speed: 800,
+      watchSlidesProgress: true,
+      autoplay: {
+        delay: 2000,
+        disableOnInteraction: false,
+      },
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+      },
+      navigation: {
+        nextEl: '.cse-next',
+        prevEl: '.cse-prev',
+      },
+      breakpoints: {
+        576: { slidesPerView: 2, spaceBetween: 20 },
+        768: { slidesPerView: 3, spaceBetween: 30 },
+        1024: { slidesPerView: 4, spaceBetween: 30 },
+      }
+    });
+  }
+}
+
+              <ul>
+                <li><i class="fa-solid fa-check"></i> Experienced Faculty</li>
+                <li><i class="fa-solid fa-check"></i> Modern Infrastructure</li>
+                <li><i class="fa-solid fa-check"></i> Holistic Development</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="qc-right">
+            <div class="qc-header">
+              <h4>Admission Support</h4>
+              <h2>Get A Quick Call Back</h2>
+              <p>Fill details for course guidance, scholarship, and fees.</p>
+            </div>
+            <form id="quick-callback-form" class="qc-form" action="https://formspree.io/f/mppardbk" method="POST">
+              <div class="qc-form-row" style="display:none;">
+                <input type="hidden" id="qc-program" name="program" value="N/A" />
+                <input type="hidden" id="qc-branch" name="branch" value="N/A" />
+              </div>
+              <div class="qc-form-row">
+                <input type="text" id="qc-name" name="name" class="qc-input" placeholder="Full Name *" required />
+                <input type="tel" id="qc-phone" name="phone" class="qc-input" placeholder="Phone Number *" required />
+              </div>
+              <input type="email" id="qc-email" name="email" class="qc-input" placeholder="Email Address *" required />
+              <input type="text" id="qc-address" name="address" class="qc-input" placeholder="Address *" required />
+              <input type="text" id="qc-message" name="message" class="qc-input" placeholder="Message (optional)" />
+              <button type="submit" class="qc-submit">Request Callback</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    const modal = document.getElementById('quick-callback-modal');
+    const closeBtn = document.getElementById('qc-close-btn');
+    const form = document.getElementById('quick-callback-form');
+    
+    // Show Modal
+    setTimeout(() => {
+      modal.classList.add('active');
+    }, 50);
+    
+    // Close Logic
+    closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.remove('active');
+    });
+    
+    // Form Submission
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const lead = {
+        date: new Date().toLocaleDateString('en-GB'),
+        program: document.getElementById('qc-program').value,
+        branch: document.getElementById('qc-branch').value,
+        name: document.getElementById('qc-name').value,
+        phone: document.getElementById('qc-phone').value,
+        email: document.getElementById('qc-email').value,
+        address: document.getElementById('qc-address').value,
+        message: document.getElementById('qc-message').value
+      };
+      
+      let leads = JSON.parse(localStorage.getItem('admin_quick_callbacks')) || [];
+      leads.push(lead);
+      localStorage.setItem('admin_quick_callbacks', JSON.stringify(leads));
+      
+      const actionUrl = form.getAttribute('action');
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalText = submitBtn ? submitBtn.innerHTML : '';
+      if(submitBtn) submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+
+      if (actionUrl && actionUrl !== '#') {
+        const formData = new FormData(form);
+        fetch(actionUrl, {
+          method: 'POST',
+          body: formData,
+          headers: { 'Accept': 'application/json' }
+        }).then(response => {
+          alert("Thank you! Our admission counselor will call you shortly.");
+          form.reset();
+          if(submitBtn) submitBtn.innerHTML = originalText;
+          modal.classList.remove('active');
+        }).catch(error => {
+          alert("Error sending request. Please try again.");
+          if(submitBtn) submitBtn.innerHTML = originalText;
+        });
+      } else {
+        alert("Thank you! Our admission counselor will call you shortly.");
+        form.reset();
+        if(submitBtn) submitBtn.innerHTML = originalText;
+        modal.classList.remove('active');
+      }
+    });
+    
+  }, 2000); // 2-second delay
+
+  /* ===========================
+     MOBILE FOOTER ACCORDION
+  =========================== */
+  const footerTitles = document.querySelectorAll('.footer-col-title');
+  footerTitles.forEach(title => {
+    title.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        const parentCol = title.closest('.footer-col');
+        parentCol.classList.toggle('open');
+      }
+    });
+  });
+
+  /* ===========================
+     (Removed duplicate faculty carousel logic)
+  =========================== */
+
+  /* ===========================
+     DYNAMIC NEWS & EVENTS
+  =========================== */
+  function renderNewsAndEvents() {
+    const grids = [
+      document.getElementById('dynamic-news-grid'),
+      document.getElementById('news-page-grid')
+    ];
+    
+    let newsList = JSON.parse(localStorage.getItem('admin_news_events')) || [];
+    
+    grids.forEach(grid => {
+      if(!grid) return;
+      grid.innerHTML = '';
+      
+      if(newsList.length === 0) {
+        grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-color); padding: 40px;">No news or events published yet. Check back later!</div>';
+        return;
+      }
+      
+      newsList.forEach((news, idx) => {
+        // Limit to 3 on homepage, show all on news page
+        if(grid.id === 'dynamic-news-grid' && idx >= 3) return;
+        
+        const photo = news.image || 'assets/images/hero-3.jpg';
+        grid.innerHTML += `
+          <article class='news-card' data-aos='fade-up' data-aos-delay='${(idx % 3 + 1) * 100}'>
+            <div class='news-image'>
+              <img src='${photo}' alt='${news.title}' loading='lazy' style='object-fit:cover; width:100%; height:100%;' />
+              <span class='news-category'>${news.category}</span>
+            </div>
+            <div class='news-body'>
+              <div class='news-meta'>
+                <span class='news-meta-item'><i class='fa-regular fa-calendar'></i> ${news.date}</span>
+              </div>
+              <h3 class='news-title'>${news.title}</h3>
+              <p class='news-excerpt'>${news.excerpt}</p>
+              <a href='news.html' class='news-read-more'>Read More <i class='fa-solid fa-arrow-right'></i></a>
+            </div>
+          </article>
+        `;
+      });
+    });
+  }
+  renderNewsAndEvents();
+
+})();
+
+
+
+// CSE Faculty Swiper Initialization
+function initCSESwiper() {
+  if (document.querySelector('.cseSwiper')) {
+    new Swiper('.cseSwiper', {
+      slidesPerView: 1,
+      spaceBetween: 20,
+      loop: true,
+      speed: 800,
+      watchSlidesProgress: true,
+      autoplay: {
+        delay: 2000,
+        disableOnInteraction: false,
+      },
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+      },
+      navigation: {
+        nextEl: '.cse-next',
+        prevEl: '.cse-prev',
+      },
+      breakpoints: {
+        576: { slidesPerView: 2, spaceBetween: 20 },
+        768: { slidesPerView: 3, spaceBetween: 30 },
+        1024: { slidesPerView: 4, spaceBetween: 30 },
+      }
+    });
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initCSESwiper);
+} else {
+  initCSESwiper();
+}
+document.addEventListener("contextmenu", (e) => e.preventDefault());
+document.addEventListener("keydown", (e) => {
+  if (e.key === "F12" || (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J" || e.key === "C")) || (e.ctrlKey && e.key === "U")) {
+    e.preventDefault();
+  }
+});
