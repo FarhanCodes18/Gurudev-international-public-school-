@@ -1,4 +1,10 @@
 /* admin.js - Superpower Admin Panel Logic (Light Theme & Sync Updates) */
+// Preload Firebase SDKs so uploads are instant
+var _fbReady = Promise.all([
+  import('./js/firebase-config.js'),
+  import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js'),
+  import('https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js')
+]).then(([c, fs, st]) => ({ db: c.db, storage: c.storage, fs, st })).catch(e => { console.warn('Firebase preload:', e); return null; });
 document.addEventListener('DOMContentLoaded', () => {
   // Navigation Logic
   const navItems = document.querySelectorAll('.nav-item');
@@ -304,33 +310,33 @@ function uploadGallery() {
   });
 }
 
-// School Gallery Upload & Sync
+// School Gallery Upload & Sync (FIREBASE)
 function uploadSchoolGallery() {
   const fileInput = document.getElementById('school-gallery-photo');
   const descInput = document.getElementById('school-gallery-desc');
-  
-  if(fileInput.files.length === 0) {
-    return alert('Please select a photo to upload.');
-  }
-
+  if(!fileInput || fileInput.files.length === 0) return alert('Please select a photo to upload.');
   const desc = descInput ? descInput.value : '';
   const file = fileInput.files[0];
-  
-  compressImage(file, 800, 0.7, function(compressedImage) {
-    let gallery = JSON.parse(localStorage.getItem('admin_school_gallery') || '[]');
-    
-    gallery.unshift({ image: compressedImage, desc: desc, date: new Date().toLocaleDateString() });
-    
-    showLoader('Uploading Photo', 'Optimizing and syncing to the School Gallery...', 2000, () => {
-      try {
-        localStorage.setItem('admin_school_gallery', JSON.stringify(gallery));
-        alert('Photo synced to the School Gallery successfully!');
-      } catch(e) {
-        alert('Storage full! Delete some old photos first.');
-      }
-      fileInput.value = '';
-      if(descInput) descInput.value = '';
-      renderSchoolGalleryList();
+  const overlay = document.getElementById('admin-loader');
+  if(overlay) { document.getElementById('loader-title').innerText = 'Uploading Photo'; document.getElementById('loader-desc').innerText = 'Uploading to cloud...'; overlay.classList.add('active'); }
+  compressImage(file, 800, 0.6, function(compressedImage) {
+    _fbReady.then(fb => {
+      if(!fb) { alert('Firebase not ready. Try again.'); if(overlay) overlay.classList.remove('active'); return; }
+      const { ref, uploadString, getDownloadURL } = fb.st;
+      const { collection, addDoc } = fb.fs;
+      const fileName = 'gallery/' + Date.now() + '.jpg';
+      const storageRef = ref(fb.storage, fileName);
+      uploadString(storageRef, compressedImage, 'data_url').then(snap => {
+        getDownloadURL(snap.ref).then(url => {
+          addDoc(collection(fb.db, 'school_gallery'), { image: url, desc: desc, date: new Date().toLocaleDateString('en-GB'), timestamp: Date.now(), storagePath: fileName }).then(() => {
+            alert('Photo uploaded successfully!');
+            fileInput.value = ''; if(descInput) descInput.value = '';
+            if(document.getElementById('school-gallery-photo-name')) document.getElementById('school-gallery-photo-name').innerText = 'No file chosen';
+            if(overlay) overlay.classList.remove('active');
+            renderSchoolGalleryList();
+          });
+        });
+      }).catch(err => { console.error('Upload error:', err); alert('Upload failed!'); if(overlay) overlay.classList.remove('active'); });
     });
   });
 }
@@ -368,37 +374,36 @@ function deleteAchiever(index) {
   renderAchieversGalleryList();
 }
 
-// Render School Gallery List
+// Render School Gallery List (FIREBASE)
 function renderSchoolGalleryList() {
   const listBody = document.getElementById('school-gallery-list');
   if(!listBody) return;
-  
-  let gallery = JSON.parse(localStorage.getItem('admin_school_gallery') || '[]');
-  
-  if(gallery.length === 0) {
-    listBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--admin-muted);">No photos uploaded yet.</td></tr>';
-    return;
-  }
-  
-  listBody.innerHTML = '';
-  gallery.forEach((item, index) => {
-    listBody.innerHTML += `
-      <tr>
-        <td><img src="${item.image}" style="width:80px; height:50px; object-fit:cover; border-radius:8px;" alt="Gallery Image"></td>
-        <td style="font-weight:600; color:var(--admin-heading);">${item.desc || 'N/A'}</td>
-        <td style="color:var(--admin-muted);">${item.date || 'N/A'}</td>
-        <td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteSchoolGallery(${index})"><i class="fa-solid fa-trash"></i></button></td>
-      </tr>
-    `;
+  listBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Loading...</td></tr>';
+  _fbReady.then(fb => {
+    if(!fb) { listBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">Firebase not connected.</td></tr>'; return; }
+    const { collection, getDocs, query, orderBy } = fb.fs;
+    getDocs(query(collection(fb.db, 'school_gallery'), orderBy('timestamp', 'desc'))).then(snap => {
+      if(snap.empty) { listBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--admin-muted);">No photos uploaded yet.</td></tr>'; return; }
+      listBody.innerHTML = '';
+      snap.forEach(d => {
+        const item = d.data(); const id = d.id;
+        listBody.innerHTML += '<tr><td><img src="'+item.image+'" style="width:80px;height:50px;object-fit:cover;border-radius:8px;" alt="Gallery"></td><td style="font-weight:600;color:var(--admin-heading);">'+(item.desc||'N/A')+'</td><td style="color:var(--admin-muted);">'+(item.date||'N/A')+'</td><td><button class="btn-admin" style="background:#ef4444;padding:6px 12px;font-size:0.8rem;" onclick="deleteSchoolGallery(''+id+'',''+( item.storagePath||'')+'')"><i class="fa-solid fa-trash"></i></button></td></tr>';
+      });
+    });
   });
 }
 
-function deleteSchoolGallery(index) {
-  if(!confirm("Are you sure you want to delete this photo?")) return;
-  let gallery = JSON.parse(localStorage.getItem('admin_school_gallery') || '[]');
-  gallery.splice(index, 1);
-  localStorage.setItem('admin_school_gallery', JSON.stringify(gallery));
-  renderSchoolGalleryList();
+function deleteSchoolGallery(id, path) {
+  if(!confirm("Delete this photo?")) return;
+  _fbReady.then(fb => {
+    if(!fb) return;
+    const { doc, deleteDoc } = fb.fs;
+    const { ref, deleteObject } = fb.st;
+    deleteDoc(doc(fb.db, 'school_gallery', id)).then(() => {
+      if(path) deleteObject(ref(fb.storage, path)).catch(()=>{});
+      alert('Deleted!'); renderSchoolGalleryList();
+    });
+  });
 }
 
 // Bulk SMS Blaster

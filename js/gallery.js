@@ -75,48 +75,35 @@
 
   const lb = new Lightbox();
 
-  // --- LIVE SYNC FROM ADMIN PANEL ---
-  const liveSchoolGalleryData = localStorage.getItem('admin_school_gallery');
-  if (liveSchoolGalleryData) {
-    const grid = document.querySelector('.gallery-grid');
-    if (grid) {
-      let livePhotos = [];
-      try { livePhotos = JSON.parse(liveSchoolGalleryData); } catch(e) {}
-      
-      // Inject at the beginning of the grid
-      livePhotos.reverse().forEach((photo) => {
-        const item = document.createElement('div');
-        item.className = 'gallery-item';
-        item.setAttribute('data-desc', photo.desc || '');
-        item.innerHTML = `
-          <img src="${photo.image}" alt="${photo.desc || 'School Event'}" loading="lazy" />
-          <div class="gallery-overlay"><div class="gallery-zoom-icon"><i class="fa-solid fa-magnifying-glass-plus"></i></div></div>
-        `;
-        grid.prepend(item);
-      });
-    }
+  // --- LIVE SYNC FROM FIREBASE ---
+  const grid = document.querySelector('.gallery-grid');
+  if (grid) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#888;">Loading gallery...</div>';
+    Promise.all([
+      import('./js/firebase-config.js'),
+      import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
+    ]).then(([config, fs]) => {
+      const { collection, getDocs, query, orderBy } = fs;
+      getDocs(query(collection(config.db, 'school_gallery'), orderBy('timestamp', 'desc'))).then(snap => {
+        grid.innerHTML = '';
+        const itemsData = [];
+        if (snap.empty) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#888;">No photos uploaded yet. Upload from Admin Panel.</div>'; return; }
+        let i = 0;
+        snap.forEach(d => {
+          const photo = d.data();
+          const item = document.createElement('div');
+          item.className = 'gallery-item';
+          item.setAttribute('data-desc', photo.desc || '');
+          item.innerHTML = '<img src="'+photo.image+'" alt="'+(photo.desc||'School')+'" loading="lazy" /><div class="gallery-overlay"><div class="gallery-zoom-icon"><i class="fa-solid fa-magnifying-glass-plus"></i></div></div>';
+          grid.appendChild(item);
+          itemsData.push({ src: photo.image, desc: photo.desc || '' });
+          const ci = i; item.addEventListener('click', () => lb.open(ci)); item.style.cursor = 'pointer';
+          i++;
+        });
+        lb.register(itemsData);
+      }).catch(err => { console.error('Gallery fetch error:', err); grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:red;">Failed to load gallery.</div>'; });
+    }).catch(err => { console.error('Firebase import error:', err); grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:red;">Failed to connect.</div>'; });
   }
-
-  // Collect all gallery items and bind them
-  const galleryItems = document.querySelectorAll('.gallery-item');
-  const itemsData = [];
-  
-  galleryItems.forEach((item, i) => {
-    let src = item.getAttribute('data-src');
-    if (!src) {
-      const img = item.querySelector('img');
-      if (img) src = img.src;
-    }
-    
-    if (src) {
-      const desc = item.getAttribute('data-desc') || '';
-      itemsData.push({ src, desc });
-      item.addEventListener('click', () => lb.open(i));
-      item.style.cursor = 'pointer';
-    }
-  });
-  
-  lb.register(itemsData);
 
   window.Lightbox = lb;
 
