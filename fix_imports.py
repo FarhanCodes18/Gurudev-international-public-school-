@@ -1,14 +1,12 @@
-import re
+import os
+import glob
 
-with open('js/gallery.js', 'r', encoding='utf-8') as f:
-    content = f.read()
-content = content.replace("import('./firebase-config.js')", "import('./js/firebase-config.js')")
-with open('js/gallery.js', 'w', encoding='utf-8') as f:
-    f.write(content)
-
-with open('js/admin.js', 'r', encoding='utf-8') as f:
-    content = f.read()
-content = content.replace("import('./firebase-config.js')", "import('./js/firebase-config.js')")
-with open('js/admin.js', 'w', encoding='utf-8') as f:
-    f.write(content)
-print("Fixed import paths")
+files = glob.glob('d:/Gurudev international/Gurudev intenational/js/*.js')
+for file in files:
+    with open(file, 'r', encoding='utf-8') as f:
+        content = f.read()
+    if "import('./firebase-config.js')" in content:
+        content = content.replace("import('./firebase-config.js')", "import('./js/firebase-config.js')")
+        with open(file, 'w', encoding='utf-8') as f:
+            f.write(content)
+        print(f'Fixed {file}')
