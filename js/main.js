@@ -260,29 +260,41 @@
   =========================== */
   const reviewsTrack = document.getElementById('dynamic-reviews-track');
   if(reviewsTrack) {
-    let reviews = JSON.parse(localStorage.getItem('admin_student_reviews')) || [];
-    let approvedReviews = reviews.filter(r => r.status === 'approved');
-    if(approvedReviews.length > 0) {
-      let html = '';
-      approvedReviews.forEach(r => {
-        html += `
-          <div class="testimonial-card">
-            <div class="stars">${'★'.repeat(Number(r.rating))}${'☆'.repeat(5 - Number(r.rating))}</div>
-            <div class="testimonial-quote">"</div>
-            <p class="testimonial-text">${r.text}</p>
-            <div class="testimonial-author">
-              <div class="testimonial-info" style="margin-left:0;">
-                <strong>${r.name}</strong>
-                <span>${r.role}</span>
-              </div>
-            </div>
-          </div>
-        `;
-      });
-      reviewsTrack.innerHTML = html;
-    } else {
-      reviewsTrack.innerHTML = '<div class="testimonial-card" style="opacity:0.5;"><p class="testimonial-text">No reviews yet. Be the first to share your feedback!</p></div>';
-    }
+    Promise.all([
+      import('./firebase-config.js'),
+      import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
+    ]).then(([config, fs]) => {
+       const { collection, getDocs, query, where, orderBy } = fs;
+       return getDocs(query(collection(config.db, 'reviews'), where('status', '==', 'approved')));
+    }).then(snapshot => {
+       if(!snapshot.empty) {
+         let html = '';
+         snapshot.forEach(doc => {
+           let r = doc.data();
+           html += `
+             <div class="testimonial-card">
+               <div class="stars">${'★'.repeat(Number(r.rating || 5))}${'☆'.repeat(5 - Number(r.rating || 5))}</div>
+               <div class="testimonial-quote">"</div>
+               <p class="testimonial-text">${r.text || ''}</p>
+               <div class="testimonial-author">
+                 <div class="testimonial-info" style="margin-left:0;">
+                   <strong>${r.name || 'Anonymous'}</strong>
+                   <span>${r.role || 'Student'}</span>
+                 </div>
+               </div>
+             </div>
+           `;
+         });
+         reviewsTrack.innerHTML = html;
+         
+         // Trigger slider recalculation if necessary
+         if(typeof window.initTestimonialSlider === 'function') window.initTestimonialSlider();
+       } else {
+         reviewsTrack.innerHTML = '<div class="testimonial-card" style="opacity:0.5;"><p class="testimonial-text">No reviews yet. Be the first to share your feedback!</p></div>';
+       }
+    }).catch(err => {
+       console.error("Error loading reviews:", err);
+    });
   }
 
   /* ===========================
@@ -582,42 +594,37 @@
       
       // Combine name for generic callback format
       const finalName = studentName ? `${studentName} (Child of ${parentName})` : parentName;
-      
-      let callbacks = JSON.parse(localStorage.getItem('erp_callbacks')) || [];
-      callbacks.push({
-        date: new Date().toLocaleDateString('en-GB'),
-        name: finalName,
-        phone: phone,
-        class: applyClass || 'General Inquiry',
-        message: message
-      });
-      
-      localStorage.setItem('erp_callbacks', JSON.stringify(callbacks));
-      
       const actionUrl = admissionForm.getAttribute('action');
       const submitBtn = admissionForm.querySelector('button[type="submit"]');
       const originalText = submitBtn ? submitBtn.innerHTML : '';
       if(submitBtn) submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
 
-      if (actionUrl && actionUrl !== '#') {
-        const formData = new FormData(admissionForm);
-        fetch(actionUrl, {
-          method: 'POST',
-          body: formData,
-          headers: { 'Accept': 'application/json' }
-        }).then(response => {
-          alert("Application Submitted Successfully! Our admission team will contact you shortly.");
-          admissionForm.reset();
-          if(submitBtn) submitBtn.innerHTML = originalText;
-        }).catch(error => {
-          alert("Error submitting application. Please try again.");
-          if(submitBtn) submitBtn.innerHTML = originalText;
-        });
-      } else {
+      Promise.all([
+        import('./firebase-config.js'),
+        import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
+      ]).then(([config, fs]) => {
+         return fs.addDoc(fs.collection(config.db, 'callbacks'), {
+           date: new Date().toLocaleDateString('en-GB'),
+           name: finalName,
+           phone: phone,
+           class: applyClass || 'General Inquiry',
+           message: message,
+           timestamp: Date.now()
+         });
+      }).then(() => {
+        if (actionUrl && actionUrl !== '#') {
+          const formData = new FormData(admissionForm);
+          return fetch(actionUrl, { method: 'POST', body: formData, headers: { 'Accept': 'application/json' } });
+        }
+      }).then(() => {
         alert("Application Submitted Successfully! Our admission team will contact you shortly.");
         admissionForm.reset();
         if(submitBtn) submitBtn.innerHTML = originalText;
-      }
+      }).catch(error => {
+        console.error("Firebase/Fetch Error:", error);
+        alert("Error submitting application. Please try again.");
+        if(submitBtn) submitBtn.innerHTML = originalText;
+      });
     });
   }
 
@@ -632,43 +639,38 @@
       const email = document.getElementById('email') ? document.getElementById('email').value : '';
       const subject = document.getElementById('subject') ? document.getElementById('subject').value : '';
       const message = document.getElementById('message') ? document.getElementById('message').value : '';
-      
-      let messages = JSON.parse(localStorage.getItem('admin_contact_messages')) || [];
-      messages.push({
-        date: new Date().toLocaleDateString('en-GB'),
-        name: name,
-        phone: phone,
-        email: email,
-        subject: subject,
-        message: message
-      });
-      
-      localStorage.setItem('admin_contact_messages', JSON.stringify(messages));
-      
       const actionUrl = contactForm.getAttribute('action');
       const submitBtn = contactForm.querySelector('button[type="submit"]');
       const originalText = submitBtn ? submitBtn.innerHTML : '';
       if(submitBtn) submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
 
-      if (actionUrl && actionUrl !== '#') {
-        const formData = new FormData(contactForm);
-        fetch(actionUrl, {
-          method: 'POST',
-          body: formData,
-          headers: { 'Accept': 'application/json' }
-        }).then(response => {
-          alert("Thank you! Your message has been sent. We will get back to you shortly.");
-          contactForm.reset();
-          if(submitBtn) submitBtn.innerHTML = originalText;
-        }).catch(error => {
-          alert("Error sending message. Please try again.");
-          if(submitBtn) submitBtn.innerHTML = originalText;
-        });
-      } else {
+      Promise.all([
+        import('./firebase-config.js'),
+        import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
+      ]).then(([config, fs]) => {
+         return fs.addDoc(fs.collection(config.db, 'contact_messages'), {
+           date: new Date().toLocaleDateString('en-GB'),
+           name: name,
+           phone: phone,
+           email: email,
+           subject: subject,
+           message: message,
+           timestamp: Date.now()
+         });
+      }).then(() => {
+        if (actionUrl && actionUrl !== '#') {
+          const formData = new FormData(contactForm);
+          return fetch(actionUrl, { method: 'POST', body: formData, headers: { 'Accept': 'application/json' } });
+        }
+      }).then(() => {
         alert("Thank you! Your message has been sent. We will get back to you shortly.");
         contactForm.reset();
         if(submitBtn) submitBtn.innerHTML = originalText;
-      }
+      }).catch(error => {
+        console.error("Firebase/Fetch Error:", error);
+        alert("Error sending message. Please try again.");
+        if(submitBtn) submitBtn.innerHTML = originalText;
+      });
     });
   }
 
@@ -681,34 +683,44 @@
       const role = document.getElementById('fb-role').value;
       const rating = document.getElementById('fb-rating').value;
       const message = document.getElementById('fb-message').value;
-      
-      let reviews = JSON.parse(localStorage.getItem('admin_student_reviews')) || [];
-      reviews.push({
-        id: Date.now(),
-        name,
-        role,
-        rating,
-        text: message,
-        status: 'pending',
-        date: new Date().toLocaleDateString('en-GB')
+      const submitBtn = feedbackForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn ? submitBtn.innerHTML : '';
+      if(submitBtn) submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+
+      Promise.all([
+        import('./firebase-config.js'),
+        import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
+      ]).then(([config, fs]) => {
+         return fs.addDoc(fs.collection(config.db, 'reviews'), {
+           name: name,
+           role: role,
+           rating: rating,
+           text: message,
+           status: 'pending',
+           date: new Date().toLocaleDateString('en-GB'),
+           timestamp: Date.now()
+         });
+      }).then(() => {
+        const modalContent = document.querySelector('#feedback-modal .modal-content');
+        if (modalContent) {
+          modalContent.innerHTML = `
+            <div style="text-align:center; padding: 40px 20px;">
+              <i class="fa-solid fa-circle-check" style="font-size: 4rem; color: #16a34a; margin-bottom: 20px;"></i>
+              <h3 style="margin-bottom: 15px; color: var(--heading-color);">Thank You!</h3>
+              <p style="color: var(--text-color); margin-bottom: 30px;">Your feedback has been successfully submitted and is pending admin approval.</p>
+              <button class="btn btn-primary" onclick="document.getElementById('feedback-modal').classList.remove('active'); setTimeout(() => window.location.reload(), 300);">Close</button>
+            </div>
+          `;
+        } else {
+          alert("Thank you for your feedback! It has been submitted to the admin for approval.");
+          feedbackForm.reset();
+          document.getElementById('feedback-modal').classList.remove('active');
+        }
+      }).catch(error => {
+         console.error("Firebase Error:", error);
+         alert("Error submitting feedback. Please try again.");
+         if(submitBtn) submitBtn.innerHTML = originalText;
       });
-      localStorage.setItem('admin_student_reviews', JSON.stringify(reviews));
-      
-      const modalContent = document.querySelector('#feedback-modal .modal-content');
-      if (modalContent) {
-        modalContent.innerHTML = `
-          <div style="text-align:center; padding: 40px 20px;">
-            <i class="fa-solid fa-circle-check" style="font-size: 4rem; color: #16a34a; margin-bottom: 20px;"></i>
-            <h3 style="margin-bottom: 15px; color: var(--heading-color);">Thank You!</h3>
-            <p style="color: var(--text-color); margin-bottom: 30px;">Your feedback has been successfully submitted and is pending admin approval.</p>
-            <button class="btn btn-primary" onclick="document.getElementById('feedback-modal').classList.remove('active'); setTimeout(() => window.location.reload(), 300);">Close</button>
-          </div>
-        `;
-      } else {
-        alert("Thank you for your feedback! It has been submitted to the admin for approval.");
-        feedbackForm.reset();
-        document.getElementById('feedback-modal').classList.remove('active');
-      }
     });
   }
 
@@ -793,37 +805,34 @@
         address: document.getElementById('qc-address').value,
         message: document.getElementById('qc-message').value
       };
-      
-      let leads = JSON.parse(localStorage.getItem('admin_quick_callbacks')) || [];
-      leads.push(lead);
-      localStorage.setItem('admin_quick_callbacks', JSON.stringify(leads));
-      
       const actionUrl = form.getAttribute('action');
       const submitBtn = form.querySelector('button[type="submit"]');
       const originalText = submitBtn ? submitBtn.innerHTML : '';
       if(submitBtn) submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
 
-      if (actionUrl && actionUrl !== '#') {
-        const formData = new FormData(form);
-        fetch(actionUrl, {
-          method: 'POST',
-          body: formData,
-          headers: { 'Accept': 'application/json' }
-        }).then(response => {
-          alert("Thank you! Our admission counselor will call you shortly.");
-          form.reset();
-          if(submitBtn) submitBtn.innerHTML = originalText;
-          modal.classList.remove('active');
-        }).catch(error => {
-          alert("Error sending request. Please try again.");
-          if(submitBtn) submitBtn.innerHTML = originalText;
-        });
-      } else {
+      Promise.all([
+        import('./firebase-config.js'),
+        import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
+      ]).then(([config, fs]) => {
+         return fs.addDoc(fs.collection(config.db, 'quick_callbacks'), {
+           ...lead,
+           timestamp: Date.now()
+         });
+      }).then(() => {
+        if (actionUrl && actionUrl !== '#') {
+          const formData = new FormData(form);
+          return fetch(actionUrl, { method: 'POST', body: formData, headers: { 'Accept': 'application/json' } });
+        }
+      }).then(() => {
         alert("Thank you! Our admission counselor will call you shortly.");
         form.reset();
         if(submitBtn) submitBtn.innerHTML = originalText;
         modal.classList.remove('active');
-      }
+      }).catch(error => {
+        console.error("Firebase/Fetch Error:", error);
+        alert("Error sending request. Please try again.");
+        if(submitBtn) submitBtn.innerHTML = originalText;
+      });
     });
     
   sessionStorage.setItem('quickCallbackShown', 'true');
@@ -940,3 +949,4 @@ document.addEventListener("keydown", (e) => {
     e.preventDefault();
   }
 });
+

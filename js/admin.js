@@ -663,27 +663,34 @@ function publishLibraryItem() {
 // --- ADMISSIONS & CALLBACKS ---
 function loadCallbacks() {
   const listBody = document.getElementById('callbacks-list');
-  let callbacks = JSON.parse(localStorage.getItem('erp_callbacks')) || [];
+  if(!listBody) return;
   
-  if(callbacks.length === 0) {
-    listBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted); padding:40px;">No online applications yet.</td></tr>';
-    return;
-  }
+  listBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Loading from Firebase...</td></tr>';
   
-  listBody.innerHTML = '';
-  const total = callbacks.length;
-  callbacks.reverse().forEach((cb, i) => {
-    const origIndex = total - 1 - i;
-    listBody.innerHTML += `
-      <tr>
-        <td>${cb.date}</td>
-        <td><strong>${cb.name}</strong></td>
-        <td><a href="tel:${cb.phone}" style="color:var(--admin-accent); text-decoration:none;">${cb.phone}</a></td>
-        <td><span class="status-badge status-active">${cb.position || cb.class}</span></td>
-        <td style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${cb.message || 'N/A'}">${cb.message || 'N/A'}</td>
-        <td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteLead('erp_callbacks', ${origIndex})"><i class="fa-solid fa-trash"></i></button></td>
-      </tr>
-    `;
+  _fbReady.then(fb => {
+    if(!fb) return;
+    const { collection, getDocs, query, orderBy } = fb.fs;
+    getDocs(query(collection(fb.db, 'callbacks'), orderBy('timestamp', 'desc'))).then(snapshot => {
+      if(snapshot.empty) {
+        listBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--admin-muted); padding:40px;">No online applications yet.</td></tr>';
+        return;
+      }
+      listBody.innerHTML = '';
+      snapshot.forEach(doc => {
+        const cb = doc.data();
+        listBody.innerHTML += `
+          <tr>
+            <td>${cb.date || 'N/A'}</td>
+            <td><strong>${cb.name || 'N/A'}</strong></td>
+            <td><a href="tel:${cb.phone}" style="color:var(--admin-accent); text-decoration:none;">${cb.phone}</a></td>
+            <td><span class="status-badge status-active">${cb.position || cb.class || 'N/A'}</span></td>
+            <td style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${cb.message || 'N/A'}">${cb.message || 'N/A'}</td>
+            <td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteLead('callbacks', '${doc.id}')"><i class="fa-solid fa-trash"></i></button></td>
+          </tr>
+        `;
+      });
+      updatePendingInquiriesCount();
+    });
   });
 }
 
@@ -691,30 +698,35 @@ function loadContactMessages() {
   const listBody = document.getElementById('contact-messages-list');
   if(!listBody) return;
   
-  let messages = JSON.parse(localStorage.getItem('admin_contact_messages')) || [];
+  listBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Loading from Firebase...</td></tr>';
   
-  if(messages.length === 0) {
-    listBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted); padding:40px;">No contact inquiries yet.</td></tr>';
-    return;
-  }
-  
-  listBody.innerHTML = '';
-  const total = messages.length;
-  messages.reverse().forEach((msg, i) => {
-    const origIndex = total - 1 - i;
-    listBody.innerHTML += `
-      <tr>
-        <td>${msg.date}</td>
-        <td><strong>${msg.name}</strong></td>
-        <td><a href="tel:${msg.phone}" style="color:var(--admin-accent); text-decoration:none;">${msg.phone}</a></td>
-        <td>
-          <a href="mailto:${msg.email}" style="color:var(--admin-muted); text-decoration:none; display:block; font-size:0.85rem;"><i class="fa-solid fa-envelope"></i> ${msg.email}</a>
-          <span style="font-weight:600; font-size:0.85rem;">${msg.subject || 'General'}</span>
-        </td>
-        <td style="max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${msg.message || 'N/A'}">${msg.message || 'N/A'}</td>
-        <td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteLead('admin_contact_messages', ${origIndex})"><i class="fa-solid fa-trash"></i></button></td>
-      </tr>
-    `;
+  _fbReady.then(fb => {
+    if(!fb) return;
+    const { collection, getDocs, query, orderBy } = fb.fs;
+    getDocs(query(collection(fb.db, 'contact_messages'), orderBy('timestamp', 'desc'))).then(snapshot => {
+      if(snapshot.empty) {
+        listBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--admin-muted); padding:40px;">No contact inquiries yet.</td></tr>';
+        return;
+      }
+      listBody.innerHTML = '';
+      snapshot.forEach(doc => {
+        const msg = doc.data();
+        listBody.innerHTML += `
+          <tr>
+            <td>${msg.date || 'N/A'}</td>
+            <td><strong>${msg.name || 'N/A'}</strong></td>
+            <td><a href="tel:${msg.phone}" style="color:var(--admin-accent); text-decoration:none;">${msg.phone || 'N/A'}</a></td>
+            <td>
+              <a href="mailto:${msg.email}" style="color:var(--admin-muted); text-decoration:none; display:block; font-size:0.85rem;"><i class="fa-solid fa-envelope"></i> ${msg.email || 'N/A'}</a>
+              <span style="font-weight:600; font-size:0.85rem;">${msg.subject || 'General'}</span>
+            </td>
+            <td style="max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${msg.message || 'N/A'}">${msg.message || 'N/A'}</td>
+            <td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteLead('contact_messages', '${doc.id}')"><i class="fa-solid fa-trash"></i></button></td>
+          </tr>
+        `;
+      });
+      updatePendingInquiriesCount();
+    });
   });
 }
 
@@ -722,104 +734,112 @@ function loadComplaints() {
   const listBody = document.getElementById('complaints-list');
   if(!listBody) return;
   
-  let complaints = JSON.parse(localStorage.getItem('admin_complaints')) || [];
+  listBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Loading from Firebase...</td></tr>';
   
-  if(complaints.length === 0) {
-    listBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted); padding:40px;">No complaints found.</td></tr>';
-    return;
-  }
-  
-  listBody.innerHTML = '';
-  const total = complaints.length;
-  complaints.reverse().forEach((msg, i) => {
-    const origIndex = total - 1 - i;
-    const isResolved = msg.status === 'Resolved';
-    const statusHtml = isResolved 
-      ? '<span style="color:#10b981; font-weight:700; font-size:0.85rem; padding:4px 8px; background:#dcfce7; border-radius:4px; display:inline-block; margin-right:5px;"><i class="fa-solid fa-check-double"></i> Resolved</span>'
-      : `<button class="btn-admin" style="background:#10b981; padding:6px 12px; font-size:0.8rem; margin-right:5px;" onclick="resolveComplaint(${origIndex})"><i class="fa-solid fa-check"></i> Mark Resolved</button>`;
-      
-    listBody.innerHTML += `
-      <tr style="${isResolved ? 'opacity:0.6;' : ''}">
-        <td>${msg.date || 'N/A'}</td>
-        <td><strong>${msg.Name || 'Anonymous'}</strong></td>
-        <td><a href="tel:${msg.Contact}" style="color:var(--admin-accent); text-decoration:none;">${msg.Contact || 'N/A'}</a></td>
-        <td style="max-width:350px; white-space:pre-wrap; word-break:break-word;">${msg.Message || 'N/A'}</td>
-        <td>
-          ${statusHtml}
-          <button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteLead('admin_complaints', ${origIndex})"><i class="fa-solid fa-trash"></i></button>
-        </td>
-      </tr>
-    `;
+  _fbReady.then(fb => {
+    if(!fb) return;
+    const { collection, getDocs, query, orderBy } = fb.fs;
+    getDocs(query(collection(fb.db, 'complaints'), orderBy('timestamp', 'desc'))).then(snapshot => {
+      if(snapshot.empty) {
+        listBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted); padding:40px;">No complaints found.</td></tr>';
+        return;
+      }
+      listBody.innerHTML = '';
+      snapshot.forEach(doc => {
+        const msg = doc.data();
+        const isResolved = msg.status === 'Resolved';
+        const statusHtml = isResolved 
+          ? '<span style="color:#10b981; font-weight:700; font-size:0.85rem; padding:4px 8px; background:#dcfce7; border-radius:4px; display:inline-block; margin-right:5px;"><i class="fa-solid fa-check-double"></i> Resolved</span>'
+          : `<button class="btn-admin" style="background:#10b981; padding:6px 12px; font-size:0.8rem; margin-right:5px;" onclick="resolveComplaint('${doc.id}')"><i class="fa-solid fa-check"></i> Mark Resolved</button>`;
+          
+        listBody.innerHTML += `
+          <tr style="${isResolved ? 'opacity:0.6;' : ''}">
+            <td>${msg.date || 'N/A'}</td>
+            <td><strong>${msg.Name || 'Anonymous'}</strong></td>
+            <td><a href="tel:${msg.Contact}" style="color:var(--admin-accent); text-decoration:none;">${msg.Contact || 'N/A'}</a></td>
+            <td style="max-width:350px; white-space:pre-wrap; word-break:break-word;">${msg.Message || 'N/A'}</td>
+            <td>
+              ${statusHtml}
+              <button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteLead('complaints', '${doc.id}')"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+      updatePendingInquiriesCount();
+    });
   });
 }
 
-window.resolveComplaint = function(index) {
-  let complaints = JSON.parse(localStorage.getItem('admin_complaints')) || [];
-  if (complaints[index]) {
-    complaints[index].status = 'Resolved';
-    localStorage.setItem('admin_complaints', JSON.stringify(complaints));
-    loadComplaints();
-    
-    // Check if showLoader/showCustomAlert exists for nice feedback
-    if (typeof showCustomAlert === 'function') {
-      showCustomAlert("Resolved!", "The complaint has been marked as resolved.", "success");
-    } else {
-      alert("Complaint marked as resolved.");
-    }
-  }
+window.resolveComplaint = function(docId) {
+  _fbReady.then(fb => {
+    if(!fb) return;
+    fb.fs.updateDoc(fb.fs.doc(fb.db, 'complaints', docId), { status: 'Resolved' }).then(() => {
+      loadComplaints();
+      if (typeof showCustomAlert === 'function') {
+        showCustomAlert("Resolved!", "The complaint has been marked as resolved.", "success");
+      } else {
+        alert("Complaint marked as resolved.");
+      }
+    });
+  });
 }
 
 function loadQuickCallbacks() {
   const listBody = document.getElementById('quick-callbacks-list');
   if(!listBody) return;
   
-  let leads = JSON.parse(localStorage.getItem('admin_quick_callbacks')) || [];
+  listBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Loading from Firebase...</td></tr>';
   
-  if(leads.length === 0) {
-    listBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--admin-muted); padding:40px;">No quick callbacks yet.</td></tr>';
-    return;
-  }
-  
-  listBody.innerHTML = '';
-  const total = leads.length;
-  leads.slice().reverse().forEach((lead, i) => {
-    const origIndex = total - 1 - i;
-    listBody.innerHTML += `
-      <tr>
-        <td style="white-space:nowrap; color:var(--admin-muted); font-size:0.85rem;">${lead.date || 'N/A'}</td>
-        <td>
-          <div style="font-weight:600; color:var(--admin-accent);">${lead.name}</div>
-        </td>
-        <td>
-          <div style="font-size:0.85rem;"><i class="fa-solid fa-phone" style="color:var(--admin-muted)"></i> ${lead.phone}</div>
-          <div style="font-size:0.85rem;"><i class="fa-solid fa-envelope" style="color:var(--admin-muted)"></i> ${lead.email}</div>
-        </td>
-        <td style="max-width: 250px; font-size:0.85rem;">
-          <div style="margin-bottom:4px;"><strong>Addr:</strong> ${lead.address}</div>
-          <div style="color:var(--admin-muted);">${lead.message ? 'Msg: ' + lead.message : 'No message'}</div>
-        </td>
-        <td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteLead('admin_quick_callbacks', ${origIndex})"><i class="fa-solid fa-trash"></i></button></td>
-      </tr>
-    `;
+  _fbReady.then(fb => {
+    if(!fb) return;
+    const { collection, getDocs, query, orderBy } = fb.fs;
+    getDocs(query(collection(fb.db, 'quick_callbacks'), orderBy('timestamp', 'desc'))).then(snapshot => {
+      if(snapshot.empty) {
+        listBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted); padding:40px;">No quick callbacks yet.</td></tr>';
+        return;
+      }
+      listBody.innerHTML = '';
+      snapshot.forEach(doc => {
+        const lead = doc.data();
+        listBody.innerHTML += `
+          <tr>
+            <td style="white-space:nowrap; color:var(--admin-muted); font-size:0.85rem;">${lead.date || 'N/A'}</td>
+            <td>
+              <div style="font-weight:600; color:var(--admin-accent);">${lead.name || 'N/A'}</div>
+            </td>
+            <td>
+              <div style="font-size:0.85rem;"><i class="fa-solid fa-phone" style="color:var(--admin-muted)"></i> ${lead.phone || 'N/A'}</div>
+              <div style="font-size:0.85rem;"><i class="fa-solid fa-envelope" style="color:var(--admin-muted)"></i> ${lead.email || 'N/A'}</div>
+            </td>
+            <td style="max-width: 250px; font-size:0.85rem;">
+              <div style="margin-bottom:4px;"><strong>Addr:</strong> ${lead.address || 'N/A'}</div>
+              <div style="color:var(--admin-muted);">${lead.message ? 'Msg: ' + lead.message : 'No message'}</div>
+            </td>
+            <td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteLead('quick_callbacks', '${doc.id}')"><i class="fa-solid fa-trash"></i></button></td>
+          </tr>
+        `;
+      });
+      updatePendingInquiriesCount();
+    });
   });
 }
 
-function deleteLead(storageKey, index) {
+function deleteLead(collectionName, docId) {
   if(!confirm("Are you sure you want to delete this entry?")) return;
   
-  let data = JSON.parse(localStorage.getItem(storageKey)) || [];
-  if (index >= 0 && index < data.length) {
-    data.splice(index, 1);
-    localStorage.setItem(storageKey, JSON.stringify(data));
-    
-    // Refresh the corresponding table
-    if (storageKey === 'erp_callbacks') loadCallbacks();
-    if (storageKey === 'admin_contact_messages') loadContactMessages();
-    if (storageKey === 'admin_quick_callbacks') loadQuickCallbacks();
-    if (storageKey === 'admin_complaints') loadComplaints();
-    
-    updatePendingInquiriesCount();
-  }
+  _fbReady.then(fb => {
+    if(!fb) return;
+    fb.fs.deleteDoc(fb.fs.doc(fb.db, collectionName, docId)).then(() => {
+      if (collectionName === 'callbacks') loadCallbacks();
+      if (collectionName === 'contact_messages') loadContactMessages();
+      if (collectionName === 'quick_callbacks') loadQuickCallbacks();
+      if (collectionName === 'complaints') loadComplaints();
+      updatePendingInquiriesCount();
+    }).catch(e => {
+      console.error(e);
+      alert("Error deleting entry");
+    });
+  });
 }
 
 // --- EXAMINATION RESULTS ---
@@ -1583,70 +1603,82 @@ function renderReviewsList() {
   const approvedList = document.getElementById('approved-reviews-list');
   if(!pendingList || !approvedList) return;
   
-  let reviews = JSON.parse(localStorage.getItem('admin_student_reviews')) || [];
+  pendingList.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Loading from Firebase...</td></tr>';
+  approvedList.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Loading from Firebase...</td></tr>';
   
-  let pending = reviews.filter(r => r.status === 'pending');
-  let approved = reviews.filter(r => r.status === 'approved');
-  
-  if(pending.length === 0) {
-    pendingList.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted);">No pending reviews.</td></tr>';
-  } else {
-    pendingList.innerHTML = '';
-    pending.forEach(r => {
-      pendingList.innerHTML += `
-        <tr>
-          <td>${r.date}</td>
-          <td><strong>${r.name}</strong><br><small style="color:var(--admin-muted);">${r.role}</small></td>
-          <td style="color:gold;">${'★'.repeat(Number(r.rating))}</td>
-          <td>${r.text}</td>
-          <td>
-            <button class="btn-admin" style="background:#16a34a; padding:4px 8px; font-size:0.8rem; margin-right:5px;" onclick="approveReview(${r.id})"><i class="fa-solid fa-check"></i></button>
-            <button class="btn-admin" style="background:var(--admin-danger); padding:4px 8px; font-size:0.8rem;" onclick="deleteReview(${r.id})"><i class="fa-solid fa-trash"></i></button>
-          </td>
-        </tr>
-      `;
+  _fbReady.then(fb => {
+    if(!fb) return;
+    const { collection, getDocs, query, orderBy } = fb.fs;
+    getDocs(query(collection(fb.db, 'reviews'), orderBy('timestamp', 'desc'))).then(snapshot => {
+      let pending = [];
+      let approved = [];
+      
+      snapshot.forEach(doc => {
+        let r = doc.data();
+        r.id = doc.id;
+        if (r.status === 'pending') pending.push(r);
+        else approved.push(r);
+      });
+      
+      if(pending.length === 0) {
+        pendingList.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted);">No pending reviews.</td></tr>';
+      } else {
+        pendingList.innerHTML = '';
+        pending.forEach(r => {
+          pendingList.innerHTML += `
+            <tr>
+              <td>${r.date || 'N/A'}</td>
+              <td><strong>${r.name || 'Anonymous'}</strong><br><small style="color:var(--admin-muted);">${r.role || 'Student'}</small></td>
+              <td style="color:gold;">${'★'.repeat(Number(r.rating || 5))}</td>
+              <td>${r.text || 'N/A'}</td>
+              <td>
+                <button class="btn-admin" style="background:#16a34a; padding:4px 8px; font-size:0.8rem; margin-right:5px;" onclick="approveReview('${r.id}')"><i class="fa-solid fa-check"></i></button>
+                <button class="btn-admin" style="background:var(--admin-danger); padding:4px 8px; font-size:0.8rem;" onclick="deleteReview('${r.id}')"><i class="fa-solid fa-trash"></i></button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+      
+      if(approved.length === 0) {
+        approvedList.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted);">No approved reviews.</td></tr>';
+      } else {
+        approvedList.innerHTML = '';
+        approved.forEach(r => {
+          approvedList.innerHTML += `
+            <tr>
+              <td>${r.date || 'N/A'}</td>
+              <td><strong>${r.name || 'Anonymous'}</strong><br><small style="color:var(--admin-muted);">${r.role || 'Student'}</small></td>
+              <td style="color:gold;">${'★'.repeat(Number(r.rating || 5))}</td>
+              <td>${r.text || 'N/A'}</td>
+              <td>
+                <button class="btn-admin" style="background:var(--admin-danger); padding:4px 8px; font-size:0.8rem;" onclick="deleteReview('${r.id}')"><i class="fa-solid fa-trash"></i></button>
+              </td>
+            </tr>
+          `;
+        });
+      }
     });
-  }
-  
-  if(approved.length === 0) {
-    approvedList.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted);">No approved reviews.</td></tr>';
-  } else {
-    approvedList.innerHTML = '';
-    approved.forEach(r => {
-      approvedList.innerHTML += `
-        <tr>
-          <td>${r.date}</td>
-          <td><strong>${r.name}</strong><br><small style="color:var(--admin-muted);">${r.role}</small></td>
-          <td style="color:gold;">${'★'.repeat(Number(r.rating))}</td>
-          <td>${r.text}</td>
-          <td>
-            <button class="btn-admin" style="background:var(--admin-danger); padding:4px 8px; font-size:0.8rem;" onclick="deleteReview(${r.id})"><i class="fa-solid fa-trash"></i></button>
-          </td>
-        </tr>
-      `;
-    });
-  }
+  });
 }
 
 function approveReview(id) {
-  let reviews = JSON.parse(localStorage.getItem('admin_student_reviews')) || [];
-  let idx = reviews.findIndex(r => r.id === id);
-  if(idx > -1) {
-    reviews[idx].status = 'approved';
-    localStorage.setItem('admin_student_reviews', JSON.stringify(reviews));
-    renderReviewsList();
-  }
+  _fbReady.then(fb => {
+    if(!fb) return;
+    fb.fs.updateDoc(fb.fs.doc(fb.db, 'reviews', id), { status: 'approved' }).then(() => {
+      renderReviewsList();
+    });
+  });
 }
 
 function deleteReview(id) {
   if(!confirm("Are you sure you want to delete this review?")) return;
-  let reviews = JSON.parse(localStorage.getItem('admin_student_reviews')) || [];
-  let idx = reviews.findIndex(r => r.id === id);
-  if(idx > -1) {
-    reviews.splice(idx, 1);
-    localStorage.setItem('admin_student_reviews', JSON.stringify(reviews));
-    renderReviewsList();
-  }
+  _fbReady.then(fb => {
+    if(!fb) return;
+    fb.fs.deleteDoc(fb.fs.doc(fb.db, 'reviews', id)).then(() => {
+      renderReviewsList();
+    });
+  });
 }
 
 // --- NOTICES MANAGEMENT ---
