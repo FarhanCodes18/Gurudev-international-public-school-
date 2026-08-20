@@ -1449,10 +1449,16 @@
     import { collection, query, onSnapshot, addDoc, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
     const tbody = document.getElementById('superadmin-students-list');
+    const dashTotal = document.getElementById('dash-total-students');
+    
     if(tbody && db) {
       const q = query(collection(db, 'students'));
       onSnapshot(q, (snapshot) => {
         window.superAdminAllStudents = [];
+        
+        // Update Total Students Dashboard Card
+        if(dashTotal) dashTotal.innerText = snapshot.size;
+        
         if (snapshot.empty) {
           tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No students registered yet.</td></tr>';
           return;
