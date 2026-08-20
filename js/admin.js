@@ -1,10 +1,9 @@
 /* admin.js - Superpower Admin Panel Logic (Light Theme & Sync Updates) */
-// Preload Firebase SDKs so uploads are instant
+// Preload Firebase SDKs so uploads are instant (No Storage needed - free plan)
 var _fbReady = Promise.all([
   import('./js/firebase-config.js'),
-  import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js'),
-  import('https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js')
-]).then(([c, fs, st]) => ({ db: c.db, storage: c.storage, fs, st })).catch(e => { console.warn('Firebase preload:', e); return null; });
+  import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
+]).then(([c, fs]) => ({ db: c.db, fs })).catch(e => { console.warn('Firebase preload:', e); return null; });
 document.addEventListener('DOMContentLoaded', () => {
   // Navigation Logic
   const navItems = document.querySelectorAll('.nav-item');
@@ -319,24 +318,17 @@ function uploadSchoolGallery() {
   const file = fileInput.files[0];
   const overlay = document.getElementById('admin-loader');
   if(overlay) { document.getElementById('loader-title').innerText = 'Uploading Photo'; document.getElementById('loader-desc').innerText = 'Uploading to cloud...'; overlay.classList.add('active'); }
-  compressImage(file, 800, 0.6, function(compressedImage) {
+  compressImage(file, 600, 0.5, function(compressedImage) {
     _fbReady.then(fb => {
       if(!fb) { alert('Firebase not ready. Try again.'); if(overlay) overlay.classList.remove('active'); return; }
-      const { ref, uploadString, getDownloadURL } = fb.st;
       const { collection, addDoc } = fb.fs;
-      const fileName = 'gallery/' + Date.now() + '.jpg';
-      const storageRef = ref(fb.storage, fileName);
-      uploadString(storageRef, compressedImage, 'data_url').then(snap => {
-        getDownloadURL(snap.ref).then(url => {
-          addDoc(collection(fb.db, 'school_gallery'), { image: url, desc: desc, date: new Date().toLocaleDateString('en-GB'), timestamp: Date.now(), storagePath: fileName }).then(() => {
-            alert('Photo uploaded successfully!');
-            fileInput.value = ''; if(descInput) descInput.value = '';
-            if(document.getElementById('school-gallery-photo-name')) document.getElementById('school-gallery-photo-name').innerText = 'No file chosen';
-            if(overlay) overlay.classList.remove('active');
-            renderSchoolGalleryList();
-          });
-        });
-      }).catch(err => { console.error('Upload error:', err); alert('Upload failed!'); if(overlay) overlay.classList.remove('active'); });
+      addDoc(collection(fb.db, 'school_gallery'), { image: compressedImage, desc: desc, date: new Date().toLocaleDateString('en-GB'), timestamp: Date.now() }).then(() => {
+        alert('Photo uploaded successfully!');
+        fileInput.value = ''; if(descInput) descInput.value = '';
+        if(document.getElementById('school-gallery-photo-name')) document.getElementById('school-gallery-photo-name').innerText = 'No file chosen';
+        if(overlay) overlay.classList.remove('active');
+        renderSchoolGalleryList();
+      }).catch(err => { console.error('Upload error:', err); alert('Upload failed! Image may be too large.'); if(overlay) overlay.classList.remove('active'); });
     });
   });
 }
@@ -387,20 +379,18 @@ function renderSchoolGalleryList() {
       listBody.innerHTML = '';
       snap.forEach(d => {
         const item = d.data(); const id = d.id;
-        listBody.innerHTML += '<tr><td><img src="'+item.image+'" style="width:80px;height:50px;object-fit:cover;border-radius:8px;" alt="Gallery"></td><td style="font-weight:600;color:var(--admin-heading);">'+(item.desc||'N/A')+'</td><td style="color:var(--admin-muted);">'+(item.date||'N/A')+'</td><td><button class="btn-admin" style="background:#ef4444;padding:6px 12px;font-size:0.8rem;" onclick="deleteSchoolGallery(''+id+'',''+( item.storagePath||'')+'')"><i class="fa-solid fa-trash"></i></button></td></tr>';
+        listBody.innerHTML += '<tr><td><img src="'+item.image+'" style="width:80px;height:50px;object-fit:cover;border-radius:8px;" alt="Gallery"></td><td style="font-weight:600;color:var(--admin-heading);">'+(item.desc||'N/A')+'</td><td style="color:var(--admin-muted);">'+(item.date||'N/A')+'</td><td><button class="btn-admin" style="background:#ef4444;padding:6px 12px;font-size:0.8rem;" onclick="deleteSchoolGallery(\''+id+'\')"><i class="fa-solid fa-trash"></i></button></td></tr>';
       });
     });
   });
 }
 
-function deleteSchoolGallery(id, path) {
+function deleteSchoolGallery(id) {
   if(!confirm("Delete this photo?")) return;
   _fbReady.then(fb => {
     if(!fb) return;
     const { doc, deleteDoc } = fb.fs;
-    const { ref, deleteObject } = fb.st;
     deleteDoc(doc(fb.db, 'school_gallery', id)).then(() => {
-      if(path) deleteObject(ref(fb.storage, path)).catch(()=>{});
       alert('Deleted!'); renderSchoolGalleryList();
     });
   });
