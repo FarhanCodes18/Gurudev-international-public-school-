@@ -101,6 +101,7 @@
         <a class="nav-item" data-view="complaints"><i class="fa-solid fa-triangle-exclamation"></i> Complaint Queries</a>
         <a class="nav-item" data-view="reviews"><i class="fa-solid fa-star"></i> Student Reviews</a>
         <a class="nav-item" data-view="students"><i class="fa-solid fa-user-group"></i> Registered Students</a>
+        <a class="nav-item" data-view="gallery"><i class="fa-solid fa-images"></i> Gallery Management</a>
         <a class="nav-item" data-view="sms"><i class="fa-solid fa-envelope-open-text"></i> Bulk Email Blaster</a>
         <a class="nav-item" data-view="documents"><i class="fa-solid fa-folder-open"></i> Student Documents</a>
         <a class="nav-item" data-view="analytics"><i class="fa-solid fa-chart-line"></i> Student Analytics</a>
@@ -380,31 +381,37 @@
             </div>
           </div>
           
-          <div class="form-card" style="margin-top: 20px;">
+          </div>
+        </section>
+
+        <!-- GALLERY MANAGEMENT -->
+        <section id="view-gallery" class="view-section">
+          <div class="page-header"><div><h2 class="page-title">Gallery Management</h2><p class="page-desc">Upload and manage photos for the live website gallery.</p></div></div>
+          
+          <div class="form-card" style="max-width: 600px; margin: 0 auto 30px; text-align: center;">
+            <div class="icon-circle" style="background: rgba(16, 185, 129, 0.1); color: #10b981; margin: 0 auto 15px; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 1.5rem;"><i class="fa-solid fa-cloud-arrow-up"></i></div>
             <h3 style="margin-bottom: 15px;">Live Sync: School Gallery</h3>
             <p style="color:var(--admin-muted); font-size:0.9rem; margin-bottom: 20px;">Upload photos of campus life, events, and facilities. These will instantly appear on the Homepage and Gallery page.</p>
-            <div class="admin-form-group"><label>Gallery Description / Event Name</label><input type="text" id="school-gallery-desc" class="admin-input" placeholder="e.g. Annual Sports Day 2026" /></div>
-            <div class="admin-form-group">
-  <label>Upload Photo</label>
-  <div style="margin-top: 5px;">
-    <label class="btn-admin-outline" style="display:inline-block; cursor:pointer; padding: 8px 16px; margin: 0; background: var(--admin-card);">
-      <i class="fa-solid fa-cloud-arrow-up"></i> Choose File
-      <input type="file" id="school-gallery-photo" accept="image/*" style="display:none;" onchange="document.getElementById('school-gallery-photo-name').innerText = this.files[0] ? this.files[0].name : 'No file chosen';" />
-    </label>
-    <span id="school-gallery-photo-name" style="margin-left:12px; color:var(--admin-muted); font-size:0.9rem; font-weight: 500;">No file chosen</span>
-  </div>
-</div>
-            <button class="btn-admin" onclick="uploadSchoolGallery()"><i class="fa-solid fa-images"></i> Upload to Gallery</button>
-            
-            <div class="table-container" style="margin-top: 30px; border:none; padding:0; box-shadow:none;">
-              <div class="table-header" style="background:transparent; padding:0 0 15px 0;"><div class="table-title">Uploaded School Photos</div></div>
-              <div class="table-responsive"><table class="admin-table">
-                <thead><tr><th>Photo</th><th>Description</th><th>Date</th><th>Action</th></tr></thead>
-                <tbody id="school-gallery-list">
-                  <tr><td colspan="4" style="text-align:center; color:var(--admin-muted);">No photos uploaded yet.</td></tr>
-                </tbody>
-              </table></div>
+            <div class="admin-form-group"><label style="text-align: left;">Gallery Description / Event Name</label><input type="text" id="school-gallery-desc" class="admin-input" placeholder="e.g. Annual Sports Day 2026" /></div>
+            <div class="file-upload-wrapper" style="border: 2px dashed #cbd5e1; padding: 30px; border-radius: 16px; margin-bottom: 20px; text-align: center; cursor: pointer; transition: all 0.3s ease;" onclick="document.getElementById('school-gallery-photo').click()" onmouseover="this.style.borderColor='var(--admin-primary)'; this.style.backgroundColor='rgba(37,99,235,0.02)'" onmouseout="this.style.borderColor='#cbd5e1'; this.style.backgroundColor='transparent'">
+              <i class="fa-solid fa-image" style="font-size: 2.5rem; color: #94a3b8; margin-bottom: 15px; transition: color 0.3s ease;"></i>
+              <div style="font-weight: 600; color: var(--admin-heading);">Click to browse photo</div>
+              <div style="font-size: 0.8rem; color: var(--admin-muted); margin-top: 5px;">Supports JPG, PNG (Max 5MB)</div>
+              <input type="file" id="school-gallery-photo" accept="image/*" style="display:none;" onchange="document.getElementById('school-gallery-photo-name').innerText = this.files[0] ? this.files[0].name : 'No file chosen';" />
             </div>
+            <span id="school-gallery-photo-name" style="color:var(--admin-primary); font-size:0.9rem; font-weight: 600; display: block; margin-bottom: 20px;">No file chosen</span>
+            
+            <button class="btn-admin" onclick="uploadSchoolGallery()" style="width: 100%;"><i class="fa-solid fa-images"></i> Upload to Gallery</button>
+          </div>
+
+          <div class="table-container">
+            <div class="table-header"><div class="table-title">Uploaded Gallery Photos</div></div>
+            <div class="table-responsive"><table class="admin-table">
+              <thead><tr><th>Preview</th><th>Description / Event</th><th>Upload Date</th><th>Action</th></tr></thead>
+              <tbody id="school-gallery-list">
+                <!-- Managed by admin.js (Firebase) -->
+              </tbody>
+            </table></div>
           </div>
         </section>
 
@@ -1449,6 +1456,7 @@
     import { collection, query, onSnapshot, addDoc, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
     const tbody = document.getElementById('superadmin-students-list');
+    const allStudentsTbody = document.getElementById('all-students-list');
     const dashTotal = document.getElementById('dash-total-students');
     
     if(tbody && db) {
@@ -1461,9 +1469,12 @@
         
         if (snapshot.empty) {
           tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No students registered yet.</td></tr>';
+          if(allStudentsTbody) allStudentsTbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No students registered yet.</td></tr>';
           return;
         }
         tbody.innerHTML = '';
+        if(allStudentsTbody) allStudentsTbody.innerHTML = '';
+        
         snapshot.forEach((doc) => {
           const data = doc.data();
           window.superAdminAllStudents.push(data);
@@ -1478,6 +1489,28 @@
               <td>${data.gender || '-'}</td>
             </tr>
           `;
+          
+          if(allStudentsTbody) {
+             const photoURL = data.photoURL && data.photoURL !== 'assets/images/default-avatar.png' ? data.photoURL : 'https://ui-avatars.com/api/?name='+data.name+'&background=2563eb&color=fff';
+             const passwordDisplay = data.password ? `<span style="font-family:monospace; background:#e2e8f0; padding:2px 6px; border-radius:4px; font-size:0.8rem;">${data.password}</span>` : '<span style="color:#ef4444">Not Set</span>';
+             
+             allStudentsTbody.innerHTML += `
+              <tr>
+                <td class="student-cell">
+                  <img src="${photoURL}" alt="Photo" style="width:36px; height:36px; border-radius:50%; object-fit:cover;">
+                  <div><h5 style="margin:0; font-size:0.9rem;">${data.name}</h5><p style="margin:0; font-size:0.75rem; color:#64748b;">${data.email || 'N/A'}</p></div>
+                </td>
+                <td style="font-family: monospace; font-weight: 600; color:var(--admin-accent);">${data.studentId || 'N/A'}</td>
+                <td>${data.class || '-'}</td>
+                <td>${data.mobile || 'N/A'}</td>
+                <td>${passwordDisplay}</td>
+                <td><span class="status-badge status-active">Active</span></td>
+                <td style="display:flex; gap:8px;">
+                  <button class="btn-admin-outline" style="padding:6px 12px; font-size:0.75rem;" onclick="alert('Profile view locked in Admin Panel')">View</button>
+                </td>
+              </tr>
+             `;
+          }
         });
       }, (error) => {
         console.error("Firebase read error:", error);

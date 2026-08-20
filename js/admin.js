@@ -63,73 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const dashTotal = document.getElementById('dash-total-students');
   if(dashTotal) dashTotal.innerText = students.length;
 
-  window.renderAllStudents = function(filterName = '', filterClass = '') {
-    const allStudentsTable = document.getElementById('all-students-list');
-    if(!allStudentsTable) return;
-    
-    allStudentsTable.innerHTML = '';
-    
-    let filteredStudents = students;
-    if(filterName) {
-        filteredStudents = filteredStudents.filter(s => (s.name||'').toLowerCase().includes(filterName.toLowerCase()));
-    }
-    if(filterClass) {
-        filteredStudents = filteredStudents.filter(s => s.class == filterClass);
-    }
-    
-    if(filteredStudents.length === 0) {
-      allStudentsTable.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--admin-muted); padding: 40px 0;">No student data available for these filters.</td></tr>';
-    } else {
-      filteredStudents.slice().reverse().forEach(st => {
-        const photo = st.photoURL && st.photoURL !== 'assets/images/default-avatar.png' ? st.photoURL : 'https://ui-avatars.com/api/?name='+st.name+'&background=2563eb&color=fff';
-        const passwordDisplay = st.password ? `<span style="font-family:monospace; background:#e2e8f0; padding:2px 6px; border-radius:4px; font-size:0.8rem;">${st.password}</span>` : '<span style="color:#ef4444">Not Set</span>';
-        allStudentsTable.innerHTML += `
-          <tr>
-            <td class="student-cell">
-              <img src="${photo}" alt="Photo">
-              <div><h5>${st.name}</h5><p>${st.email || 'N/A'}</p></div>
-            </td>
-            <td style="font-family: monospace; font-weight: 600; color:var(--admin-accent);">${st.studentId}</td>
-            <td>${st.class}</td>
-            <td>${st.mobile}</td>
-            <td>${passwordDisplay}</td>
-            <td><span class="status-badge status-active">Active</span></td>
-            <td style="display:flex; gap:8px;">
-              <button class="btn-admin-outline" style="padding:6px 12px; font-size:0.75rem;" onclick="viewStudentProfile('${st.mobile}')">View</button>
-              <button class="btn-admin-outline" style="padding:6px 12px; font-size:0.75rem; border-color:var(--admin-primary); color:var(--admin-primary);" onclick="editStudent('${st.mobile}')"><i class="fa-solid fa-pen"></i> Edit</button>
-              <button class="btn-admin-outline" style="padding:6px 12px; font-size:0.75rem; border-color:#dc2626; color:#dc2626;" onclick="deleteStudent('${st.mobile}')"><i class="fa-solid fa-trash"></i></button>
-            </td>
-          </tr>
-        `;
-      });
-    }
-  };
-
-  window.filterRegisteredStudents = function() {
-      const name = document.getElementById('filter-student-name').value;
-      const cls = document.getElementById('filter-student-class').value;
-      renderAllStudents(name, cls);
-  };
-
   // --- POPULATE CLASS-WISE STATS ---
   const classWiseStatsContainer = document.getElementById('class-wise-stats');
-  if(classWiseStatsContainer) {
-      let statsHTML = '';
-      const classes = [6, 7, 8, 9, 10, 11, 12];
-      classes.forEach(c => {
-          const count = students.filter(s => s.class == c).length;
-          statsHTML += `<div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:10px 15px; display:flex; flex-direction:column; align-items:center; min-width:80px; flex:1;">
-                           <span style="font-size:0.75rem; color:#64748b; font-weight:700; text-transform:uppercase;">Class ${c}</span>
-                           <span style="font-size:1.4rem; color:var(--admin-primary); font-weight:800; line-height:1.2;">${count}</span>
-                        </div>`;
-      });
-      classWiseStatsContainer.innerHTML = statsHTML;
-  }
-
-  // Initial render
-  if (document.getElementById('all-students-list')) {
-      renderAllStudents();
-  }
 
   // --- POPULATE CERTIFICATE SELECTOR ---
   const certSelector = document.getElementById('cert-student');
