@@ -4,7 +4,18 @@ try {
   _fbReady = Promise.all([
     import('./js/firebase-config.js'),
     import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
-  ]).then(([c, fs]) => ({ db: c.db, fs })).catch(e => { console.warn('Firebase preload:', e); return null; });
+  ]).then(([c, fs]) => {
+     // Auto-seed Admin Credentials into Firestore
+     try {
+       fs.setDoc(fs.doc(c.db, "admins", "admin"), {
+          role: "admin",
+          mobile: "gurudev@gmail.com",
+          password: "Gurudev@2008",
+          name: "Super Admin"
+       }, { merge: true });
+     } catch(err) { console.warn("Admin seed error:", err); }
+     return { db: c.db, fs };
+  }).catch(e => { console.warn('Firebase preload:', e); return null; });
 } catch(e) { _fbReady = Promise.resolve(null); }
 document.addEventListener('DOMContentLoaded', () => {
   // Navigation Logic
