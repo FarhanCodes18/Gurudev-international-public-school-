@@ -15,7 +15,11 @@ try {
        }, { merge: true });
      } catch(err) { console.warn("Admin seed error:", err); }
      return { db: c.db, fs };
-  }).catch(e => { console.warn('Firebase preload:', e); return null; });
+  }).catch(e => { 
+     console.error('Firebase preload error:', e); 
+     alert('Firebase Preload Error: ' + (e.message || String(e))); 
+     return null; 
+  });
 } catch(e) { _fbReady = Promise.resolve(null); }
 document.addEventListener('DOMContentLoaded', () => {
   // Navigation Logic
