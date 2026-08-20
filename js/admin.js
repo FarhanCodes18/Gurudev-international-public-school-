@@ -1,4 +1,11 @@
 /* admin.js - Superpower Admin Panel Logic (Light Theme & Sync Updates) */
+// EAGERLY LOAD FIREBASE SDKs TO SPEED UP UPLOADS
+Promise.all([
+    import('./js/firebase-config.js').catch(()=>{}),
+    import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js').catch(()=>{}),
+    import('https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js').catch(()=>{})
+]);
+
 document.addEventListener('DOMContentLoaded', () => {
   // Navigation Logic
   const navItems = document.querySelectorAll('.nav-item');
