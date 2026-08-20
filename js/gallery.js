@@ -80,7 +80,7 @@
   if (grid) {
     grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#888;">Loading gallery...</div>';
     Promise.all([
-      import('./firebase-config.js'),
+      import('./js/firebase-config.js'),
       import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
     ]).then(([config, fs]) => {
       const { collection, getDocs, query, orderBy } = fs;

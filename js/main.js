@@ -206,7 +206,7 @@
   const reviewsTrack = document.getElementById('dynamic-reviews-track');
   if(reviewsTrack) {
     Promise.all([
-      import('./firebase-config.js'),
+      import('./js/firebase-config.js'),
       import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
     ]).then(([config, fs]) => {
        const { collection, getDocs, query, where, orderBy } = fs;
@@ -545,7 +545,7 @@
       if(submitBtn) submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
 
       Promise.all([
-        import('./firebase-config.js'),
+        import('./js/firebase-config.js'),
         import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
       ]).then(([config, fs]) => {
          return fs.addDoc(fs.collection(config.db, 'callbacks'), {
@@ -590,7 +590,7 @@
       if(submitBtn) submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
 
       Promise.all([
-        import('./firebase-config.js'),
+        import('./js/firebase-config.js'),
         import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
       ]).then(([config, fs]) => {
          return fs.addDoc(fs.collection(config.db, 'contact_messages'), {
@@ -633,7 +633,7 @@
       if(submitBtn) submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
 
       Promise.all([
-        import('./firebase-config.js'),
+        import('./js/firebase-config.js'),
         import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
       ]).then(([config, fs]) => {
          return fs.addDoc(fs.collection(config.db, 'reviews'), {
@@ -756,7 +756,7 @@
       if(submitBtn) submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
 
       Promise.all([
-        import('./firebase-config.js'),
+        import('./js/firebase-config.js'),
         import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
       ]).then(([config, fs]) => {
          return fs.addDoc(fs.collection(config.db, 'quick_callbacks'), {
@@ -816,7 +816,7 @@
       const data = Object.fromEntries(fd.entries());
       
       Promise.all([
-        import('./firebase-config.js'),
+        import('./js/firebase-config.js'),
         import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
       ]).then(([config, fs]) => {
          return fs.addDoc(fs.collection(config.db, 'complaints'), {
