@@ -324,7 +324,7 @@ window.uploadSchoolGallery = function() {
       overlay.classList.add('active');
   }
   
-  compressImage(file, 1000, 0.8, function(compressedImage) {
+  compressImage(file, 800, 0.6, function(compressedImage) {
     Promise.all([
       import('./js/firebase-config.js'),
       import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js'),
