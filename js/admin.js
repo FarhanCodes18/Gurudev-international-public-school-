@@ -2,7 +2,7 @@
 var _fbReady = null;
 try {
   _fbReady = Promise.all([
-    import('./js/firebase-config.js'),
+    import('./firebase-config.js'),
     import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
   ]).then(([c, fs]) => {
      // Auto-seed Admin Credentials into Firestore
