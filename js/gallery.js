@@ -75,48 +75,60 @@
 
   const lb = new Lightbox();
 
-  // --- LIVE SYNC FROM ADMIN PANEL ---
-  const liveSchoolGalleryData = localStorage.getItem('admin_school_gallery');
-  if (liveSchoolGalleryData) {
-    const grid = document.querySelector('.gallery-grid');
-    if (grid) {
-      let livePhotos = [];
-      try { livePhotos = JSON.parse(liveSchoolGalleryData); } catch(e) {}
-      
-      // Inject at the beginning of the grid
-      livePhotos.reverse().forEach((photo) => {
-        const item = document.createElement('div');
-        item.className = 'gallery-item';
-        item.setAttribute('data-desc', photo.desc || '');
-        item.innerHTML = `
-          <img src="${photo.image}" alt="${photo.desc || 'School Event'}" loading="lazy" />
-          <div class="gallery-overlay"><div class="gallery-zoom-icon"><i class="fa-solid fa-magnifying-glass-plus"></i></div></div>
-        `;
-        grid.prepend(item);
-      });
-    }
-  }
-
-  // Collect all gallery items and bind them
-  const galleryItems = document.querySelectorAll('.gallery-item');
-  const itemsData = [];
   
-  galleryItems.forEach((item, i) => {
-    let src = item.getAttribute('data-src');
-    if (!src) {
-      const img = item.querySelector('img');
-      if (img) src = img.src;
-    }
+  // --- LIVE SYNC FROM FIREBASE ---
+  const grid = document.querySelector('.gallery-grid');
+  
+  if (grid) {
+    // Show a loading skeleton or message
+    grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--admin-muted);">Loading gallery images...</div>';
     
-    if (src) {
-      const desc = item.getAttribute('data-desc') || '';
-      itemsData.push({ src, desc });
-      item.addEventListener('click', () => lb.open(i));
-      item.style.cursor = 'pointer';
-    }
-  });
-  
-  lb.register(itemsData);
+    // Dynamically import Firebase
+    Promise.all([
+      import('./firebase-config.js'),
+      import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
+    ]).then(([config, fs]) => {
+      const db = config.db;
+      const { collection, getDocs, query, orderBy } = fs;
+      
+      const q = query(collection(db, 'school_gallery'), orderBy('timestamp', 'desc'));
+      getDocs(q).then(snapshot => {
+        grid.innerHTML = '';
+        const itemsData = [];
+        
+        if (snapshot.empty) {
+          grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--admin-muted);">No photos uploaded yet.</div>';
+          return;
+        }
+
+        let i = 0;
+        snapshot.forEach(doc => {
+          const photo = doc.data();
+          const item = document.createElement('div');
+          item.className = 'gallery-item';
+          item.setAttribute('data-desc', photo.desc || '');
+          item.innerHTML = `
+            <img src="${photo.image}" alt="${photo.desc || 'School Event'}" loading="lazy" />
+            <div class="gallery-overlay"><div class="gallery-zoom-icon"><i class="fa-solid fa-magnifying-glass-plus"></i></div></div>
+          `;
+          grid.appendChild(item);
+          
+          itemsData.push({ src: photo.image, desc: photo.desc || '' });
+          
+          // Bind click event
+          const currentIndex = i;
+          item.addEventListener('click', () => lb.open(currentIndex));
+          item.style.cursor = 'pointer';
+          i++;
+        });
+        
+        lb.register(itemsData);
+      }).catch(err => {
+        console.error("Error fetching gallery:", err);
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:40px; color:red;">Failed to load gallery.</div>';
+      });
+    }).catch(err => console.error("Firebase import error:", err));
+  }
 
   window.Lightbox = lb;
 
