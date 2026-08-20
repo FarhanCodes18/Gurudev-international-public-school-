@@ -51,62 +51,7 @@
     overlay.addEventListener('click', closeAlert);
   }
 
-  // --- UNIVERSAL FORMSPREE & ADMIN PANEL HANDLER ---
-  document.addEventListener('submit', function(e) {
-    if (e.target && e.target.tagName === 'FORM') {
-      const form = e.target;
-      const actionUrl = form.getAttribute('action');
-      
-      // Only intercept forms going to Formspree
-      if (actionUrl && actionUrl.includes('formspree')) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        
-        // 1. Save to Admin Panel LocalStorage
-        const fd = new FormData(form);
-        const data = Object.fromEntries(fd.entries());
-        data.date = new Date().toLocaleDateString('en-GB');
-        
-        let key = 'admin_general_forms';
-        if (form.id === 'contact-form') key = 'admin_contact_messages';
-        else if (form.id === 'admission-form') key = 'erp_callbacks';
-        else if (form.id === 'quick-callback-form') key = 'admin_quick_callbacks';
-        else if (form.id === 'complaint-form') key = 'admin_complaints';
-        
-        try {
-           let list = JSON.parse(localStorage.getItem(key)) || [];
-           list.push(data);
-           localStorage.setItem(key, JSON.stringify(list));
-        } catch(err) { console.error("Error saving to admin panel", err); }
 
-        // 2. Submit to Formspree via AJAX
-        const submitBtn = form.querySelector('button[type="submit"]');
-        const origText = submitBtn ? submitBtn.innerHTML : 'Send';
-        if (submitBtn) submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
-
-        fetch(actionUrl, {
-          method: 'POST',
-          body: fd,
-          headers: { 'Accept': 'application/json' }
-        }).then(response => {
-          if (response.ok) {
-            showCustomAlert("Success!", "Thank you for contacting us! We will get back to you shortly.", "success");
-            form.reset();
-            if (form.id === 'quick-callback-form') {
-               const modal = document.getElementById('quick-callback-modal');
-               if (modal) modal.classList.remove('active');
-            }
-          } else {
-            showCustomAlert("Oops!", "There was a problem submitting your form. Please try again.", "error");
-          }
-        }).catch(error => {
-          showCustomAlert("Network Error", "Failed to send message. Please check your internet connection.", "error");
-        }).finally(() => {
-          if (submitBtn) submitBtn.innerHTML = origText;
-        });
-      }
-    }
-  }, true); // true = capture phase to run before other buggy listeners
 
   /* ===========================
      SCROLL PROGRESS BAR
@@ -853,8 +798,46 @@
   });
 
   /* ===========================
-     (Removed duplicate faculty carousel logic)
+     COMPLAINT / GENERAL FORM HANDLER
   =========================== */
+  const complaintForm = document.getElementById('complaint-form');
+  if(complaintForm) {
+    complaintForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const submitBtn = complaintForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn ? submitBtn.innerHTML : 'Submit';
+      if(submitBtn) {
+         submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+         submitBtn.disabled = true;
+      }
+      
+      const fd = new FormData(complaintForm);
+      const data = Object.fromEntries(fd.entries());
+      
+      Promise.all([
+        import('./firebase-config.js'),
+        import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
+      ]).then(([config, fs]) => {
+         return fs.addDoc(fs.collection(config.db, 'complaints'), {
+            ...data,
+            date: new Date().toLocaleDateString('en-GB'),
+            timestamp: Date.now()
+         });
+      }).then(() => {
+         alert("Thank you! Your complaint/message has been submitted successfully.");
+         complaintForm.reset();
+      }).catch(error => {
+         console.error("Firebase Error:", error);
+         alert("Error submitting form. Please try again.");
+      }).finally(() => {
+         if(submitBtn) {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+         }
+      });
+    });
+  }
 
   /* ===========================
      DYNAMIC NEWS & EVENTS
