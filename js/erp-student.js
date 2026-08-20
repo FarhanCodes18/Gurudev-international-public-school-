@@ -222,6 +222,7 @@ const modules = [
       let recordKeys = Object.keys(records).sort().reverse(); // Newest first
       
       let presents = 0;
+      let totalWorkingDays = 0;
       let total = recordKeys.length;
       
       let listHTML = '';
@@ -230,10 +231,14 @@ const modules = [
       } else {
         recordKeys.forEach(date => {
           let status = records[date];
-          if(status === 'Present') presents++;
           
-          let color = status === 'Present' ? '#10b981' : (status === 'Absent' ? '#ef4444' : '#f59e0b');
-          let bg = status === 'Present' ? '#f0fdf4' : (status === 'Absent' ? '#fef2f2' : '#fff7ed');
+          if(status !== 'Holiday' && status !== 'Sunday') {
+            totalWorkingDays++;
+            if(status === 'Present') presents++;
+          }
+          
+          let color = status === 'Present' ? '#10b981' : (status === 'Absent' ? '#ef4444' : (status === 'Holiday' ? '#3b82f6' : '#f59e0b'));
+          let bg = status === 'Present' ? '#f0fdf4' : (status === 'Absent' ? '#fef2f2' : (status === 'Holiday' ? '#eff6ff' : '#fff7ed'));
           
           listHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:${bg}; border-left:4px solid ${color}; border-radius:8px; margin-bottom:10px;">
             <div style="font-weight:600; color:#334155;">${date}</div>
@@ -242,7 +247,7 @@ const modules = [
         });
       }
       
-      let percentage = total > 0 ? Math.round((presents / total) * 100) : 0;
+      let percentage = totalWorkingDays > 0 ? Math.round((presents / totalWorkingDays) * 100) : 0;
       
       return `
         <div style="text-align:center; padding: 20px 0;">
@@ -263,7 +268,7 @@ const modules = [
     }
   },
   {
-    selector: '.feature-card:nth-child(4)',
+    selector: '.feature-card:nth-child(10)',
     title: 'Apply Leave',
     render: () => {
       window.submitLeave = function(e) {
@@ -335,12 +340,12 @@ const modules = [
     }
   },
   {
-    selector: '.feature-card:nth-child(6)',
+    selector: '.feature-card:nth-child(5)',
     title: 'Daily Timetable',
     render: () => emptyState('fa-solid fa-clock-rotate-left', 'Timetable Pending', 'Your class timetable has not been uploaded by the coordinator yet.')
   },
   {
-    selector: '.feature-card:nth-child(7)',
+    selector: '.feature-card:nth-child(6)',
     title: 'Assignments',
     render: () => {
       let allUsers = JSON.parse(localStorage.getItem('erp_users')) || {};
@@ -366,7 +371,7 @@ const modules = [
     }
   },
   {
-    selector: '.feature-card:nth-child(8)',
+    selector: '.feature-card:nth-child(7)',
     title: 'My Documents',
     render: () => {
       // Helper to convert file to base64

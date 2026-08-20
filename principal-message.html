@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ï»¿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -17,7 +17,41 @@
 
   gtag('config', 'G-VT8PT9GZNW');
 </script>
-<script class="disable-inspect">document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('keydown', e => { if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) e.preventDefault(); });</script></head>
+<script class="disable-inspect">document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('keydown', e => { if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) e.preventDefault(); });</script>
+<style>
+  body {
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  input, textarea, select {
+    -webkit-user-select: auto !important;
+    -ms-user-select: auto !important;
+    user-select: auto !important;
+  }
+</style>
+<script class="disable-copy-paste">
+  document.addEventListener('contextmenu', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+    if (e.ctrlKey && ['c', 'C', 'v', 'V', 'x', 'X', 'a', 'A', 'u', 'U', 's', 'S', 'p', 'P'].includes(e.key)) {
+      e.preventDefault();
+    }
+  });
+  document.addEventListener('copy', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+  document.addEventListener('cut', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+</script>
+</head>
+
 <body>
   <div id="page-loader"><img src="assets/icons/gurudev_school-removebg-preview.png" alt="Logo" class="loader-logo-img" /><div class="loader-spinner"></div></div>
   <div id="scroll-progress"></div><div class="cursor-dot"></div><div class="cursor-ring"></div>
@@ -35,8 +69,8 @@
             <a href="about.html" class="nav-link">About <i class="fa-solid fa-chevron-down arrow"></i></a>
             <div class="dropdown">
               <a href="about.html"           class="dropdown-item"><i class="fa-solid fa-school"></i> School Overview</a>
-              <a href="secretary-message.html" class="dropdown-item"><i class="fa-solid fa-user-tie"></i> Secretary's Message</a>
-              <a href="director-message.html" class="dropdown-item"><i class="fa-solid fa-user-tie"></i> Director's Message</a>
+              <a href="secretary-message.html" style="display: none !important;" class="dropdown-item"><i class="fa-solid fa-user-tie"></i> Secretary's Message</a>
+              <a href="director-message.html" style="display: none !important;" class="dropdown-item"><i class="fa-solid fa-user-tie"></i> Director's Message</a>
               <a href="principal-message.html" class="dropdown-item"><i class="fa-solid fa-user-graduate"></i> Principal's Message</a>
               <a href="mission-vision.html"  class="dropdown-item"><i class="fa-solid fa-bullseye"></i> Mission & Vision</a>
             </div>
@@ -104,8 +138,8 @@
       <a href="#"             class="drawer-nav-link" data-toggle="about">About Us <i class="fa-solid fa-chevron-right arrow"></i></a>
       <div class="drawer-submenu">
         <a href="about.html"           class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> School Overview</a>
-        <a href="secretary-message.html" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Secretary's Message</a>
-        <a href="director-message.html" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Director's Message</a>
+        <a href="secretary-message.html" style="display: none !important;" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Secretary's Message</a>
+        <a href="director-message.html" style="display: none !important;" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Director's Message</a>
         <a href="principal-message.html" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Principal's Message</a>
         <a href="mission-vision.html"  class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Mission & Vision</a>
       </div>
@@ -134,8 +168,8 @@
   <section class="section-padding" style="background:var(--secondary)"><div class="container">
 <div style="display:grid;grid-template-columns:340px 1fr;gap:60px;align-items:start">
 <div style="background:var(--secondary);border-radius:var(--radius-xl);overflow:hidden;box-shadow:var(--shadow-lg);border:1px solid var(--border-color)" data-aos="fade-right">
-  <div style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));padding:40px 30px;text-align:center"><img src="assets/images/principal.jpg" alt="Principal Dr. Anshuman Tiwari" style="width:140px;height:140px;border-radius:50%;border:4px solid var(--accent);object-fit:cover;margin:0 auto 16px;display:block;box-shadow:0 8px 30px rgba(0,0,0,.3)" loading="lazy" /><div style="font-family:var(--font-accent);font-size:1.2rem;font-weight:800;color:var(--secondary)">Dr. Anshuman Tiwari</div><div style="font-size:.82rem;color:var(--accent);text-transform:uppercase;letter-spacing:1px">Principal</div></div>
-  <div style="padding:24px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:.85rem;color:var(--text-secondary)"><i class="fa-solid fa-graduation-cap" style="color:var(--primary)"></i><span>M.A.(english Literature, M.A. (education), Bed, Phd.</span></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:.85rem;color:var(--text-secondary)"><i class="fa-solid fa-building" style="color:var(--primary)"></i><span>18 Years Teaching Experience</span></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:.85rem;color:var(--text-secondary)"><i class="fa-solid fa-envelope" style="color:var(--primary)"></i><span>atiwari031@gmail.com</span></div></div>
+  <div style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));padding:40px 30px;text-align:center"><img src="assets/images/principal_new.png" alt="Principal Dr. Anshuman Tiwari" style="width:140px;height:140px;border-radius:50%;border:4px solid var(--accent);object-fit:cover;margin:0 auto 16px;display:block;box-shadow:0 8px 30px rgba(0,0,0,.3)" loading="lazy" /><div style="font-family:var(--font-accent);font-size:1.2rem;font-weight:800;color:var(--secondary)">Dr. Anshuman Tiwari</div><div style="font-size:.82rem;color:var(--accent);text-transform:uppercase;letter-spacing:1px">Principal</div></div>
+  <div style="padding:24px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:.85rem;color:var(--text-secondary)"><i class="fa-solid fa-graduation-cap" style="color:var(--primary)"></i><span>M.A. (English Literature), M.A. (Education), B.Ed, Ph.D.</span></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:.85rem;color:var(--text-secondary)"><i class="fa-solid fa-building" style="color:var(--primary)"></i><span>25+ Years Experience</span></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:.85rem;color:var(--text-secondary)"><i class="fa-solid fa-envelope" style="color:var(--primary)"></i><span>atiwari031@gmail.com</span></div></div>
 </div>
 <div data-aos="fade-left">
   <div class="section-label">From the Principal's Desk</div>
@@ -143,7 +177,7 @@
   <blockquote style="border-left:4px solid var(--accent);padding:16px 24px;background:rgba(212,175,55,.06);border-radius:0 var(--radius-md) var(--radius-md) 0;font-style:italic;color:var(--text-secondary);margin:24px 0;font-size:1.05rem;line-height:1.8">"Every student who walks through our gates carries within them the potential to change the world. My promise to each of them is that we will spare no effort in helping that potential shine."</blockquote>
   <p style="font-size:.95rem;color:var(--text-secondary);line-height:1.95;margin-bottom:18px">Dear Students, Parents, and Colleagues,</p>
   <p style="font-size:.95rem;color:var(--text-secondary);line-height:1.95;margin-bottom:18px">It is my great honour and privilege to serve as the Principal of Gurudev International Public School. Every morning when I see our students arrive with energy, enthusiasm, and the eagerness to learn, I am reminded of the profound responsibility and joy of education.</p>
-  <p style="font-size:.95rem;color:var(--text-secondary);line-height:1.95;margin-bottom:18px">At Gurudev International, we believe that education goes far beyond textbooks and examinations. We strive to create thinkers, not just test-takers. We nurture creativity, critical thinking, empathy, and leadership — qualities that will serve our students throughout their lives.</p>
+  <p style="font-size:.95rem;color:var(--text-secondary);line-height:1.95;margin-bottom:18px">At Gurudev International, we believe that education goes far beyond textbooks and examinations. We strive to create thinkers, not just test-takers. We nurture creativity, critical thinking, empathy, and leadership ï¿½ qualities that will serve our students throughout their lives.</p>
   <p style="font-size:.95rem;color:var(--text-secondary);line-height:1.95;margin-bottom:18px">Our teachers are our greatest strength. They are not just instructors but mentors, guides, and role models who genuinely care about each student's well-being and growth. The relationships built in these classrooms often last a lifetime.</p>
   <p style="font-size:.95rem;color:var(--text-secondary);line-height:1.95;margin-bottom:18px">I urge every student: embrace every opportunity, participate actively, ask questions fearlessly, and never stop dreaming. And to our parents: your partnership in your child's education is invaluable. Together, we are unstoppable.</p>
   <div style="font-family:Georgia,serif;font-size:1.6rem;color:var(--primary);margin-top:32px;font-style:italic">Dr. Anshuman Tiwari</div>

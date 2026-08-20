@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="css/admin.css" />
   <!-- Chart.js for Student Analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <link rel="icon" type="image/png" href="assets/icons/gurudev_school-removebg-preview.png" />
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-VT8PT9GZNW"></script>
@@ -19,12 +20,46 @@
   gtag('config', 'G-VT8PT9GZNW');
 </script>
 <link rel="stylesheet" href="css/responsive.css" />
-<script class="disable-inspect">document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('keydown', e => { if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) e.preventDefault(); });</script></head>
+<script class="disable-inspect">document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('keydown', e => { if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) e.preventDefault(); });</script>
+<style>
+  body {
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  input, textarea, select {
+    -webkit-user-select: auto !important;
+    -ms-user-select: auto !important;
+    user-select: auto !important;
+  }
+</style>
+<script class="disable-copy-paste">
+  document.addEventListener('contextmenu', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+    if (e.ctrlKey && ['c', 'C', 'v', 'V', 'x', 'X', 'a', 'A', 'u', 'U', 's', 'S', 'p', 'P'].includes(e.key)) {
+      e.preventDefault();
+    }
+  });
+  document.addEventListener('copy', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+  document.addEventListener('cut', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+</script>
+</head>
+
 <body>
   
   <script>
     // Security check
-    if(!localStorage.getItem('admin_session')) {
+    if(!sessionStorage.getItem('admin_session')) {
       window.location.href = 'admin-login.html';
     }
   </script>
@@ -66,17 +101,18 @@
         <a class="nav-item" data-view="complaints"><i class="fa-solid fa-triangle-exclamation"></i> Complaint Queries</a>
         <a class="nav-item" data-view="reviews"><i class="fa-solid fa-star"></i> Student Reviews</a>
         <a class="nav-item" data-view="students"><i class="fa-solid fa-user-group"></i> Registered Students</a>
-        <a class="nav-item" data-view="sms"><i class="fa-solid fa-comment-sms"></i> Bulk SMS Blaster</a>
+        <a class="nav-item" data-view="sms"><i class="fa-solid fa-envelope-open-text"></i> Bulk Email Blaster</a>
         <a class="nav-item" data-view="documents"><i class="fa-solid fa-folder-open"></i> Student Documents</a>
         <a class="nav-item" data-view="analytics"><i class="fa-solid fa-chart-line"></i> Student Analytics</a>
         <a class="nav-item" data-view="certificate"><i class="fa-solid fa-award"></i> Certificate Maker</a>
         <a class="nav-item" data-view="transport"><i class="fa-solid fa-bus"></i> Transport Routes</a>
         <a class="nav-item" data-view="faculty"><i class="fa-solid fa-chalkboard-user"></i> Faculty Manager</a>
         <a class="nav-item" data-view="birthdays"><i class="fa-solid fa-cake-candles"></i> Student Birthdays</a>
+        <a class="nav-item locked" onclick="alert('Student Progress feature is currently locked by the admin.'); return false;" style="opacity: 0.6; cursor: not-allowed;"><i class="fa-solid fa-lock"></i> Student Progress (Locked)</a>
       </div>
       
       <div style="padding: 20px; border-top: 1px solid var(--admin-border);">
-        <button onclick="localStorage.removeItem('admin_session'); window.location.href='admin-login.html'" class="btn-admin-outline" style="width:100%; border-color:var(--admin-danger); color:var(--admin-danger);"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+        <button onclick="sessionStorage.removeItem('admin_session'); window.location.href='admin-login.html'" class="btn-admin-outline" style="width:100%; border-color:var(--admin-danger); color:var(--admin-danger);"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
       </div>
     </aside>
 
@@ -687,14 +723,166 @@
         </section>
 
         <!-- BULK SMS -->
+        <!-- BULK EMAIL/SMS -->
         <section id="view-sms" class="view-section">
-          <div class="page-header"><div><h2 class="page-title">Bulk SMS Blaster</h2><p class="page-desc">Send automated SMS to all parents.</p></div></div>
-          <div class="form-card">
-            <div class="admin-form-group"><label>Select Target Audience</label><select id="sms-target" class="admin-select"><option value="all">All Registered Students</option><option value="6">Class 6</option><option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select></div>
-            <div class="admin-form-group"><label>Message (160 Chars)</label><textarea id="sms-msg" class="admin-input" style="height:100px;"></textarea></div>
-            <button class="btn-admin" onclick="sendBulkSMS()"><i class="fa-solid fa-paper-plane"></i> Blast SMS</button>
+          <div class="page-header"><div><h2 class="page-title">Bulk Email Blaster</h2><p class="page-desc">Send automated emails to all students securely using Google Apps Script.</p></div></div>
+          
+          <div class="form-card" style="max-width: 700px; margin: 0 auto; border: 2px solid var(--admin-primary); box-shadow: 0 10px 30px rgba(37,99,235,0.1);">
+            <div style="background: rgba(37,99,235,0.05); padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid var(--admin-primary);">
+              <h4 style="margin:0 0 5px 0; color: var(--admin-primary);"><i class="fa-solid fa-shield-halved"></i> Secure Email Gateway</h4>
+              <p style="margin:0; font-size: 0.85rem; color: var(--admin-muted);">This module uses a direct Google Apps Script. Emails will be sent from your linked Gmail account automatically without requiring third-party limits.</p>
+            </div>
+            
+            <div class="admin-form-group">
+              <label>Select Target Audience</label>
+              <select id="email-target" class="admin-select">
+                <option value="all">All Registered Students</option>
+                <option value="6">Class 6</option><option value="7">Class 7</option>
+                <option value="8">Class 8</option><option value="9">Class 9</option>
+                <option value="10">Class 10</option><option value="11">Class 11</option>
+                <option value="12">Class 12</option>
+              </select>
+            </div>
+            
+            <div class="admin-form-group">
+              <label>Email Subject</label>
+              <input type="text" id="email-subject" class="admin-input" placeholder="e.g. Important Notice Regarding Holidays" />
+            </div>
+            
+            <div class="admin-form-group">
+              <label>Email Message</label>
+              <textarea id="email-msg" class="admin-input" style="height:150px;" placeholder="Type your full email message here..."></textarea>
+            </div>
+            
+            <button class="btn-admin" id="btn-blast-email" onclick="sendBulkEmail()"><i class="fa-solid fa-paper-plane"></i> Send Bulk Email</button>
+            
+            <div id="email-progress-container" style="display:none; margin-top:20px; background:var(--admin-bg); padding:15px; border-radius:8px; border:1px solid var(--admin-border);">
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:0.9rem; font-weight:600;">
+                <span id="email-progress-text">Sending emails... 0/0</span>
+                <span id="email-progress-percent">0%</span>
+              </div>
+              <div style="width:100%; height:8px; background:var(--admin-border); border-radius:4px; overflow:hidden;">
+                <div id="email-progress-bar" style="height:100%; width:0%; background:var(--admin-success); transition: width 0.3s ease;"></div>
+              </div>
+            </div>
           </div>
         </section>
+
+        <!-- Script for Bulk Email Blaster -->
+        <script>
+          async function sendBulkEmail() {
+            const targetClass = document.getElementById('email-target').value;
+            const subject = document.getElementById('email-subject').value.trim();
+            const message = document.getElementById('email-msg').value.trim();
+            
+            if(!subject || !message) {
+              alert('Please enter both subject and message before sending.');
+              return;
+            }
+            
+            // Paste your deployed Google Web App URL here
+            const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_SCRIPT_URL_HERE'; 
+            
+            if(GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_SCRIPT_URL_HERE') {
+              alert('Google Script URL is not configured yet. Please add your URL in the code first.');
+              return;
+            }
+            
+            const btn = document.getElementById('btn-blast-email');
+            const progressContainer = document.getElementById('email-progress-container');
+            const progressText = document.getElementById('email-progress-text');
+            const progressBar = document.getElementById('email-progress-bar');
+            const progressPercent = document.getElementById('email-progress-percent');
+            
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            btn.disabled = true;
+            
+            try {
+              // 1. Fetch Students from Firebase
+              // Assuming 'db' is already initialized in gurudev-super.html from firebase setup
+              let studentsRef = window.collection(window.db, 'students'); // Usually from firebase logic
+              let snapshot;
+              
+              if(targetClass === 'all') {
+                snapshot = await window.getDocs(studentsRef);
+              } else {
+                const q = window.query(studentsRef, window.where("class", "==", targetClass));
+                snapshot = await window.getDocs(q);
+              }
+              
+              const students = [];
+              snapshot.forEach(doc => {
+                const data = doc.data();
+                if(data.email) {
+                  students.push({ name: data.name || 'Student', email: data.email });
+                }
+              });
+              
+              if(students.length === 0) {
+                alert(`No students found with valid email addresses for the selected class (${targetClass}).`);
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Bulk Email';
+                btn.disabled = false;
+                return;
+              }
+              
+              if(!confirm(`You are about to send an email to ${students.length} students. Proceed?`)) {
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Bulk Email';
+                btn.disabled = false;
+                return;
+              }
+              
+              // 2. Start Sending loop
+              progressContainer.style.display = 'block';
+              let successCount = 0;
+              let failCount = 0;
+              
+              for(let i = 0; i < students.length; i++) {
+                const student = students[i];
+                progressText.innerText = `Sending to ${student.name} (${i+1}/${students.length})...`;
+                
+                try {
+                  await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      to_email: student.email,
+                      subject: subject,
+                      message: `Hi ${student.name},\n\n${message}`
+                    })
+                  });
+                  // no-cors doesn't return full status, assume success if promise resolves
+                  successCount++;
+                } catch(err) {
+                  console.error("Failed to send to " + student.email, err);
+                  failCount++;
+                }
+                
+                const percent = Math.round(((i + 1) / students.length) * 100);
+                progressBar.style.width = percent + '%';
+                progressPercent.innerText = percent + '%';
+                
+                // Small delay to prevent hitting API rate limits too quickly
+                await new Promise(resolve => setTimeout(resolve, 500));
+              }
+              
+              progressText.innerText = `Finished! Successfully sent: ${successCount}. Failed: ${failCount}.`;
+              
+              if(successCount > 0) {
+                alert(`Bulk email blast complete! ${successCount} emails sent successfully.`);
+                document.getElementById('email-subject').value = '';
+                document.getElementById('email-msg').value = '';
+              }
+              
+            } catch(error) {
+              console.error("Error in bulk email:", error);
+              alert("An error occurred while fetching students. Ensure Firebase is connected properly.");
+            } finally {
+              btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Bulk Email';
+              btn.disabled = false;
+            }
+          }
+        </script>
 
         <!-- STUDENT DOCUMENTS -->
         <section id="view-documents" class="view-section">
@@ -892,9 +1080,9 @@
         <section id="view-faculty" class="view-section">
           <div class="page-header"><div><h2 class="page-title">Faculty Manager</h2><p class="page-desc">Add, manage, and sync faculty members directly to the Our Faculty section on the homepage.</p></div></div>
 
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+          <div style="display:flex; flex-wrap:wrap; gap:24px;">
             <!-- Upload Form -->
-            <div class="form-card">
+            <div class="form-card" style="flex: 1 1 320px;">
               <h3 style="margin-bottom:18px;"><i class="fa-solid fa-user-plus" style="color:var(--admin-accent);"></i> Add New Faculty Member</h3>
 
               <div class="admin-form-group">
@@ -935,11 +1123,11 @@
             </div>
 
             <!-- Live Preview -->
-            <div class="form-card" style="display:flex; flex-direction:column; gap:16px;">
+            <div class="form-card" style="display:flex; flex-direction:column; gap:16px; flex: 1 1 320px; overflow: hidden; box-sizing: border-box;">
               <h3 style="margin-bottom:4px;"><i class="fa-solid fa-eye" style="color:var(--admin-accent);"></i> Live Preview — Homepage Card</h3>
               <p style="color:var(--admin-muted); font-size:0.85rem; margin:0;">This is how the card will look on the homepage.</p>
-              <div style="background: linear-gradient(135deg, #0f172a, #1e293b); border-radius:16px; padding:30px; display:flex; justify-content:center; align-items:center; min-height:480px; flex:1;">
-                <div style="background:#1e293b; border-radius:16px; overflow:hidden; width:300px; text-align:center; border:1px solid rgba(255,255,255,0.08); box-shadow:0 20px 40px rgba(0,0,0,0.3);">
+              <div style="background: linear-gradient(135deg, #0f172a, #1e293b); border-radius:16px; padding:20px; display:flex; justify-content:center; align-items:center; min-height:480px; flex:1; width:100%; box-sizing: border-box;">
+                <div style="background:#1e293b; border-radius:16px; overflow:hidden; width:100%; max-width:300px; text-align:center; border:1px solid rgba(255,255,255,0.08); box-shadow:0 20px 40px rgba(0,0,0,0.3);">
                   <div style="height:340px; background:#0f172a; overflow:hidden; position:relative;">
                     <img id="faculty-preview-img" src="" alt="" style="width:100%; height:100%; object-fit:cover; object-position:top center; display:none;">
                     <div id="faculty-preview-placeholder" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#475569; font-size:4rem;"><i class="fa-solid fa-user"></i></div>
@@ -1265,6 +1453,7 @@
       if(tbody && db) {
         const q = query(collection(db, 'students'));
         onSnapshot(q, (snapshot) => {
+          window.superAdminAllStudents = [];
           if (snapshot.empty) {
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No students registered yet.</td></tr>';
             return;
@@ -1272,6 +1461,7 @@
           tbody.innerHTML = '';
           snapshot.forEach((doc) => {
             const data = doc.data();
+            window.superAdminAllStudents.push(data);
             const photo = data.photoURL || 'assets/images/default-avatar.png';
             tbody.innerHTML += `
               <tr>
@@ -1358,6 +1548,15 @@
     function updatePendingInquiriesCount() {
       let count = 0;
       try {
+        if (!localStorage.getItem('queries_cleared_once')) {
+            localStorage.setItem('admin_contact_messages', '[]');
+            localStorage.setItem('erp_callbacks', '[]');
+            localStorage.setItem('admin_quick_callbacks', '[]');
+            localStorage.setItem('admin_general_forms', '[]');
+            localStorage.setItem('admin_complaints', '[]');
+            localStorage.setItem('queries_cleared_once', 'true');
+        }
+        
         const contacts = JSON.parse(localStorage.getItem('admin_contact_messages')) || [];
         const admissions = JSON.parse(localStorage.getItem('erp_callbacks')) || [];
         const quick = JSON.parse(localStorage.getItem('admin_quick_callbacks')) || [];
@@ -1470,6 +1669,135 @@
     });
   </script>
 
+
+  <!-- Student Progress Logic (Firebase) -->
+  <script type="module">
+    import { db } from './js/firebase-config.js';
+    import { collection, addDoc, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    const classSelect = document.getElementById('superProgressClassSelect');
+    const studentSelect = document.getElementById('superProgressStudentSelect');
+    const progressForm = document.getElementById('superProgressForm');
+    const submitBtn = document.getElementById('superProgressSubmitBtn');
+
+    if(classSelect && studentSelect) {
+      classSelect.addEventListener('change', async () => {
+        const selectedClass = classSelect.value;
+        studentSelect.innerHTML = '<option value="">-- Choose Student --</option>';
+        
+        if(!selectedClass) {
+          studentSelect.disabled = true;
+          studentSelect.style.background = '#f8fafc';
+          return;
+        }
+        
+        studentSelect.disabled = true;
+        studentSelect.innerHTML = '<option value="">Searching for students...</option>';
+        
+        try {
+            // 1. Fetch from Firebase
+            let allStudents = [];
+            if(db) {
+               try {
+                  const querySnapshot = await getDocs(collection(db, 'students'));
+                  querySnapshot.forEach((doc) => {
+                     allStudents.push(doc.data());
+                  });
+               } catch(e) {
+                  console.error("Firebase fetch error:", e);
+               }
+            }
+            
+            // 2. Fetch from LocalStorage as fallback
+            try {
+                const users = JSON.parse(localStorage.getItem('erp_users')) || {};
+                const localStudents = Object.values(users).filter(u => u.role === 'student');
+                localStudents.forEach(ls => {
+                   // Avoid duplicates if Firebase already fetched them
+                   if(!allStudents.find(fs => fs.studentId === ls.studentId)) {
+                       allStudents.push(ls);
+                   }
+                });
+            } catch(e) {
+                console.error("Local storage error:", e);
+            }
+            
+            // 3. Filter by class (robust matching)
+            const filtered = allStudents.filter(s => {
+                if(!s.class) return false;
+                const sClass = String(s.class).trim().toLowerCase();
+                const selClass = String(selectedClass).trim().toLowerCase();
+                return sClass === selClass || 
+                       sClass === "class " + selClass || 
+                       sClass === "class" + selClass ||
+                       sClass === "0" + selClass;
+            });
+            
+            if(filtered.length === 0) {
+               studentSelect.innerHTML = '<option value="">No students found in this class</option>';
+               studentSelect.disabled = true;
+               studentSelect.style.background = '#f8fafc';
+            } else {
+               studentSelect.innerHTML = '<option value="">-- Choose Student --</option>';
+               filtered.forEach(student => {
+                 studentSelect.innerHTML += `<option value="${student.studentId}">${student.name} (${student.studentId || 'No ID'})</option>`;
+               });
+               studentSelect.disabled = false;
+               studentSelect.style.background = '#ffffff';
+            }
+        } catch(err) {
+            console.error("Overall error:", err);
+            studentSelect.innerHTML = '<option value="">Error loading students</option>';
+        }
+      });
+    }
+
+    if(progressForm) {
+      progressForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+        submitBtn.disabled = true;
+        
+        const studentId = studentSelect.value;
+        const studentName = studentSelect.options[studentSelect.selectedIndex].text.split('(')[0].trim();
+        const className = classSelect.value;
+        const progressText = document.getElementById('superProgressText').value;
+        
+        try {
+          await addDoc(collection(db, 'student_progress'), {
+            studentId: studentId,
+            studentName: studentName,
+            className: className,
+            progressText: progressText,
+            timestamp: Date.now(),
+            dateStr: new Date().toISOString()
+          });
+          
+          if(typeof showCustomAlert === 'function') {
+             showCustomAlert("Success", "Progress report successfully uploaded to student portal!", "success");
+          } else {
+             alert('Progress report successfully uploaded to student portal!');
+          }
+          
+          progressForm.reset();
+          studentSelect.disabled = true;
+          studentSelect.style.background = '#f8fafc';
+        } catch(err) {
+          console.error("Error uploading progress:", err);
+          if(typeof showCustomAlert === 'function') {
+             showCustomAlert("Error", "Failed to upload progress. Check console.", "error");
+          } else {
+             alert('Failed to upload progress.');
+          }
+        } finally {
+          submitBtn.innerHTML = originalText;
+          submitBtn.disabled = false;
+        }
+      });
+    }
+  </script>
 </body>
 
 </html>

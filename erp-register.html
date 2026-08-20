@@ -26,7 +26,41 @@
   gtag('config', 'G-VT8PT9GZNW');
 </script>
 <link rel="stylesheet" href="css/responsive.css" />
-<script class="disable-inspect">document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('keydown', e => { if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) e.preventDefault(); });</script></head>
+<script class="disable-inspect">document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('keydown', e => { if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) e.preventDefault(); });</script>
+<style>
+  body {
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  input, textarea, select {
+    -webkit-user-select: auto !important;
+    -ms-user-select: auto !important;
+    user-select: auto !important;
+  }
+</style>
+<script class="disable-copy-paste">
+  document.addEventListener('contextmenu', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+    if (e.ctrlKey && ['c', 'C', 'v', 'V', 'x', 'X', 'a', 'A', 'u', 'U', 's', 'S', 'p', 'P'].includes(e.key)) {
+      e.preventDefault();
+    }
+  });
+  document.addEventListener('copy', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+  document.addEventListener('cut', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+</script>
+</head>
+
 <body class="erp-auth-page">
 
   <div class="erp-auth-shapes">

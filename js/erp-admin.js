@@ -71,6 +71,7 @@ if (app) {
       try {
         onSnapshot(q, (querySnapshot) => {
           let total = 0;
+          window.allStudentsData = [];
           let pending = 0;
           tableBody.innerHTML = "";
 
@@ -82,6 +83,7 @@ if (app) {
           }
 
           querySnapshot.forEach((docSnap) => {
+            window.allStudentsData.push(docSnap.data());
             const data = docSnap.data();
             total++;
             if (data.status === "Pending") pending++;
@@ -132,6 +134,97 @@ if (btnLogout) {
       signOut(auth).then(() => window.location.href = "erp-login.html");
     } else {
       window.location.href = "erp-login.html";
+    }
+  });
+}
+
+
+// --- Student Progress Logic ---
+import { addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const progressClassSelect = document.getElementById('progressClassSelect');
+const progressStudentSelect = document.getElementById('progressStudentSelect');
+const progressForm = document.getElementById('progressForm');
+const progressSubmitBtn = document.getElementById('progressSubmitBtn');
+
+if(progressClassSelect && progressStudentSelect) {
+  progressClassSelect.addEventListener('change', () => {
+    const selectedClass = progressClassSelect.value;
+    progressStudentSelect.innerHTML = '<option value="">-- Choose Student --</option>';
+    
+    if(!selectedClass) {
+      progressStudentSelect.disabled = true;
+      return;
+    }
+    
+    
+    progressStudentSelect.disabled = true;
+    progressStudentSelect.innerHTML = '<option value="">Searching for students...</option>';
+    
+    // Fallback if window.allStudentsData is missing or empty
+    let allStudents = window.allStudentsData || [];
+    if(allStudents.length === 0) {
+        try {
+            const users = JSON.parse(localStorage.getItem('erp_users')) || {};
+            allStudents = Object.values(users).filter(u => u.role === 'student');
+        } catch(e) {}
+    }
+    
+    const filtered = allStudents.filter(s => {
+        if(!s.class) return false;
+        const sClass = String(s.class).trim().toLowerCase();
+        const selClass = String(selectedClass).trim().toLowerCase();
+        return sClass === selClass || 
+               sClass === "class " + selClass || 
+               sClass === "class" + selClass ||
+               sClass === "0" + selClass;
+    });
+
+    if(filtered.length === 0) {
+       progressStudentSelect.innerHTML = '<option value="">No students found in this class</option>';
+       progressStudentSelect.disabled = true;
+    } else {
+       progressStudentSelect.innerHTML = '<option value="">-- Choose Student --</option>';
+       filtered.forEach(student => {
+         progressStudentSelect.innerHTML += `<option value="${student.studentId}">${student.name} (${student.studentId || 'No ID'})</option>`;
+       });
+       progressStudentSelect.disabled = false;
+    }
+  });
+}
+
+if(progressForm) {
+  progressForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if(!app) { alert('Mock mode: Progress saved locally.'); return; }
+    
+    const originalText = progressSubmitBtn.innerHTML;
+    progressSubmitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+    progressSubmitBtn.disabled = true;
+    
+    const studentId = progressStudentSelect.value;
+    const studentName = progressStudentSelect.options[progressStudentSelect.selectedIndex].text.split('(')[0].trim();
+    const className = progressClassSelect.value;
+    const progressText = document.getElementById('progressText').value;
+    
+    try {
+      await addDoc(collection(db, 'student_progress'), {
+        studentId: studentId,
+        studentName: studentName,
+        className: className,
+        progressText: progressText,
+        timestamp: Date.now(),
+        dateStr: new Date().toISOString()
+      });
+      alert('Progress report successfully uploaded!');
+      progressForm.reset();
+      progressStudentSelect.disabled = true;
+    } catch(err) {
+      console.error(err);
+      alert('Failed to upload progress.');
+    } finally {
+      progressSubmitBtn.innerHTML = originalText;
+      progressSubmitBtn.disabled = false;
     }
   });
 }

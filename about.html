@@ -23,7 +23,41 @@
 
   gtag('config', 'G-VT8PT9GZNW');
 </script>
-<script class="disable-inspect">document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('keydown', e => { if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) e.preventDefault(); });</script></head>
+<script class="disable-inspect">document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('keydown', e => { if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) e.preventDefault(); });</script>
+<style>
+  body {
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  input, textarea, select {
+    -webkit-user-select: auto !important;
+    -ms-user-select: auto !important;
+    user-select: auto !important;
+  }
+</style>
+<script class="disable-copy-paste">
+  document.addEventListener('contextmenu', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+    if (e.ctrlKey && ['c', 'C', 'v', 'V', 'x', 'X', 'a', 'A', 'u', 'U', 's', 'S', 'p', 'P'].includes(e.key)) {
+      e.preventDefault();
+    }
+  });
+  document.addEventListener('copy', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+  document.addEventListener('cut', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+</script>
+</head>
+
 <body>
   <div id="page-loader"><img src="assets/icons/gurudev_school-removebg-preview.png" alt="Logo" class="loader-logo-img" /><div class="loader-spinner"></div><div class="loader-text">Loading...</div></div>
   <div id="scroll-progress"></div>
@@ -72,8 +106,8 @@
             <a href="about.html" class="nav-link">About <i class="fa-solid fa-chevron-down arrow"></i></a>
             <div class="dropdown">
               <a href="about.html"           class="dropdown-item"><i class="fa-solid fa-school"></i> School Overview</a>
-              <a href="secretary-message.html" class="dropdown-item"><i class="fa-solid fa-user-tie"></i> Secretary's Message</a>
-              <a href="director-message.html" class="dropdown-item"><i class="fa-solid fa-user-tie"></i> Director's Message</a>
+              <a href="secretary-message.html" style="display: none !important;" class="dropdown-item"><i class="fa-solid fa-user-tie"></i> Secretary's Message</a>
+              <a href="director-message.html" style="display: none !important;" class="dropdown-item"><i class="fa-solid fa-user-tie"></i> Director's Message</a>
               <a href="principal-message.html" class="dropdown-item"><i class="fa-solid fa-user-graduate"></i> Principal's Message</a>
               <a href="mission-vision.html"  class="dropdown-item"><i class="fa-solid fa-bullseye"></i> Mission & Vision</a>
             </div>
@@ -150,8 +184,8 @@
       <a href="#"             class="drawer-nav-link" data-toggle="about">About Us <i class="fa-solid fa-chevron-right arrow"></i></a>
       <div class="drawer-submenu">
         <a href="about.html"           class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> School Overview</a>
-        <a href="secretary-message.html" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Secretary's Message</a>
-        <a href="director-message.html" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Director's Message</a>
+        <a href="secretary-message.html" style="display: none !important;" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Secretary's Message</a>
+        <a href="director-message.html" style="display: none !important;" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Director's Message</a>
         <a href="principal-message.html" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Principal's Message</a>
         <a href="mission-vision.html"  class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Mission & Vision</a>
       </div>
@@ -223,7 +257,7 @@
   <section class="stats-section section-padding-sm">
     <div class="container"><div class="stats-grid">
       <div class="stat-card" data-aos="zoom-in" data-aos-delay="100"><div class="stat-icon"><i class="fa-solid fa-users-line"></i></div><div class="stat-number" data-counter data-target="5000" data-suffix="+" data-duration="2500">0</div><div class="stat-label">Students Enrolled</div></div>
-      <div class="stat-card" data-aos="zoom-in" data-aos-delay="200"><div class="stat-icon"><i class="fa-solid fa-chalkboard-teacher"></i></div><div class="stat-number" data-counter data-target="200" data-suffix="+" data-duration="2000">0</div><div class="stat-label">Expert Educators</div></div>
+      <div class="stat-card" data-aos="zoom-in" data-aos-delay="200"><div class="stat-icon"><i class="fa-solid fa-chalkboard-teacher"></i></div><div class="stat-number" data-counter data-target="45" data-suffix="+" data-duration="2000">0</div><div class="stat-label">Expert Faculty</div></div>
       <div class="stat-card" data-aos="zoom-in" data-aos-delay="300"><div class="stat-icon"><i class="fa-solid fa-trophy"></i></div><div class="stat-number" data-counter data-target="150" data-suffix="+" data-duration="2200">0</div><div class="stat-label">Awards Won</div></div>
       <div class="stat-card" data-aos="zoom-in" data-aos-delay="400"><div class="stat-icon"><i class="fa-solid fa-building-columns"></i></div><div class="stat-number" data-counter data-target="20" data-suffix="+" data-duration="1800">0</div><div class="stat-label">Years of Excellence</div></div>
     </div></div>

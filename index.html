@@ -84,7 +84,41 @@
 
   gtag('config', 'G-VT8PT9GZNW');
 </script>
-<script class="disable-inspect">document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('keydown', e => { if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) e.preventDefault(); });</script></head>
+<script class="disable-inspect">document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('keydown', e => { if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) e.preventDefault(); });</script>
+<style>
+  body {
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  input, textarea, select {
+    -webkit-user-select: auto !important;
+    -ms-user-select: auto !important;
+    user-select: auto !important;
+  }
+</style>
+<script class="disable-copy-paste">
+  document.addEventListener('contextmenu', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+    if (e.ctrlKey && ['c', 'C', 'v', 'V', 'x', 'X', 'a', 'A', 'u', 'U', 's', 'S', 'p', 'P'].includes(e.key)) {
+      e.preventDefault();
+    }
+  });
+  document.addEventListener('copy', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+  document.addEventListener('cut', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+</script>
+</head>
+
 <body><!--  -->
 
   <!-- ====================================================
@@ -154,9 +188,9 @@
           <i class="fa-solid fa-envelope"></i>
           <span>gips.balaghat@gmail.com</span>
         </a>
-        <a href="tel:+919876500000" class="contact-info-item">
+        <a href="tel:+917770822000" class="contact-info-item">
           <i class="fa-solid fa-headset"></i>
-          <span>Helpline: +91 98765 00000</span>
+          <span>Helpline: 7770822000</span>
         </a>
         <span class="contact-info-item">
           <i class="fa-solid fa-clock"></i>
@@ -206,8 +240,8 @@
             <a href="about.html" class="nav-link">About <i class="fa-solid fa-chevron-down arrow"></i></a>
             <div class="dropdown">
               <a href="about.html"           class="dropdown-item"><i class="fa-solid fa-school"></i> School Overview</a>
-              <a href="secretary-message.html" class="dropdown-item"><i class="fa-solid fa-user-tie"></i> Secretary's Message</a>
-              <a href="director-message.html" class="dropdown-item"><i class="fa-solid fa-user-tie"></i> Director's Message</a>
+              <a href="secretary-message.html" style="display: none !important;" class="dropdown-item"><i class="fa-solid fa-user-tie"></i> Secretary's Message</a>
+              <a href="director-message.html" style="display: none !important;" class="dropdown-item"><i class="fa-solid fa-user-tie"></i> Director's Message</a>
               <a href="principal-message.html" class="dropdown-item"><i class="fa-solid fa-user-graduate"></i> Principal's Message</a>
               <a href="mission-vision.html"  class="dropdown-item"><i class="fa-solid fa-bullseye"></i> Mission & Vision</a>
             </div>
@@ -302,8 +336,8 @@
       <a href="#"             class="drawer-nav-link" data-toggle="about">About Us <i class="fa-solid fa-chevron-right arrow"></i></a>
       <div class="drawer-submenu">
         <a href="about.html"           class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> School Overview</a>
-        <a href="secretary-message.html" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Secretary's Message</a>
-        <a href="director-message.html" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Director's Message</a>
+        <a href="secretary-message.html" style="display: none !important;" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Secretary's Message</a>
+        <a href="director-message.html" style="display: none !important;" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Director's Message</a>
         <a href="principal-message.html" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Principal's Message</a>
         <a href="mission-vision.html"  class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Mission & Vision</a>
       </div>
@@ -441,7 +475,7 @@
           </div>
           <div class="hero-stat">
             <div class="hero-stat-number"
-                 data-counter data-target="200" data-suffix="+" data-duration="2000">200+</div>
+                 data-counter data-target="45" data-suffix="+" data-duration="2000">45+</div>
             <div class="hero-stat-label">Expert Faculty</div>
           </div>
           <div class="hero-stat">
@@ -489,7 +523,7 @@
             </div>
           </div>
           <div class="about-image-accent">
-            <img src="assets/images/school_building_main.png" alt="Science lab" loading="lazy" />
+            <img src="assets/images/science_lab.png" alt="Science lab" loading="lazy" />
           </div>
         </div>
 
@@ -564,8 +598,8 @@
         </div>
         <div class="stat-card" data-aos="zoom-in" data-aos-delay="200">
           <div class="stat-icon"><i class="fa-solid fa-chalkboard-teacher"></i></div>
-          <div class="stat-number" data-counter data-target="200" data-suffix="+" data-duration="2000">0</div>
-          <div class="stat-label">Expert Educators</div>
+          <div class="stat-number" data-counter data-target="45" data-suffix="+" data-duration="2000">0</div>
+          <div class="stat-label">Expert Faculty</div>
         </div>
         <div class="stat-card" data-aos="zoom-in" data-aos-delay="300">
           <div class="stat-icon"><i class="fa-solid fa-trophy"></i></div>
@@ -618,7 +652,7 @@
         <div class="why-card tilt-card" data-aos="fade-up" data-aos-delay="500">
           <div class="why-card-icon"><i class="fa-solid fa-users"></i></div>
           <h3>Experienced Faculty</h3>
-          <p>Over 200 dedicated educators with post-graduate qualifications and decades of teaching experience across all subjects.</p>
+          <p>Over 45 expert faculty with post-graduate qualifications and decades of teaching experience across all subjects.</p>
         </div>
         <div class="why-card tilt-card" data-aos="fade-up" data-aos-delay="600">
           <div class="why-card-icon"><i class="fa-solid fa-wifi"></i></div>
@@ -677,7 +711,7 @@
       <div class="messages-grid">
 
         <!-- Secretary -->
-        <div class="message-card" data-aos="fade-up" data-aos-delay="100">
+        <div class="message-card" data-aos="fade-up" data-aos-delay="100" style="display: none;">
           <div class="message-card-top">
             <img src="assets/images/chairman.jpg" alt="School Secretary" class="message-avatar" loading="lazy" />
             <div class="message-name">Sh. Rajendra Gupta</div>
@@ -690,14 +724,14 @@
               cultivate leaders who will shape a better tomorrow through knowledge, compassion,
               and integrity."
             </p>
-            <a href="secretary-message.html" class="message-read-more">
+            <a href="secretary-message.html" style="display: none !important;" class="message-read-more">
               Read Full Message <i class="fa-solid fa-arrow-right"></i>
             </a>
           </div>
         </div>
 
         <!-- Director -->
-        <div class="message-card" data-aos="fade-up" data-aos-delay="200">
+        <div class="message-card" data-aos="fade-up" data-aos-delay="200" style="display: none;">
           <div class="message-card-top">
             <img src="assets/images/director.jpg" alt="School Director" class="message-avatar" loading="lazy" />
             <div class="message-name">Dr. Sunita Sharma</div>
@@ -709,7 +743,7 @@
               feels valued, challenged, and inspired. We believe that education should ignite
               curiosity and build the confidence to pursue dreams fearlessly."
             </p>
-            <a href="director-message.html" class="message-read-more">
+            <a href="director-message.html" style="display: none !important;" class="message-read-more">
               Read Full Message <i class="fa-solid fa-arrow-right"></i>
             </a>
           </div>
@@ -718,15 +752,14 @@
         <!-- Principal -->
         <div class="message-card" data-aos="fade-up" data-aos-delay="300">
           <div class="message-card-top">
-            <img src="assets/images/principal.jpg" alt="School Principal" class="message-avatar" loading="lazy" />
+            <img src="assets/images/principal_new.png" alt="School Principal" class="message-avatar" loading="lazy" />
             <div class="message-name">Dr. Anshuman Tiwari</div>
             <div class="message-title">Principal</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; font-weight: 500;">M.A. (English Lit.), M.A. (Edu), B.Ed, Ph.D.</div>
           </div>
           <div class="message-card-body">
             <p class="message-text">
-              "Dear students, every day is a new opportunity to learn, grow, and become the
-              best version of yourselves. At Gurudev International, we are committed to walking
-              alongside you on this extraordinary journey of discovery and achievement."
+              "With over 25 years of experience in education, I believe that every day is a new opportunity to learn, grow, and become the best version of yourselves. At Gurudev International, we are committed to walking alongside you on this extraordinary journey of discovery and achievement."
             </p>
             <a href="principal-message.html" class="message-read-more">
               Read Full Message <i class="fa-solid fa-arrow-right"></i>
@@ -1120,7 +1153,7 @@
             <div class="contact-detail-icon"><i class="fa-solid fa-phone"></i></div>
             <div class="contact-detail-text">
               <strong>Phone / Helpline</strong>
-              <span>7770822000, 9753187666 | +91 98765 00000</span>
+              <span>7770822000, 9753187666</span>
             </div>
           </div>
           <div class="contact-detail-item">
@@ -1264,7 +1297,7 @@
             </div>
             <div class="footer-contact-item">
               <i class="fa-solid fa-phone"></i>
-              <span>7770822000, 9753187666<br/>+91 98765 00000</span>
+              <span>7770822000, 9753187666</span>
             </div>
             <div class="footer-contact-item">
               <i class="fa-solid fa-envelope"></i>

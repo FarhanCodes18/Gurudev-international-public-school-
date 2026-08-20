@@ -72,7 +72,41 @@
 
   gtag('config', 'G-VT8PT9GZNW');
 </script>
-<script class="disable-inspect">document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('keydown', e => { if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) e.preventDefault(); });</script></head>
+<script class="disable-inspect">document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('keydown', e => { if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) e.preventDefault(); });</script>
+<style>
+  body {
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  input, textarea, select {
+    -webkit-user-select: auto !important;
+    -ms-user-select: auto !important;
+    user-select: auto !important;
+  }
+</style>
+<script class="disable-copy-paste">
+  document.addEventListener('contextmenu', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+    if (e.ctrlKey && ['c', 'C', 'v', 'V', 'x', 'X', 'a', 'A', 'u', 'U', 's', 'S', 'p', 'P'].includes(e.key)) {
+      e.preventDefault();
+    }
+  });
+  document.addEventListener('copy', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+  document.addEventListener('cut', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+</script>
+</head>
+
 <body>
   <div id="page-loader"><img src="assets/icons/gurudev_school-removebg-preview.png" alt="Logo" class="loader-logo-img" /><div class="loader-spinner"></div></div>
   <div id="scroll-progress"></div><div class="cursor-dot"></div><div class="cursor-ring"></div>
@@ -98,8 +132,8 @@
             <a href="about.html" class="nav-link">About <i class="fa-solid fa-chevron-down arrow"></i></a>
             <div class="dropdown">
               <a href="about.html"           class="dropdown-item"><i class="fa-solid fa-school"></i> School Overview</a>
-              <a href="secretary-message.html" class="dropdown-item"><i class="fa-solid fa-user-tie"></i> Secretary's Message</a>
-              <a href="director-message.html" class="dropdown-item"><i class="fa-solid fa-user-tie"></i> Director's Message</a>
+              <a href="secretary-message.html" style="display: none !important;" class="dropdown-item"><i class="fa-solid fa-user-tie"></i> Secretary's Message</a>
+              <a href="director-message.html" style="display: none !important;" class="dropdown-item"><i class="fa-solid fa-user-tie"></i> Director's Message</a>
               <a href="principal-message.html" class="dropdown-item"><i class="fa-solid fa-user-graduate"></i> Principal's Message</a>
               <a href="mission-vision.html"  class="dropdown-item"><i class="fa-solid fa-bullseye"></i> Mission & Vision</a>
             </div>
@@ -178,8 +212,8 @@
       <a href="#"             class="drawer-nav-link" data-toggle="about">About Us <i class="fa-solid fa-chevron-right arrow"></i></a>
       <div class="drawer-submenu">
         <a href="about.html"           class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> School Overview</a>
-        <a href="secretary-message.html" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Secretary's Message</a>
-        <a href="director-message.html" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Director's Message</a>
+        <a href="secretary-message.html" style="display: none !important;" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Secretary's Message</a>
+        <a href="director-message.html" style="display: none !important;" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Director's Message</a>
         <a href="principal-message.html" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Principal's Message</a>
         <a href="mission-vision.html"  class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Mission & Vision</a>
       </div>
@@ -242,14 +276,17 @@
         <p style="margin-bottom:16px; color:#64748b; font-size:0.9rem;"><i class="fa-solid fa-circle-info"></i> Click the search icon to view the submitted documents</p>
         <div class="disclosure-table-wrap"><div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;"><table class="disclosure-table">
           <tr><th style="width:10%;">S.NO.</th><th style="width:70%;">DOCUMENTS / INFORMATION</th><th style="width:20%;">LINKS OF ATTACHED DOCUMENTS</th></tr>
-          <tr><td>1</td><td>Copies of Affiliation/Upgradation letter & recent extension of Affiliation (if any)</td><td><a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
-          <tr><td>2</td><td>Copies of Societies/Trust/Company registration/renewal certificate as applicable</td><td><a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
-          <tr><td>3</td><td>Copy of No Objection Certificate (NOC) issued (if applicable) by the State Govt/UT</td><td><a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
-          <tr><td>4</td><td>Non Proprietary Certificate</td><td><a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
-          <tr><td>5</td><td>Copies of Recognition Certificate under RTE Act 2009 and its renewal (if applicable)</td><td><a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
-          <tr><td>6</td><td>Copy of valid Building Safety Certificate as per the national building code</td><td><a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
-          <tr><td>7</td><td>Copy of valid Fire Safety Certificate issued by the competent authority</td><td><a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
-          <tr><td>8</td><td>Copy of valid DEO Certificate issued by the competent authority</td><td><a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
+          <tr><td>1</td><td>Copies of Affiliation/Upgradation letter & recent extension of Affiliation (if any)</td><td><a href="documnets/Affiliation%20Letter.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
+          <tr><td>2</td><td>Copies of Societies/Trust/Company registration/renewal certificate as applicable</td><td><a href="documnets/GURUDEV%20SIKHSHAN%20SAMITI.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
+          <tr><td>3</td><td>Copy of No Objection Certificate (NOC) issued (if applicable) by the State Govt/UT</td><td><a href="javascript:void(0);" onclick="alert(\'Document coming soon\')" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
+          <tr><td>4</td><td>Non Proprietary Certificate</td><td><a href="documnets/AFFIDAVIT%20NON%20PROPRIETORY.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
+          <tr><td>5</td><td>Copies of Recognition Certificate under RTE Act 2009 and its renewal (if applicable)</td><td><a href="javascript:void(0);" onclick="alert(\'Document coming soon\')" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
+          <tr><td>6</td><td>Copy of valid Building Safety Certificate as per the national building code</td><td><a href="documnets/BUILDING%20SAFETY%20CERTIFICATE.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
+          <tr><td>7</td><td>Copy of valid Fire Safety Certificate issued by the competent authority</td><td><a href="documnets/FIRE%20SAFETY%20CERTIFICATE.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
+          <tr><td>8</td><td>Copy of valid DEO Certificate issued by the competent authority</td><td><a href="javascript:void(0);" onclick="alert(\'Document coming soon\')" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
+          <tr><td>9</td><td>Certificate of Land</td><td><a href="documnets/CERTIFICATE%20OF%20LAND.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
+          <tr><td>10</td><td>Transport Safety Certificate</td><td><a href="documnets/TRANSPORT%20SAFETY%20CERTIFICATE.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
+          <tr><td>11</td><td>Water Testing Report (Health & Sanitation)</td><td><a href="documnets/WATER%20TESTING%20REPORT.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
         </table></div></div>
       </div>
 
@@ -258,11 +295,14 @@
         <h3 class="disclosure-title">C. Result and Academics</h3>
         <div class="disclosure-table-wrap"><div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;"><table class="disclosure-table">
           <tr><th style="width:10%;">S.NO.</th><th style="width:70%;">DOCUMENTS / INFORMATION</th><th style="width:20%;">LINKS OF ATTACHED DOCUMENTS</th></tr>
-          <tr><td>1</td><td>Fee Structure of School</td><td><a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
-          <tr><td>2</td><td>Annual Academic Calendar</td><td><a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
-          <tr><td>3</td><td>List of School Management Committee (SMC)</td><td><a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
-          <tr><td>4</td><td>Last 3-Year Result of the Board Examination</td><td><a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
-          <tr><td>5</td><td>Details of Book Store and Dress Store Facilities Available in the Campus</td><td><a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
+          <tr><td>1</td><td>Fee Structure of School</td><td><a href="javascript:void(0);" onclick="alert(\'Document coming soon\')" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
+          <tr><td>2</td><td>Annual Academic Calendar</td><td><a href="documnets/ANNUAL%20ACADEMIC%20CALENDAR.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
+          <tr><td>3</td><td>List of School Management Committee (SMC)</td><td><a href="documnets/SCHOOL%20MANAGEMENT%20COMMITTEE.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
+          <tr><td>4</td><td>Last 3-Year Result of the Board Examination</td><td><a href="javascript:void(0);" onclick="alert(\'Document coming soon\')" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
+          <tr><td>5</td><td>Details of Book Store and Dress Store Facilities Available in the Campus</td><td><a href="javascript:void(0);" onclick="alert(\'Document coming soon\')" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
+          <tr><td>6</td><td>Assessment & PTM Schedule</td><td><a href="documnets/ASSESSMENT-%20PTM%20SCHEDULE.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
+          <tr><td>7</td><td>Events and Celebration</td><td><a href="documnets/EVENTS%20AND%20CELEBRATION.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
+          <tr><td>8</td><td>Parent Teacher Association (PTA)</td><td><a href="documnets/PARENT%20TEACHER%20ACCOCIATION.pdf" target="_blank" class="doc-link"><i class="fa-solid fa-file-pdf"></i> View Document</a></td></tr>
         </table></div></div>
       </div>
 

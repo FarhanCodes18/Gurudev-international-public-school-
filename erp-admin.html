@@ -33,7 +33,41 @@
   gtag('config', 'G-VT8PT9GZNW');
 </script>
 <link rel="stylesheet" href="css/responsive.css" />
-<script class="disable-inspect">document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('keydown', e => { if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) e.preventDefault(); });</script></head>
+<script class="disable-inspect">document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('keydown', e => { if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) e.preventDefault(); });</script>
+<style>
+  body {
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  input, textarea, select {
+    -webkit-user-select: auto !important;
+    -ms-user-select: auto !important;
+    user-select: auto !important;
+  }
+</style>
+<script class="disable-copy-paste">
+  document.addEventListener('contextmenu', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+    if (e.ctrlKey && ['c', 'C', 'v', 'V', 'x', 'X', 'a', 'A', 'u', 'U', 's', 'S', 'p', 'P'].includes(e.key)) {
+      e.preventDefault();
+    }
+  });
+  document.addEventListener('copy', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+  document.addEventListener('cut', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+</script>
+</head>
+
 <body class="erp-layout">
 
   <!-- Admin Sidebar -->
@@ -52,6 +86,9 @@
       </div>
       <div class="erp-nav-item" data-target="module-notices">
         <i class="fa-solid fa-bullhorn"></i> Notice Board
+      </div>
+      <div class="erp-nav-item" data-target="module-progress">
+        <i class="fa-solid fa-chart-line"></i> Student Progress
       </div>
       <div class="erp-nav-item" data-target="module-homework">
         <i class="fa-solid fa-file-upload"></i> Upload Homework
@@ -153,6 +190,38 @@
               <textarea class="form-control" rows="4" placeholder="Notice details..."></textarea>
             </div>
             <button type="button" class="btn btn-primary" onclick="alert('Notice Published (Mock)')">Publish Notice</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Module: Student Progress -->
+      <div id="module-progress" class="erp-module">
+        <div class="erp-card">
+          <div class="erp-card-header">
+            <div class="erp-card-title">Upload Student Progress</div>
+          </div>
+          <form style="max-width: 600px;" id="progressForm">
+            <div class="form-group">
+              <label class="form-label">Select Class</label>
+              <select class="form-control" id="progressClassSelect" required>
+                <option value="">-- Choose Class --</option>
+                <option value="9">Class 9</option>
+                <option value="10">Class 10</option>
+                <option value="11">Class 11</option>
+                <option value="12">Class 12</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Select Student</label>
+              <select class="form-control" id="progressStudentSelect" required disabled>
+                <option value="">-- Choose Student --</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Progress Report</label>
+              <textarea class="form-control" id="progressText" rows="5" required placeholder="Describe the student's progress, achievements, or areas for improvement..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" id="progressSubmitBtn">Upload Progress</button>
           </form>
         </div>
       </div>

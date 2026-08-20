@@ -715,30 +715,34 @@
   // ============================================================
   // GLOBAL QUICK CALLBACK POPUP
   // ============================================================
+  if (!sessionStorage.getItem('quickCallbackShown')) {
   setTimeout(() => {
     // Inject Modal HTML
     const modalHTML = `
       <div id="quick-callback-modal">
-        <div class="qc-modal-content">
-          <button class="qc-close" id="qc-close-btn"><i class="fa-solid fa-xmark"></i></button>
+        <div class="qc-modal-content" style="border-radius:24px; overflow:hidden;">
+          <button class="qc-close" id="qc-close-btn" style="background:#fff; color:#333; box-shadow:0 4px 10px rgba(0,0,0,0.1);"><i class="fa-solid fa-xmark"></i></button>
           
-          <div class="qc-left">
-            <div class="qc-left-content">
+          <div class="qc-left" style="background: linear-gradient(135deg, #1d4ed8, #1e3a8a); position:relative; overflow:hidden;">
+            <div style="position:absolute; top:-50px; left:-50px; width:150px; height:150px; background:rgba(255,255,255,0.1); border-radius:50%;"></div>
+            <div style="position:absolute; bottom:-30px; right:-30px; width:100px; height:100px; background:rgba(255,255,255,0.1); border-radius:50%;"></div>
+            <div class="qc-left-content" style="position:relative; z-index:2;">
+              <div style="font-size:2rem; margin-bottom:15px; color:#facc15;"><i class="fa-solid fa-graduation-cap"></i></div>
               <h3>Admissions Open 2026-27</h3>
               <p>Secure your child's future at Gurudev International Public School.</p>
-              <ul>
-                <li><i class="fa-solid fa-check"></i> Experienced Faculty</li>
-                <li><i class="fa-solid fa-check"></i> Modern Infrastructure</li>
-                <li><i class="fa-solid fa-check"></i> Holistic Development</li>
+              <ul style="margin-top:20px;">
+                <li style="margin-bottom:10px;"><i class="fa-solid fa-check-circle" style="color:#facc15;"></i> Experienced Faculty</li>
+                <li style="margin-bottom:10px;"><i class="fa-solid fa-check-circle" style="color:#facc15;"></i> Modern Infrastructure</li>
+                <li><i class="fa-solid fa-check-circle" style="color:#facc15;"></i> Holistic Development</li>
               </ul>
             </div>
           </div>
           
           <div class="qc-right">
             <div class="qc-header">
-              <h4>Admission Support</h4>
-              <h2>Get A Quick Call Back</h2>
-              <p>Fill details for course guidance, scholarship, and fees.</p>
+              <h4 style="color:#2563eb; font-weight:700; letter-spacing:1px; text-transform:uppercase;">Admissions Helpdesk</h4>
+              <h2 style="font-weight:800; color:#0f172a;">Let's Connect!</h2>
+              <p>Fill out the details below and our team will guide you through the process.</p>
             </div>
             <form id="quick-callback-form" class="qc-form" action="https://formspree.io/f/mppardbk" method="POST">
               <div class="qc-form-row" style="display:none;">
@@ -822,7 +826,9 @@
       }
     });
     
-  }, 2000); // 2-second delay
+  sessionStorage.setItem('quickCallbackShown', 'true');
+    }, 2000); // 2-second delay
+  }
 
   /* ===========================
      MOBILE FOOTER ACCORDION

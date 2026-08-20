@@ -32,7 +32,41 @@
 
   gtag('config', 'G-VT8PT9GZNW');
 </script>
-<script class="disable-inspect">document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('keydown', e => { if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) e.preventDefault(); });</script></head>
+<script class="disable-inspect">document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('keydown', e => { if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) e.preventDefault(); });</script>
+<style>
+  body {
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  input, textarea, select {
+    -webkit-user-select: auto !important;
+    -ms-user-select: auto !important;
+    user-select: auto !important;
+  }
+</style>
+<script class="disable-copy-paste">
+  document.addEventListener('contextmenu', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+    if (e.ctrlKey && ['c', 'C', 'v', 'V', 'x', 'X', 'a', 'A', 'u', 'U', 's', 'S', 'p', 'P'].includes(e.key)) {
+      e.preventDefault();
+    }
+  });
+  document.addEventListener('copy', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+  document.addEventListener('cut', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+</script>
+</head>
+
 <body>
   <div id="page-loader"><img src="assets/icons/gurudev_school-removebg-preview.png" alt="Logo" class="loader-logo-img" /><div class="loader-spinner"></div></div>
   <div id="scroll-progress"></div><div class="cursor-dot"></div><div class="cursor-ring"></div>
@@ -50,8 +84,8 @@
             <a href="about.html" class="nav-link">About <i class="fa-solid fa-chevron-down arrow"></i></a>
             <div class="dropdown">
               <a href="about.html"           class="dropdown-item"><i class="fa-solid fa-school"></i> School Overview</a>
-              <a href="secretary-message.html" class="dropdown-item"><i class="fa-solid fa-user-tie"></i> Secretary's Message</a>
-              <a href="director-message.html" class="dropdown-item"><i class="fa-solid fa-user-tie"></i> Director's Message</a>
+              <a href="secretary-message.html" style="display: none !important;" class="dropdown-item"><i class="fa-solid fa-user-tie"></i> Secretary's Message</a>
+              <a href="director-message.html" style="display: none !important;" class="dropdown-item"><i class="fa-solid fa-user-tie"></i> Director's Message</a>
               <a href="principal-message.html" class="dropdown-item"><i class="fa-solid fa-user-graduate"></i> Principal's Message</a>
               <a href="mission-vision.html"  class="dropdown-item"><i class="fa-solid fa-bullseye"></i> Mission & Vision</a>
             </div>
@@ -119,8 +153,8 @@
       <a href="#"             class="drawer-nav-link" data-toggle="about">About Us <i class="fa-solid fa-chevron-right arrow"></i></a>
       <div class="drawer-submenu">
         <a href="about.html"           class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> School Overview</a>
-        <a href="secretary-message.html" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Secretary's Message</a>
-        <a href="director-message.html" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Director's Message</a>
+        <a href="secretary-message.html" style="display: none !important;" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Secretary's Message</a>
+        <a href="director-message.html" style="display: none !important;" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Director's Message</a>
         <a href="principal-message.html" class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Principal's Message</a>
         <a href="mission-vision.html"  class="drawer-submenu-link"><i class="fa-solid fa-angle-right"></i> Mission & Vision</a>
       </div>
@@ -156,7 +190,7 @@
           <p style="color:var(--text-secondary);line-height:1.9;margin-bottom:16px">We welcome applications for all classes from Nursery to Class XI for the academic session 2026–27. Gurudev International is committed to providing a world-class education to every admitted student.</p>
           <p style="color:var(--text-secondary);line-height:1.9;margin-bottom:24px">Seats are limited. Early application is strongly recommended. Our admission team is available to answer any questions and guide you through the process.</p>
           <div style="display:flex;gap:12px;flex-wrap:wrap">
-            <a href="tel:+919876500000" class="btn btn-primary"><i class="fa-solid fa-headset"></i> Helpline: +91 98765 00000</a>
+            <a href="tel:+917770822000" class="btn btn-primary"><i class="fa-solid fa-headset"></i> Helpline: 7770822000</a>
             <button class="btn btn-gold" data-download="assets/downloads/brochure.pdf"><i class="fa-solid fa-file-pdf"></i> Download Prospectus</button>
           </div>
         </div>
@@ -235,7 +269,7 @@
     </div>
   </section>
 
-  <section class="admission-banner section-padding-sm"><div class="container"><div class="admission-content"><div class="admission-text" data-aos="fade-right"><div class="section-label">Need Help?</div><h2 class="section-title">Contact Our <span style="-webkit-text-fill-color:var(--accent-light)">Admission Team</span></h2><p class="section-subtitle">Our admission counsellors are available Mon–Sat, 8AM–4PM.</p></div><div class="admission-actions" data-aos="fade-left"><a href="tel:+919876500000" class="btn btn-gold btn-lg"><i class="fa-solid fa-phone"></i> Call Helpline</a><a href="https://wa.me/917770822000" class="btn btn-outline-white btn-lg"><i class="fab fa-whatsapp"></i> WhatsApp</a></div></div></div></section>
+  <section class="admission-banner section-padding-sm"><div class="container"><div class="admission-content"><div class="admission-text" data-aos="fade-right"><div class="section-label">Need Help?</div><h2 class="section-title">Contact Our <span style="-webkit-text-fill-color:var(--accent-light)">Admission Team</span></h2><p class="section-subtitle">Our admission counsellors are available Mon–Sat, 8AM–4PM.</p></div><div class="admission-actions" data-aos="fade-left"><a href="tel:+917770822000" class="btn btn-gold btn-lg"><i class="fa-solid fa-phone"></i> Call Helpline</a><a href="https://wa.me/917770822000" class="btn btn-outline-white btn-lg"><i class="fab fa-whatsapp"></i> WhatsApp</a></div></div></div></section>
 
   <footer class="footer"><div class="footer-main"><div class="container"><div class="footer-grid"><div class="footer-brand"><div class="footer-logo"><img src="assets/icons/gurudev_school-removebg-preview.png" alt="Logo" class="footer-logo-image" /><div class="footer-logo-text"><div class="name">Gurudev International Public School</div><div class="tagline">Excellence Since 2005</div></div></div><p class="footer-desc">CBSE-affiliated premier school.</p><div class="footer-social"><a href="#" class="footer-social-icon"><i class="fab fa-facebook-f"></i></a><a href="#" class="footer-social-icon"><i class="fab fa-instagram"></i></a><a href="https://wa.me/917770822000" class="footer-social-icon"><i class="fab fa-whatsapp"></i></a></div></div><div class="footer-col"><h4 class="footer-col-title">Quick Links</h4><div class="footer-links"><a href="index.html" class="footer-link">Home</a><a href="about.html" class="footer-link">About</a><a href="academics.html" class="footer-link">Academics</a><a href="admission.html" class="footer-link">Admissions</a><a href="contact.html" class="footer-link">Contact</a></div></div><div class="footer-col"><h4 class="footer-col-title">Campus</h4><div class="footer-links"><a href="computer-lab.html" class="footer-link">Computer Lab</a><a href="science-lab.html" class="footer-link">Science Lab</a><a href="robotics-lab.html" class="footer-link">Robotics Lab</a><a href="library.html" class="footer-link">Library</a><a href="sports.html" class="footer-link">Sports</a></div></div><div class="footer-col"><h4 class="footer-col-title">Contact</h4><div class="footer-contact-item"><i class="fa-solid fa-phone"></i><span>7770822000, 9753187666</span></div><div class="footer-contact-item"><i class="fa-solid fa-envelope"></i><span>gips.balaghat@gmail.com</span></div></div></div></div></div><div class="container"><div class="footer-bottom"><p class="footer-copyright">© <span class="current-year"></span> Gurudev International Public School. All Rights Reserved. Designed & Developed By <a href="https://www.cloudnovaa.in" target="_blank" style="color:var(--accent);font-weight:bold;text-decoration:none;">Cloudnovaa</a></p></div></div></footer>
   <div class="floating-buttons group">
