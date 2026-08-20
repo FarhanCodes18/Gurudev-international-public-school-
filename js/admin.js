@@ -1,11 +1,4 @@
 /* admin.js - Superpower Admin Panel Logic (Light Theme & Sync Updates) */
-// EAGERLY LOAD FIREBASE SDKs TO SPEED UP UPLOADS
-Promise.all([
-    import('./js/firebase-config.js').catch(()=>{}),
-    import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js').catch(()=>{}),
-    import('https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js').catch(()=>{})
-]);
-
 document.addEventListener('DOMContentLoaded', () => {
   // Navigation Logic
   const navItems = document.querySelectorAll('.nav-item');
@@ -311,150 +304,101 @@ function uploadGallery() {
   });
 }
 
-// School Gallery Upload & Sync (FIREBASE)
-window.uploadSchoolGallery = function() {
+// School Gallery Upload & Sync
+function uploadSchoolGallery() {
   const fileInput = document.getElementById('school-gallery-photo');
   const descInput = document.getElementById('school-gallery-desc');
   
-  if(!fileInput || fileInput.files.length === 0) {
+  if(fileInput.files.length === 0) {
     return alert('Please select a photo to upload.');
   }
 
   const desc = descInput ? descInput.value : '';
   const file = fileInput.files[0];
   
-  // Need to show loader but do not auto-close
-  const overlay = document.getElementById('admin-loader');
-  if(overlay) {
-      document.getElementById('loader-title').innerText = 'Uploading Photo';
-      document.getElementById('loader-desc').innerText = 'Uploading to cloud database...';
-      overlay.classList.add('active');
-  }
-  
-  compressImage(file, 800, 0.6, function(compressedImage) {
-    Promise.all([
-      import('./js/firebase-config.js'),
-      import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js'),
-      import('https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js')
-    ]).then(([config, fs, storageFs]) => {
-      const db = config.db;
-      const storage = config.storage;
-      const { collection, addDoc } = fs;
-      const { ref, uploadString, getDownloadURL } = storageFs;
-      
-      const fileName = 'gallery/' + Date.now() + '.jpg';
-      const storageRef = ref(storage, fileName);
-      
-      uploadString(storageRef, compressedImage, 'data_url').then(snapshot => {
-        getDownloadURL(snapshot.ref).then(downloadURL => {
-          addDoc(collection(db, 'school_gallery'), {
-            image: downloadURL,
-            desc: desc,
-            date: new Date().toLocaleDateString('en-GB'),
-            timestamp: Date.now(),
-            storagePath: fileName
-          }).then(() => {
-            alert('Photo uploaded to School Gallery successfully!');
-            fileInput.value = '';
-            if(descInput) descInput.value = '';
-            if(document.getElementById('school-gallery-photo-name')) {
-                document.getElementById('school-gallery-photo-name').innerText = 'No file chosen';
-            }
-            if(overlay) overlay.classList.remove('active');
-            renderSchoolGalleryList();
-          });
-        });
-      }).catch(err => {
-        console.error("Upload error:", err);
-        alert("Upload failed! Check console.");
-        if(overlay) overlay.classList.remove('active');
-      });
-    }).catch(err => {
-        console.error("Firebase load error:", err);
-        alert("Failed to load Firebase.");
-        if(overlay) overlay.classList.remove('active');
+  compressImage(file, 800, 0.7, function(compressedImage) {
+    let gallery = JSON.parse(localStorage.getItem('admin_school_gallery') || '[]');
+    
+    gallery.unshift({ image: compressedImage, desc: desc, date: new Date().toLocaleDateString() });
+    
+    showLoader('Uploading Photo', 'Optimizing and syncing to the School Gallery...', 2000, () => {
+      try {
+        localStorage.setItem('admin_school_gallery', JSON.stringify(gallery));
+        alert('Photo synced to the School Gallery successfully!');
+      } catch(e) {
+        alert('Storage full! Delete some old photos first.');
+      }
+      fileInput.value = '';
+      if(descInput) descInput.value = '';
+      renderSchoolGalleryList();
     });
   });
 }
 
-window.renderSchoolGalleryList = function() {
+// Render Achievers List
+function renderAchieversGalleryList() {
+  const listBody = document.getElementById('achievers-list');
+  if(!listBody) return;
+  
+  let gallery = JSON.parse(localStorage.getItem('admin_achievers_gallery') || '[]');
+  
+  if(gallery.length === 0) {
+    listBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--admin-muted);">No achievers uploaded yet.</td></tr>';
+    return;
+  }
+  
+  listBody.innerHTML = '';
+  gallery.forEach((item, index) => {
+    listBody.innerHTML += `
+      <tr>
+        <td><img src="${item.image}" style="width:50px; height:50px; object-fit:cover; border-radius:8px;" alt="Achiever"></td>
+        <td style="font-weight:600; color:var(--admin-heading);">${item.name}</td>
+        <td style="color:var(--admin-muted);">${item.score}</td>
+        <td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteAchiever(${index})"><i class="fa-solid fa-trash"></i></button></td>
+      </tr>
+    `;
+  });
+}
+
+function deleteAchiever(index) {
+  if(!confirm("Are you sure you want to delete this achiever?")) return;
+  let gallery = JSON.parse(localStorage.getItem('admin_achievers_gallery') || '[]');
+  gallery.splice(index, 1);
+  localStorage.setItem('admin_achievers_gallery', JSON.stringify(gallery));
+  renderAchieversGalleryList();
+}
+
+// Render School Gallery List
+function renderSchoolGalleryList() {
   const listBody = document.getElementById('school-gallery-list');
   if(!listBody) return;
   
-  listBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Loading from cloud...</td></tr>';
+  let gallery = JSON.parse(localStorage.getItem('admin_school_gallery') || '[]');
   
-  Promise.all([
-    import('./js/firebase-config.js'),
-    import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
-  ]).then(([config, fs]) => {
-    const db = config.db;
-    const { collection, getDocs, query, orderBy } = fs;
-    
-    const q = query(collection(db, 'school_gallery'), orderBy('timestamp', 'desc'));
-    getDocs(q).then(snapshot => {
-      if (snapshot.empty) {
-        listBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--admin-muted);">No photos uploaded yet.</td></tr>';
-        return;
-      }
-      
-      listBody.innerHTML = '';
-      snapshot.forEach(docSnap => {
-        const item = docSnap.data();
-        const id = docSnap.id;
-        listBody.innerHTML += `
-          <tr>
-            <td><img src="${item.image}" style="width:80px; height:50px; object-fit:cover; border-radius:8px;" alt="Gallery Image"></td>
-            <td style="font-weight:600; color:var(--admin-heading);">${item.desc || 'N/A'}</td>
-            <td style="color:var(--admin-muted);">${item.date || 'N/A'}</td>
-            <td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteSchoolGallery('${id}', '${item.storagePath || ''}')"><i class="fa-solid fa-trash"></i></button></td>
-          </tr>
-        `;
-      });
-    }).catch(err => {
-        listBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">Failed to load.</td></tr>';
-    });
+  if(gallery.length === 0) {
+    listBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--admin-muted);">No photos uploaded yet.</td></tr>';
+    return;
+  }
+  
+  listBody.innerHTML = '';
+  gallery.forEach((item, index) => {
+    listBody.innerHTML += `
+      <tr>
+        <td><img src="${item.image}" style="width:80px; height:50px; object-fit:cover; border-radius:8px;" alt="Gallery Image"></td>
+        <td style="font-weight:600; color:var(--admin-heading);">${item.desc || 'N/A'}</td>
+        <td style="color:var(--admin-muted);">${item.date || 'N/A'}</td>
+        <td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteSchoolGallery(${index})"><i class="fa-solid fa-trash"></i></button></td>
+      </tr>
+    `;
   });
 }
 
-window.deleteSchoolGallery = function(id, storagePath) {
-  if(!confirm("Are you sure you want to delete this photo from the cloud?")) return;
-  
-  const overlay = document.getElementById('admin-loader');
-  if(overlay) {
-      document.getElementById('loader-title').innerText = 'Deleting Photo';
-      document.getElementById('loader-desc').innerText = 'Removing from database and storage...';
-      overlay.classList.add('active');
-  }
-  
-  Promise.all([
-    import('./js/firebase-config.js'),
-    import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js'),
-    import('https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js')
-  ]).then(([config, fs, storageFs]) => {
-    const db = config.db;
-    const storage = config.storage;
-    const { doc, deleteDoc } = fs;
-    const { ref, deleteObject } = storageFs;
-    
-    deleteDoc(doc(db, 'school_gallery', id)).then(() => {
-      if(storagePath) {
-        deleteObject(ref(storage, storagePath)).then(() => {
-          alert('Photo deleted successfully!');
-          if(overlay) overlay.classList.remove('active');
-          renderSchoolGalleryList();
-        }).catch(err => {
-          console.warn("Storage deletion failed", err);
-          alert('Photo deleted successfully!');
-          if(overlay) overlay.classList.remove('active');
-          renderSchoolGalleryList();
-        });
-      } else {
-        alert('Photo deleted successfully!');
-        if(overlay) overlay.classList.remove('active');
-        renderSchoolGalleryList();
-      }
-    });
-  });
+function deleteSchoolGallery(index) {
+  if(!confirm("Are you sure you want to delete this photo?")) return;
+  let gallery = JSON.parse(localStorage.getItem('admin_school_gallery') || '[]');
+  gallery.splice(index, 1);
+  localStorage.setItem('admin_school_gallery', JSON.stringify(gallery));
+  renderSchoolGalleryList();
 }
 
 // Bulk SMS Blaster
