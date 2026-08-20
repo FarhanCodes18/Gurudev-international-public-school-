@@ -85,7 +85,7 @@
     
     // Dynamically import Firebase
     Promise.all([
-      import('./firebase-config.js'),
+      import('./js/firebase-config.js'),
       import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
     ]).then(([config, fs]) => {
       const db = config.db;

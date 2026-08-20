@@ -326,7 +326,7 @@ window.uploadSchoolGallery = function() {
   
   compressImage(file, 1000, 0.8, function(compressedImage) {
     Promise.all([
-      import('./firebase-config.js'),
+      import('./js/firebase-config.js'),
       import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js'),
       import('https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js')
     ]).then(([config, fs, storageFs]) => {
@@ -377,7 +377,7 @@ window.renderSchoolGalleryList = function() {
   listBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Loading from cloud...</td></tr>';
   
   Promise.all([
-    import('./firebase-config.js'),
+    import('./js/firebase-config.js'),
     import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
   ]).then(([config, fs]) => {
     const db = config.db;
@@ -420,7 +420,7 @@ window.deleteSchoolGallery = function(id, storagePath) {
   }
   
   Promise.all([
-    import('./firebase-config.js'),
+    import('./js/firebase-config.js'),
     import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js'),
     import('https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js')
   ]).then(([config, fs, storageFs]) => {
