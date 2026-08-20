@@ -8,12 +8,13 @@ import { getStorage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-s
 // You can find these in your Firebase Console > Project Settings > General
 // ============================================================================
 const firebaseConfig = {
-  apiKey: "AIzaSyDqAnyzEn01mTArpi6nzE__IXPYQgTSAPk",
-  authDomain: "gips-f1d15.firebaseapp.com",
-  projectId: "gips-f1d15",
-  storageBucket: "gips-f1d15.firebasestorage.app",
-  messagingSenderId: "116129811641",
-  appId: "1:116129811641:web:ad1ee64393238b20541f68"
+  apiKey: "AIzaSyDh401C4sAgg68T7RsB4XIITzcuEtZo5Kc",
+  authDomain: "gips-eeaca.firebaseapp.com",
+  databaseURL: "https://gips-eeaca-default-rtdb.firebaseio.com",
+  projectId: "gips-eeaca",
+  storageBucket: "gips-eeaca.firebasestorage.app",
+  messagingSenderId: "73492038814",
+  appId: "1:73492038814:web:8790a5bff15cac1189678f"
 };
 
 let app, auth, db, storage;
