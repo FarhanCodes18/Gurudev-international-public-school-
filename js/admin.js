@@ -1,9 +1,11 @@
 /* admin.js - Superpower Admin Panel Logic (Light Theme & Sync Updates) */
-// Preload Firebase SDKs so uploads are instant (No Storage needed - free plan)
-var _fbReady = Promise.all([
-  import('./js/firebase-config.js'),
-  import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
-]).then(([c, fs]) => ({ db: c.db, fs })).catch(e => { console.warn('Firebase preload:', e); return null; });
+var _fbReady = null;
+try {
+  _fbReady = Promise.all([
+    import('./js/firebase-config.js'),
+    import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
+  ]).then(([c, fs]) => ({ db: c.db, fs })).catch(e => { console.warn('Firebase preload:', e); return null; });
+} catch(e) { _fbReady = Promise.resolve(null); }
 document.addEventListener('DOMContentLoaded', () => {
   // Navigation Logic
   const navItems = document.querySelectorAll('.nav-item');
