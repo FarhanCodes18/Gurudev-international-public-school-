@@ -10,6 +10,7 @@ import { getStorage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-s
 const firebaseConfig = {
   apiKey: "AIzaSyD778gbyVVrez8R__xnvVNRMAZjAqEhVgQ",
   authDomain: "gurudev-international.firebaseapp.com",
+  databaseURL: "https://gurudev-international-default-rtdb.firebaseio.com",
   projectId: "gurudev-international",
   storageBucket: "gurudev-international.firebasestorage.app",
   messagingSenderId: "683044437533",
