@@ -43,6 +43,10 @@ if (_fbReady) {
         // Refresh tables if their view is currently active
         if(typeof loadAdminDocuments === 'function') loadAdminDocuments();
         if(typeof loadAdminCertificates === 'function') loadAdminCertificates();
+        
+        // Refresh dashboard stats and birthdays
+        if(typeof window.renderAdminDashboard === 'function') window.renderAdminDashboard();
+        if(typeof loadBirthdays === 'function') loadBirthdays();
       } catch(e) { console.warn("Failed to sync students:", e); }
     }
   });
@@ -77,100 +81,131 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(renderAttendanceAnalytics, 500);
   }
 
-  // Fetch Data from LocalStorage
-  const studentsRaw = localStorage.getItem('erp_users');
-  let studentsObj = {};
-  let students = []; // Array version for looping
-  if(studentsRaw) {
-    try { 
-      studentsObj = JSON.parse(studentsRaw); 
-      // Convert to array for easy mapping
-      students = Object.values(studentsObj);
-    } catch(e) {}
-  }
-
-  // --- POPULATE DASHBOARD TOTALS ---
-  const dashTotal = document.getElementById('dash-total-students');
-  if(dashTotal) dashTotal.innerText = students.length;
-
-  // --- POPULATE CLASS-WISE STATS ---
-  const classWiseStatsContainer = document.getElementById('class-wise-stats');
-
-  // --- POPULATE CERTIFICATE SELECTOR ---
-  const certSelector = document.getElementById('cert-student');
-  if(certSelector) {
-    certSelector.innerHTML = '<option value="">-- Select a Student --</option>';
-    students.forEach(st => {
-      certSelector.innerHTML += `<option value="${st.mobile}">${st.name} (${st.studentId})</option>`;
-    });
-  }
-
-  // --- LEAVE APPROVALS ---
-  const leaveTable = document.getElementById('admin-leave-requests');
-  let pendingLeaves = 0;
-  if(leaveTable) {
-    leaveTable.innerHTML = '';
-    let hasLeaves = false;
-    students.forEach(st => {
-      if(st.leaveRequests) {
-        st.leaveRequests.forEach((leave, idx) => {
-          if(leave.status === 'Pending') {
-            hasLeaves = true;
-            pendingLeaves++;
-            leaveTable.innerHTML += `
-              <tr>
-                <td>${st.name}</td>
-                <td>${st.studentId}</td>
-                <td>${leave.reason}</td>
-                <td>${leave.date}</td>
-                <td>
-                  <button class="action-btn" style="color:var(--admin-success); border-color:var(--admin-success);" onclick="approveLeave('${st.mobile}', ${idx})"><i class="fa-solid fa-check"></i></button>
-                  <button class="action-btn danger" onclick="rejectLeave('${st.mobile}', ${idx})"><i class="fa-solid fa-xmark"></i></button>
-                </td>
-              </tr>
-            `;
-          }
-        });
-      }
-    });
-    
-    if(!hasLeaves) {
-      leaveTable.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted); padding:30px;">No pending leave requests.</td></tr>';
+  window.renderAdminDashboard = function() {
+    const studentsRaw = localStorage.getItem('erp_users');
+    let studentsObj = {};
+    let students = [];
+    if(studentsRaw) {
+      try { 
+        studentsObj = JSON.parse(studentsRaw); 
+        students = Object.values(studentsObj);
+      } catch(e) {}
     }
-    const badge = document.getElementById('pending-leaves-badge');
-    if (badge) badge.innerText = pendingLeaves;
-  }
 
-  // --- STUDENT ANALYTICS CHART (CHART.JS) ---
-  const ctx = document.getElementById('registrationChart');
-  if(ctx && students.length > 0) {
-    const classCounts = {};
-    students.forEach(st => {
-      const c = st.class || 'Unknown';
-      classCounts[c] = (classCounts[c] || 0) + 1;
-    });
-    
-    new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: Object.keys(classCounts).map(c => 'Class ' + c),
-        datasets: [{
-          label: 'Students Registered',
-          data: Object.values(classCounts),
-          backgroundColor: '#2563eb',
-          borderRadius: 6
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { beginAtZero: true, grid: { color: '#e2e8f0' }, ticks: { color: '#64748b', stepSize: 1 } },
-          x: { grid: { display: false }, ticks: { color: '#64748b' } }
+    // --- POPULATE DASHBOARD TOTALS ---
+    const dashTotal = document.getElementById('dash-total-students');
+    if(dashTotal) dashTotal.innerText = students.length;
+
+    // --- POPULATE CLASS-WISE STATS ---
+    const classWiseStatsContainer = document.getElementById('class-wise-stats');
+    if(classWiseStatsContainer) {
+      const classCounts = {};
+      students.forEach(st => {
+        if(st.role === 'student') {
+          const c = st.class || 'Unknown';
+          classCounts[c] = (classCounts[c] || 0) + 1;
         }
+      });
+      classWiseStatsContainer.innerHTML = '';
+      for (let c in classCounts) {
+        classWiseStatsContainer.innerHTML += `
+          <div style="background:var(--admin-surface); padding:15px 25px; border-radius:12px; border:1px solid var(--admin-border); flex:1; min-width:150px; text-align:center;">
+            <h4 style="color:var(--admin-muted); font-size:0.85rem; margin-bottom:5px;">Class ${c}</h4>
+            <h2 style="color:var(--admin-primary); margin:0;">${classCounts[c]} <span style="font-size:0.8rem; color:var(--admin-muted);">Students</span></h2>
+          </div>
+        `;
       }
-    });
-  }
+      if(Object.keys(classCounts).length === 0) {
+        classWiseStatsContainer.innerHTML = '<p style="color:var(--admin-muted); padding:20px;">No students registered yet.</p>';
+      }
+    }
+
+    // --- POPULATE CERTIFICATE SELECTOR ---
+    const certSelector = document.getElementById('cert-student');
+    if(certSelector) {
+      certSelector.innerHTML = '<option value="">-- Select a Student --</option>';
+      students.forEach(st => {
+        if(st.role === 'student') {
+          certSelector.innerHTML += `<option value="${st.mobile}">${st.name} (${st.studentId || 'N/A'})</option>`;
+        }
+      });
+    }
+
+    // --- LEAVE APPROVALS ---
+    const leaveTable = document.getElementById('admin-leave-requests');
+    let pendingLeaves = 0;
+    if(leaveTable) {
+      leaveTable.innerHTML = '';
+      let hasLeaves = false;
+      students.forEach(st => {
+        if(st.leaveRequests) {
+          st.leaveRequests.forEach((leave, idx) => {
+            if(leave.status === 'Pending') {
+              hasLeaves = true;
+              pendingLeaves++;
+              leaveTable.innerHTML += `
+                <tr>
+                  <td>${st.name}</td>
+                  <td>${st.studentId}</td>
+                  <td>${leave.reason}</td>
+                  <td>${leave.date}</td>
+                  <td>
+                    <button class="action-btn" style="color:var(--admin-success); border-color:var(--admin-success);" onclick="approveLeave('${st.mobile}', ${idx})"><i class="fa-solid fa-check"></i></button>
+                    <button class="action-btn danger" onclick="rejectLeave('${st.mobile}', ${idx})"><i class="fa-solid fa-xmark"></i></button>
+                  </td>
+                </tr>
+              `;
+            }
+          });
+        }
+      });
+      
+      if(!hasLeaves) {
+        leaveTable.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted); padding:30px;">No pending leave requests.</td></tr>';
+      }
+      const badge = document.getElementById('pending-leaves-badge');
+      if (badge) badge.innerText = pendingLeaves;
+    }
+
+    // --- STUDENT ANALYTICS CHART (CHART.JS) ---
+    const ctx = document.getElementById('registrationChart');
+    if(ctx && students.length > 0) {
+      const classCounts = {};
+      students.forEach(st => {
+        if(st.role === 'student') {
+          const c = st.class || 'Unknown';
+          classCounts[c] = (classCounts[c] || 0) + 1;
+        }
+      });
+      
+      // Destroy previous chart instance if exists
+      if(window.registrationChartInstance) window.registrationChartInstance.destroy();
+      
+      window.registrationChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(classCounts).map(c => 'Class ' + c),
+          datasets: [{
+            label: 'Students Registered',
+            data: Object.values(classCounts),
+            backgroundColor: '#2563eb',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { color: '#e2e8f0' }, ticks: { color: '#64748b', stepSize: 1 } },
+            x: { grid: { display: false }, ticks: { color: '#64748b' } }
+          }
+        }
+      });
+    }
+  };
+
+  // Run on first load
+  window.renderAdminDashboard();
 
   // Load Admissions and Contact Inquiries initially
   loadCallbacks();
