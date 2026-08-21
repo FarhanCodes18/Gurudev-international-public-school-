@@ -1652,8 +1652,11 @@
     };
   </script>
 
-  <script>
-    function updatePendingInquiriesCount() {
+  <script type="module">
+    import { db } from './js/firebase-config.js';
+    import { collection, getDocs, query } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    async function updatePendingInquiriesCount() {
       let count = 0;
       try {
         if (!localStorage.getItem('queries_cleared_once')) {
@@ -1661,7 +1664,6 @@
             localStorage.setItem('erp_callbacks', '[]');
             localStorage.setItem('admin_quick_callbacks', '[]');
             localStorage.setItem('admin_general_forms', '[]');
-            localStorage.setItem('admin_complaints', '[]');
             localStorage.setItem('queries_cleared_once', 'true');
         }
         
@@ -1669,8 +1671,18 @@
         const admissions = JSON.parse(localStorage.getItem('erp_callbacks')) || [];
         const quick = JSON.parse(localStorage.getItem('admin_quick_callbacks')) || [];
         const general = JSON.parse(localStorage.getItem('admin_general_forms')) || [];
-        const complaints = JSON.parse(localStorage.getItem('admin_complaints')) || [];
-        count = contacts.length + admissions.length + quick.length + general.length + complaints.length;
+        
+        count += Array.isArray(contacts) ? contacts.length : 0;
+        count += Array.isArray(admissions) ? admissions.length : 0;
+        count += Array.isArray(quick) ? quick.length : 0;
+        count += Array.isArray(general) ? general.length : 0;
+
+        // Fetch Firebase Complaints Count
+        try {
+          const snap = await getDocs(query(collection(db, 'complaints')));
+          count += snap.size;
+        } catch(err) { console.error("Firebase complaints count error:", err); }
+
       } catch(e) {}
       
       const dashEl = document.getElementById('dash-pending-inquiries');
@@ -1681,7 +1693,7 @@
     }
     
     document.addEventListener('DOMContentLoaded', updatePendingInquiriesCount);
-    setInterval(updatePendingInquiriesCount, 2000);
+    setInterval(updatePendingInquiriesCount, 5000); // 5 seconds
   </script>
 
   <script>
