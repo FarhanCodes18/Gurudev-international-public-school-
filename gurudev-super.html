@@ -1393,6 +1393,55 @@
     }
   </script>
 
+  <!-- Complaint Queries (Firebase) -->
+  <script type="module">
+    import { db } from './js/firebase-config.js';
+    import { collection, getDocs, query, orderBy, doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    window.loadComplaints = async function() {
+      const tbody = document.getElementById('complaints-list');
+      if (!tbody) return;
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted); padding:40px;">Loading complaints...</td></tr>';
+
+      try {
+        const snap = await getDocs(query(collection(db, 'complaints'), orderBy('timestamp', 'desc')));
+        if (snap.empty) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted); padding:40px;">No complaints found.</td></tr>';
+          return;
+        }
+        var html = '';
+        snap.forEach(function(d) {
+          var c = d.data();
+          html += '<tr>' +
+            '<td style="color:var(--admin-muted); white-space:nowrap;">' + (c.date || 'N/A') + '</td>' +
+            '<td style="font-weight:700; color:var(--admin-heading);">' + (c.name || 'Anonymous') + '</td>' +
+            '<td style="color:var(--admin-accent);">' + (c.contact || 'N/A') + '</td>' +
+            '<td style="color:var(--admin-text); max-width:300px; word-break:break-word;">' + (c.message || '') + '</td>' +
+            '<td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteComplaint(\'' + d.id + '\')"><i class="fa-solid fa-trash"></i></button></td>' +
+            '</tr>';
+        });
+        tbody.innerHTML = html;
+      } catch (err) {
+        console.error('Load complaints error:', err);
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Failed to load complaints.</td></tr>';
+      }
+    };
+
+    window.deleteComplaint = async function(docId) {
+      if (!confirm('Delete this complaint?')) return;
+      try {
+        await deleteDoc(doc(db, 'complaints', docId));
+        loadComplaints();
+      } catch (err) {
+        console.error('Delete complaint error:', err);
+        alert('Failed to delete: ' + err.message);
+      }
+    };
+
+    // Auto-load on page load
+    loadComplaints();
+  </script>
+
   <!-- SheetJS for Excel Parsing -->
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
