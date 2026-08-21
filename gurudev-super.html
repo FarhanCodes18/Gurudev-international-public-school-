@@ -1832,6 +1832,100 @@
       });
     }
   </script>
+
+  <!-- Firebase Faculty Admin Logic -->
+  <script type="module">
+    import { db } from './js/firebase-config.js';
+    import { collection, addDoc, deleteDoc, doc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    window.uploadFacultyFirebase = async function() {
+      const name = document.getElementById('faculty-name').value.trim();
+      const post = document.getElementById('faculty-post').value.trim();
+      const spec = document.getElementById('faculty-specialization').value.trim();
+      const fileInput = document.getElementById('faculty-photo');
+
+      if (!name || !post) return alert('Please fill Name and Post fields.');
+      if (fileInput.files.length === 0) return alert('Please select a photo.');
+
+      const btn = document.querySelector('button[onclick="uploadFaculty()"]');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+      btn.disabled = true;
+      
+      compressImage(fileInput.files[0], 600, 0.8, async function(compressedImage) {
+        try {
+          await addDoc(collection(db, 'faculty'), {
+            name: name,
+            post: post,
+            specialization: spec,
+            image: compressedImage,
+            timestamp: Date.now()
+          });
+          alert('Faculty member synced to the Homepage successfully!');
+          
+          document.getElementById('faculty-name').value = '';
+          document.getElementById('faculty-post').value = '';
+          document.getElementById('faculty-specialization').value = '';
+          fileInput.value = '';
+          document.getElementById('faculty-photo-name').innerText = 'No file chosen';
+          document.getElementById('faculty-photo-preview').style.display = 'none';
+          document.getElementById('faculty-preview-img').style.display = 'none';
+          document.getElementById('faculty-preview-placeholder').style.display = 'flex';
+          document.getElementById('faculty-preview-name').innerText = 'Faculty Name';
+          document.getElementById('faculty-preview-post').innerText = 'Designation';
+        } catch(e) {
+          console.error(e);
+          alert('Error uploading to Firebase.');
+        } finally {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
+      });
+    };
+
+    // Override the button click
+    const uploadBtn = document.querySelector('button[onclick="uploadFaculty()"]');
+    if(uploadBtn) {
+        uploadBtn.onclick = window.uploadFacultyFirebase;
+    }
+
+    window.deleteFacultyFirebase = async function(id) {
+      if (!confirm('Are you sure you want to remove this faculty member?')) return;
+      try {
+        await deleteDoc(doc(db, 'faculty', id));
+      } catch(e) {
+        console.error(e);
+        alert('Failed to delete.');
+      }
+    };
+
+    // Realtime listener
+    onSnapshot(collection(db, 'faculty'), (snapshot) => {
+      const tbody = document.getElementById('faculty-list');
+      if (!tbody) return;
+      
+      if (snapshot.empty) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted);">No faculty added yet.</td></tr>';
+        return;
+      }
+      
+      let html = '';
+      snapshot.forEach(docSnap => {
+        const member = docSnap.data();
+        html += `
+          <tr>
+            <td><img src="${member.image}" style="width:50px; height:50px; object-fit:cover; object-position:top; border-radius:50%; border:2px solid var(--admin-border);" alt="${member.name}"></td>
+            <td style="font-weight:700; color:var(--admin-heading);">${member.name}</td>
+            <td style="color:var(--admin-accent);">${member.post}</td>
+            <td style="color:var(--admin-muted);">${member.specialization || '—'}</td>
+            <td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteFacultyFirebase('${docSnap.id}')"><i class="fa-solid fa-trash"></i></button></td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    });
+  </script>
+
 </body>
 
 </html>

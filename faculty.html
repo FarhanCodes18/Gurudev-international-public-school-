@@ -124,49 +124,60 @@
   <button class="float-btn float-btn-toggle" aria-label="Contact Options"><i class="fa-solid fa-message"></i></button>
 </div><button class="back-to-top" id="back-to-top"><i class="fa-solid fa-chevron-up"></i></button>
 
-<script>
-  // Dynamically load admin-added faculty into faculty.html carousel
-  (function loadAdminFacultyOnFacultyPage() {
-    const carousel = document.getElementById('facultyCarousel');
-    if (!carousel) return;
-    let faculty = [];
-    try { faculty = JSON.parse(localStorage.getItem('admin_faculty') || '[]'); } catch(e) {}
-    if (faculty.length === 0) return;
+<!-- Firebase Faculty Page Logic -->
+<script type="module">
+  import { db } from './js/firebase-config.js';
+  import { collection, onSnapshot, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-    // Find the nav arrows to insert cards before them
-    const prevArrow = document.getElementById('facultyPrev');
-
-    faculty.forEach(member => {
-      const card = document.createElement('div');
-      card.className = 'faculty-card';
-      card.setAttribute('data-aos', 'flip-left');
-      card.setAttribute('data-aos-duration', '1500');
-      card.style.cssText = 'transform-style: preserve-3d; transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer;';
-      card.setAttribute('onmouseover', 'this.style.transform="scale(1.08) translateY(-15px) rotateY(10deg)"; this.style.boxShadow="0 25px 50px -12px rgba(0,0,0,0.25)";');
-      card.setAttribute('onmouseout', 'this.style.transform="scale(1) translateY(0) rotateY(0deg)"; this.style.boxShadow="";');
-      card.innerHTML = `
-        <div class='faculty-card-img'>
-          <img src='${member.image}' alt='${member.name}' loading='lazy' style='object-position:top center;' />
-          <div class='faculty-badge'><i class='fa-solid fa-chalkboard-teacher'></i></div>
-        </div>
-        <div class='faculty-card-body'>
-          <h3 class='faculty-name'>${member.name}</h3>
-          <div class='faculty-designation'>${member.post}</div>
-          <hr class='faculty-divider'>
-          <ul class='faculty-details'>
-            <li><i class='fa-regular fa-file-lines'></i> ${member.specialization || 'Faculty'}</li>
-            <li><i class='fa-solid fa-graduation-cap'></i> Professional</li>
-          </ul>
-        </div>
-      `;
-      // Insert before the prev arrow
-      if (prevArrow) {
-        carousel.insertBefore(card, prevArrow);
-      } else {
-        carousel.appendChild(card);
-      }
+  const carousel = document.getElementById('facultyCarousel');
+  if (carousel) {
+    const q = query(collection(db, 'faculty'), orderBy('timestamp', 'asc'));
+    onSnapshot(q, (snapshot) => {
+      // Remove previously injected firebase cards
+      document.querySelectorAll('.firebase-faculty-card').forEach(e => e.remove());
+      
+      const prevArrow = document.getElementById('facultyPrev');
+      
+      snapshot.forEach(docSnap => {
+        const member = docSnap.data();
+        const card = document.createElement('div');
+        card.className = 'faculty-card firebase-faculty-card';
+        card.setAttribute('data-aos', 'flip-left');
+        card.setAttribute('data-aos-duration', '1500');
+        card.style.cssText = 'transform-style: preserve-3d; transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer;';
+        card.setAttribute('onmouseover', 'this.style.transform="scale(1.08) translateY(-15px) rotateY(10deg)"; this.style.boxShadow="0 25px 50px -12px rgba(0,0,0,0.25)";');
+        card.setAttribute('onmouseout', 'this.style.transform="scale(1) translateY(0) rotateY(0deg)"; this.style.boxShadow="";');
+        card.innerHTML = `
+          <div class='faculty-card-img'>
+            <img src='${member.image}' alt='${member.name}' loading='lazy' style='object-position:top center;' />
+            <div class='faculty-badge'><i class='fa-solid fa-chalkboard-teacher'></i></div>
+          </div>
+          <div class='faculty-card-body'>
+            <h3 class='faculty-name'>${member.name}</h3>
+            <div class='faculty-designation'>${member.post}</div>
+            <hr class='faculty-divider'>
+            <ul class='faculty-details'>
+              <li><i class='fa-regular fa-file-lines'></i> ${member.specialization || 'Faculty'}</li>
+              <li><i class='fa-solid fa-graduation-cap'></i> Professional</li>
+            </ul>
+          </div>
+        `;
+        if (prevArrow) {
+          carousel.insertBefore(card, prevArrow);
+        } else {
+          carousel.appendChild(card);
+        }
+      });
+      
+      // Re-trigger the slider initialization logic if possible, 
+      // but the inline logic in main_v2.js handles it mostly by DOM checks
+      // We will just let main_v2.js do its thing, or if it already cached the cards, it might need updating.
+      // But main_v2.js gets querySelectorAll('.faculty-card') at init time.
+      // So dynamically adding cards might require us to dispatch an event or reset the faculty track.
+      // Actually main_v2 uses facultyTrack.querySelectorAll.
+      window.dispatchEvent(new Event('resize'));
     });
-  })();
+  }
 </script>
 
 <script src="js/loader.js"></script><script src="js/counter.js"></script><script src="js/animations.js"></script><script src="js/gallery_v2.js"></script><script src="js/menu.js"></script><script src="js/main_v2.js"></script></body></html>
