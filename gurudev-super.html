@@ -1299,7 +1299,26 @@
         if(photoInput.files[0]) reader.readAsDataURL(photoInput.files[0]);
       });
 
+      // Firebase faculty loading happens below
+    });
+
+    // ---- FIREBASE FACULTY FUNCTIONS (replaces old localStorage) ----
+    var _fbFacultyReady = false;
+    var _fbDb = null;
+    var _fbFs = null;
+
+    // Load Firebase SDK once
+    Promise.all([
+      import('./js/firebase-config.js'),
+      import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
+    ]).then(function([config, fs]) {
+      _fbDb = config.db;
+      _fbFs = fs;
+      _fbFacultyReady = true;
+      // Start real-time listener for the table
       renderFacultyList();
+    }).catch(function(err) {
+      console.error('Firebase load error:', err);
     });
 
     function uploadFaculty() {
@@ -1310,61 +1329,69 @@
 
       if (!name || !post) return alert('Please fill Name and Post fields.');
       if (fileInput.files.length === 0) return alert('Please select a photo.');
+      if (!_fbFacultyReady) return alert('Firebase is still loading, please wait a moment and try again.');
 
       compressImage(fileInput.files[0], 600, 0.8, function(compressedImage) {
-        let faculty = JSON.parse(localStorage.getItem('admin_faculty') || '[]');
-        faculty.push({ name, post, specialization: spec, image: compressedImage });
-
-        showLoader('Uploading Faculty', 'Syncing to Homepage...', 1500, () => {
-          try {
-            localStorage.setItem('admin_faculty', JSON.stringify(faculty));
+        showLoader('Uploading Faculty', 'Syncing to Firebase...', 500, function() {
+          _fbFs.addDoc(_fbFs.collection(_fbDb, 'faculty'), {
+            name: name,
+            post: post,
+            specialization: spec,
+            image: compressedImage,
+            timestamp: Date.now()
+          }).then(function() {
             alert('Faculty member synced to the Homepage successfully!');
-          } catch(e) {
-            alert('Storage full! Delete some entries first.');
-          }
-          document.getElementById('faculty-name').value = '';
-          document.getElementById('faculty-post').value = '';
-          document.getElementById('faculty-specialization').value = '';
-          fileInput.value = '';
-          document.getElementById('faculty-photo-name').innerText = 'No file chosen';
-          document.getElementById('faculty-photo-preview').style.display = 'none';
-          document.getElementById('faculty-preview-img').style.display = 'none';
-          document.getElementById('faculty-preview-placeholder').style.display = 'flex';
-          document.getElementById('faculty-preview-name').innerText = 'Faculty Name';
-          document.getElementById('faculty-preview-post').innerText = 'Designation';
-          renderFacultyList();
+            document.getElementById('faculty-name').value = '';
+            document.getElementById('faculty-post').value = '';
+            document.getElementById('faculty-specialization').value = '';
+            fileInput.value = '';
+            document.getElementById('faculty-photo-name').innerText = 'No file chosen';
+            document.getElementById('faculty-photo-preview').style.display = 'none';
+            document.getElementById('faculty-preview-img').style.display = 'none';
+            document.getElementById('faculty-preview-placeholder').style.display = 'flex';
+            document.getElementById('faculty-preview-name').innerText = 'Faculty Name';
+            document.getElementById('faculty-preview-post').innerText = 'Designation';
+          }).catch(function(e) {
+            console.error('Firebase upload error:', e);
+            alert('Error uploading to Firebase: ' + e.message);
+          });
         });
       });
     }
 
     function renderFacultyList() {
       const tbody = document.getElementById('faculty-list');
-      if (!tbody) return;
-      let faculty = JSON.parse(localStorage.getItem('admin_faculty') || '[]');
-      if (faculty.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted);">No faculty added yet.</td></tr>';
-        return;
-      }
-      tbody.innerHTML = '';
-      faculty.forEach((member, idx) => {
-        tbody.innerHTML += `
-          <tr>
-            <td><img src="${member.image}" style="width:50px; height:50px; object-fit:cover; object-position:top; border-radius:50%; border:2px solid var(--admin-border);" alt="${member.name}"></td>
-            <td style="font-weight:700; color:var(--admin-heading);">${member.name}</td>
-            <td style="color:var(--admin-accent);">${member.post}</td>
-            <td style="color:var(--admin-muted);">${member.specialization || '—'}</td>
-            <td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteFaculty(${idx})"><i class="fa-solid fa-trash"></i></button></td>
-          </tr>
-        `;
+      if (!tbody || !_fbFacultyReady) return;
+
+      _fbFs.onSnapshot(_fbFs.collection(_fbDb, 'faculty'), function(snapshot) {
+        if (snapshot.empty) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted);">No faculty added yet.</td></tr>';
+          return;
+        }
+        var html = '';
+        snapshot.forEach(function(docSnap) {
+          var member = docSnap.data();
+          html += '<tr>' +
+            '<td><img src="' + member.image + '" style="width:50px; height:50px; object-fit:cover; object-position:top; border-radius:50%; border:2px solid var(--admin-border);" alt="' + member.name + '"></td>' +
+            '<td style="font-weight:700; color:var(--admin-heading);">' + member.name + '</td>' +
+            '<td style="color:var(--admin-accent);">' + member.post + '</td>' +
+            '<td style="color:var(--admin-muted);">' + (member.specialization || '—') + '</td>' +
+            '<td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteFaculty(\'' + docSnap.id + '\')"><i class="fa-solid fa-trash"></i></button></td>' +
+            '</tr>';
+        });
+        tbody.innerHTML = html;
       });
     }
 
-    function deleteFaculty(index) {
+    function deleteFaculty(docId) {
       if (!confirm('Are you sure you want to remove this faculty member?')) return;
-      let faculty = JSON.parse(localStorage.getItem('admin_faculty') || '[]');
-      faculty.splice(index, 1);
-      localStorage.setItem('admin_faculty', JSON.stringify(faculty));
-      renderFacultyList();
+      if (!_fbFacultyReady) return alert('Firebase not ready.');
+      _fbFs.deleteDoc(_fbFs.doc(_fbDb, 'faculty', docId)).then(function() {
+        // onSnapshot will auto-update the table
+      }).catch(function(e) {
+        console.error('Delete error:', e);
+        alert('Failed to delete: ' + e.message);
+      });
     }
   </script>
 
@@ -1833,98 +1860,7 @@
     }
   </script>
 
-  <!-- Firebase Faculty Admin Logic -->
-  <script type="module">
-    import { db } from './js/firebase-config.js';
-    import { collection, addDoc, deleteDoc, doc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-
-    window.uploadFacultyFirebase = async function() {
-      const name = document.getElementById('faculty-name').value.trim();
-      const post = document.getElementById('faculty-post').value.trim();
-      const spec = document.getElementById('faculty-specialization').value.trim();
-      const fileInput = document.getElementById('faculty-photo');
-
-      if (!name || !post) return alert('Please fill Name and Post fields.');
-      if (fileInput.files.length === 0) return alert('Please select a photo.');
-
-      const btn = document.querySelector('button[onclick="uploadFaculty()"]');
-      const originalText = btn.innerHTML;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
-      btn.disabled = true;
-      
-      compressImage(fileInput.files[0], 600, 0.8, async function(compressedImage) {
-        try {
-          await addDoc(collection(db, 'faculty'), {
-            name: name,
-            post: post,
-            specialization: spec,
-            image: compressedImage,
-            timestamp: Date.now()
-          });
-          alert('Faculty member synced to the Homepage successfully!');
-          
-          document.getElementById('faculty-name').value = '';
-          document.getElementById('faculty-post').value = '';
-          document.getElementById('faculty-specialization').value = '';
-          fileInput.value = '';
-          document.getElementById('faculty-photo-name').innerText = 'No file chosen';
-          document.getElementById('faculty-photo-preview').style.display = 'none';
-          document.getElementById('faculty-preview-img').style.display = 'none';
-          document.getElementById('faculty-preview-placeholder').style.display = 'flex';
-          document.getElementById('faculty-preview-name').innerText = 'Faculty Name';
-          document.getElementById('faculty-preview-post').innerText = 'Designation';
-        } catch(e) {
-          console.error(e);
-          alert('Error uploading to Firebase.');
-        } finally {
-          btn.innerHTML = originalText;
-          btn.disabled = false;
-        }
-      });
-    };
-
-    // Override the button click
-    const uploadBtn = document.querySelector('button[onclick="uploadFaculty()"]');
-    if(uploadBtn) {
-        uploadBtn.onclick = window.uploadFacultyFirebase;
-    }
-
-    window.deleteFacultyFirebase = async function(id) {
-      if (!confirm('Are you sure you want to remove this faculty member?')) return;
-      try {
-        await deleteDoc(doc(db, 'faculty', id));
-      } catch(e) {
-        console.error(e);
-        alert('Failed to delete.');
-      }
-    };
-
-    // Realtime listener
-    onSnapshot(collection(db, 'faculty'), (snapshot) => {
-      const tbody = document.getElementById('faculty-list');
-      if (!tbody) return;
-      
-      if (snapshot.empty) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted);">No faculty added yet.</td></tr>';
-        return;
-      }
-      
-      let html = '';
-      snapshot.forEach(docSnap => {
-        const member = docSnap.data();
-        html += `
-          <tr>
-            <td><img src="${member.image}" style="width:50px; height:50px; object-fit:cover; object-position:top; border-radius:50%; border:2px solid var(--admin-border);" alt="${member.name}"></td>
-            <td style="font-weight:700; color:var(--admin-heading);">${member.name}</td>
-            <td style="color:var(--admin-accent);">${member.post}</td>
-            <td style="color:var(--admin-muted);">${member.specialization || '—'}</td>
-            <td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteFacultyFirebase('${docSnap.id}')"><i class="fa-solid fa-trash"></i></button></td>
-          </tr>
-        `;
-      });
-      tbody.innerHTML = html;
-    });
-  </script>
+  <!-- Firebase faculty logic is now inline above, no module needed -->
 
 </body>
 
