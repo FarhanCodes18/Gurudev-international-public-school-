@@ -21,6 +21,32 @@ try {
      return null; 
   });
 } catch(e) { _fbReady = Promise.resolve(null); }
+
+// Global Sync: Fetch students from Firebase and sync to localStorage
+if (_fbReady) {
+  _fbReady.then(async (fb) => {
+    if(fb) {
+      try {
+        console.log('Syncing all students from Firebase to Admin Panel...');
+        const { collection, getDocs } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+        const querySnapshot = await getDocs(collection(fb.db, 'students'));
+        let localUsers = JSON.parse(localStorage.getItem('erp_users')) || {};
+        
+        querySnapshot.forEach((doc) => {
+           // Merge Firebase student data into local
+           localUsers[doc.id] = { ...localUsers[doc.id], ...doc.data() };
+        });
+        
+        localStorage.setItem('erp_users', JSON.stringify(localUsers));
+        console.log("Firebase sync complete.");
+        
+        // Refresh tables if their view is currently active
+        if(typeof loadAdminDocuments === 'function') loadAdminDocuments();
+        if(typeof loadAdminCertificates === 'function') loadAdminCertificates();
+      } catch(e) { console.warn("Failed to sync students:", e); }
+    }
+  });
+}
 document.addEventListener('DOMContentLoaded', () => {
   // Navigation Logic
   const navItems = document.querySelectorAll('.nav-item');
