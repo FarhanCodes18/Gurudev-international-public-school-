@@ -125,21 +125,28 @@
 </div><button class="back-to-top" id="back-to-top"><i class="fa-solid fa-chevron-up"></i></button>
 
 <!-- Firebase Faculty Page Logic -->
-<script type="module">
-  import { db } from './js/firebase-config.js';
-  import { collection, onSnapshot, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-
-  const carousel = document.getElementById('facultyCarousel');
-  if (carousel) {
-    const q = query(collection(db, 'faculty'), orderBy('timestamp', 'asc'));
-    onSnapshot(q, (snapshot) => {
-      // Remove previously injected firebase cards
-      document.querySelectorAll('.firebase-faculty-card').forEach(e => e.remove());
+<script>
+  (function loadFacultyFromFirebase() {
+    const carousel = document.getElementById('facultyCarousel');
+    if (!carousel) return;
+    
+    Promise.all([
+      import('./js/firebase-config.js'),
+      import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
+    ]).then(([config, fs]) => {
+      const { collection, getDocs } = fs;
+      return getDocs(collection(config.db, 'faculty'));
+    }).then(snapshot => {
+      if (snapshot.empty) return;
+      
+      // Sort client-side
+      let facultyList = [];
+      snapshot.forEach(doc => facultyList.push(doc.data()));
+      facultyList.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
       
       const prevArrow = document.getElementById('facultyPrev');
       
-      snapshot.forEach(docSnap => {
-        const member = docSnap.data();
+      facultyList.forEach(member => {
         const card = document.createElement('div');
         card.className = 'faculty-card firebase-faculty-card';
         card.setAttribute('data-aos', 'flip-left');
@@ -169,15 +176,11 @@
         }
       });
       
-      // Re-trigger the slider initialization logic if possible, 
-      // but the inline logic in main_v2.js handles it mostly by DOM checks
-      // We will just let main_v2.js do its thing, or if it already cached the cards, it might need updating.
-      // But main_v2.js gets querySelectorAll('.faculty-card') at init time.
-      // So dynamically adding cards might require us to dispatch an event or reset the faculty track.
-      // Actually main_v2 uses facultyTrack.querySelectorAll.
       window.dispatchEvent(new Event('resize'));
+    }).catch(err => {
+      console.error("Error loading faculty:", err);
     });
-  }
+  })();
 </script>
 
 <script src="js/loader.js"></script><script src="js/counter.js"></script><script src="js/animations.js"></script><script src="js/gallery_v2.js"></script><script src="js/menu.js"></script><script src="js/main_v2.js"></script></body></html>

@@ -938,13 +938,17 @@ function loadFacultyAndInitSwiper() {
     import('./firebase-config.js'),
     import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
   ]).then(([config, fs]) => {
-    const { collection, getDocs, query, orderBy } = fs;
-    return getDocs(query(collection(config.db, 'faculty'), orderBy('timestamp', 'desc')));
+    const { collection, getDocs } = fs;
+    return getDocs(collection(config.db, 'faculty'));
   }).then(snapshot => {
     if (!snapshot.empty) {
+      // Sort client-side by timestamp (newest first)
+      let facultyList = [];
+      snapshot.forEach(doc => facultyList.push(doc.data()));
+      facultyList.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      
       let html = '';
-      snapshot.forEach(doc => {
-        const member = doc.data();
+      facultyList.forEach(member => {
         html += `
           <div class="swiper-slide">
             <div class="cse-faculty-card" style="transform-style: preserve-3d; transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer;"
