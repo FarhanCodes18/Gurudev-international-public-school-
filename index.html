@@ -1468,6 +1468,13 @@
           `;
         });
         wrapper.innerHTML = html;
+        // Re-initialize swiper if it already exists
+        if (document.querySelector(".cseSwiper") && document.querySelector(".cseSwiper").swiper) {
+            document.querySelector(".cseSwiper").swiper.destroy(true, true);
+        }
+        if (typeof initCSESwiper === "function") {
+            initCSESwiper();
+        }
       });
     }
   </script>
