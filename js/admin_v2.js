@@ -1314,8 +1314,8 @@ function editStudent(mobile) {
 // --- SCHOOL CALENDAR ---
 let adminCalDate = new Date();
 
-function loadAdminCalendar() {
-  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+async function loadAdminCalendar() {
+  const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const year = adminCalDate.getFullYear();
   const month = adminCalDate.getMonth();
   
@@ -1328,7 +1328,18 @@ function loadAdminCalendar() {
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   
+  // Load from Firebase first, fallback to localStorage
   let calendarData = JSON.parse(localStorage.getItem('erp_calendar')) || {};
+  try {
+    const fb = await _fbReady;
+    if(fb) {
+      const docSnap = await fb.fs.getDoc(fb.fs.doc(fb.db, 'school_calendar', 'data'));
+      if(docSnap.exists()) {
+        calendarData = docSnap.data();
+        localStorage.setItem('erp_calendar', JSON.stringify(calendarData));
+      }
+    }
+  } catch(e) { console.warn('Calendar Firebase load failed, using local:', e); }
   
   // Empty blocks for days before start of month
   for (let i = 0; i < firstDay; i++) {
@@ -1378,7 +1389,7 @@ function toggleCalDay(dateStr) {
   document.getElementById('calendar-modal').classList.add('active');
 }
 
-window.saveCalendarEvent = function() {
+window.saveCalendarEvent = async function() {
   let type = document.getElementById('cal-modal-type').value;
   let title = document.getElementById('cal-modal-title').value.trim();
   let calendarData = JSON.parse(localStorage.getItem('erp_calendar')) || {};
@@ -1390,6 +1401,16 @@ window.saveCalendarEvent = function() {
   }
   
   localStorage.setItem('erp_calendar', JSON.stringify(calendarData));
+  
+  // Sync to Firebase so all students see it instantly
+  try {
+    const fb = await _fbReady;
+    if(fb) {
+      await fb.fs.setDoc(fb.fs.doc(fb.db, 'school_calendar', 'data'), calendarData);
+      console.log('Calendar synced to Firebase!');
+    }
+  } catch(e) { console.error('Calendar Firebase sync failed:', e); }
+  
   document.getElementById('calendar-modal').classList.remove('active');
   loadAdminCalendar();
 }

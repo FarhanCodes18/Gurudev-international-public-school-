@@ -168,14 +168,29 @@ const modules = [
     render: () => {
       if(!window.studentCalDate) window.studentCalDate = new Date();
       
-      window.renderStudentCalendar = function() {
+      // Show loading first, then fetch from Firebase
+      setTimeout(async () => {
+        try {
+          const { doc: fbDoc, getDoc: fbGetDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+          const { db: fbDb } = await import('./firebase-config.js');
+          const docSnap = await fbGetDoc(fbDoc(fbDb, 'school_calendar', 'data'));
+          if(docSnap.exists()) {
+            window._studentCalData = docSnap.data();
+          }
+        } catch(e) { console.warn('Calendar fetch failed:', e); }
+        
+        const body = document.getElementById('modalBody');
+        if(body) body.innerHTML = window.renderStudentCalendarHTML();
+      }, 100);
+      
+      window.renderStudentCalendarHTML = function() {
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         const year = window.studentCalDate.getFullYear();
         const month = window.studentCalDate.getMonth();
         
         const firstDay = new Date(year, month, 1).getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
-        let calendarData = JSON.parse(localStorage.getItem('erp_calendar')) || {};
+        let calendarData = window._studentCalData || JSON.parse(localStorage.getItem('erp_calendar')) || {};
         
         let gridHTML = '';
         for (let i = 0; i < firstDay; i++) {
@@ -223,10 +238,10 @@ const modules = [
 
       window.changeStudentMonth = function(step) {
         window.studentCalDate.setMonth(window.studentCalDate.getMonth() + step);
-        document.getElementById('modalBody').innerHTML = window.renderStudentCalendar();
+        document.getElementById('modalBody').innerHTML = window.renderStudentCalendarHTML();
       };
       
-      return window.renderStudentCalendar();
+      return '<div style="text-align:center; padding:30px; color:#64748b;"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:2rem; margin-bottom:12px; color:var(--primary);"></i><p>Loading calendar from server...</p></div>';
     }
   },
   {
