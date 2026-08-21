@@ -1306,14 +1306,19 @@
     var _fbFacultyReady = false;
     var _fbDb = null;
     var _fbFs = null;
+    var _fbStorage = null;
+    var _fbStorageApi = null;
 
     // Load Firebase SDK once
     Promise.all([
       import('./js/firebase-config.js'),
-      import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
-    ]).then(function([config, fs]) {
+      import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js'),
+      import('https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js')
+    ]).then(function([config, fs, storageApi]) {
       _fbDb = config.db;
       _fbFs = fs;
+      _fbStorage = config.storage;
+      _fbStorageApi = storageApi;
       _fbFacultyReady = true;
       // Start real-time listener for the table
       renderFacultyList();
@@ -1332,13 +1337,26 @@
       if (!_fbFacultyReady) return alert('Firebase is still loading, please wait a moment and try again.');
 
       compressImage(fileInput.files[0], 600, 0.8, function(compressedImage) {
-        showLoader('Uploading Faculty', 'Syncing to Firebase...', 500, function() {
-          _fbFs.addDoc(_fbFs.collection(_fbDb, 'faculty'), {
-            name: name,
-            post: post,
-            specialization: spec,
-            image: compressedImage,
-            timestamp: Date.now()
+        showLoader('Uploading Faculty', 'Syncing photo to Storage...', 500, function() {
+          
+          // Upload to Firebase Storage first
+          const timestamp = Date.now();
+          const storagePath = 'faculty_photos/faculty_' + timestamp + '.jpg';
+          const imageRef = _fbStorageApi.ref(_fbStorage, storagePath);
+          
+          _fbStorageApi.uploadString(imageRef, compressedImage, 'data_url').then(function(snapshot) {
+            document.getElementById('loader-desc').innerText = 'Saving profile to database...';
+            return _fbStorageApi.getDownloadURL(snapshot.ref);
+          }).then(function(downloadURL) {
+            // Now save to Firestore with the Storage URL
+            return _fbFs.addDoc(_fbFs.collection(_fbDb, 'faculty'), {
+              name: name,
+              post: post,
+              specialization: spec,
+              image: downloadURL, // Store the HTTP URL
+              storagePath: storagePath, // Store path for easier deletion later
+              timestamp: timestamp
+            });
           }).then(function() {
             alert('Faculty member synced to the Homepage successfully!');
             document.getElementById('faculty-name').value = '';
@@ -1371,26 +1389,35 @@
         var html = '';
         snapshot.forEach(function(docSnap) {
           var member = docSnap.data();
+          var path = member.storagePath || '';
           html += '<tr>' +
             '<td><img src="' + member.image + '" style="width:50px; height:50px; object-fit:cover; object-position:top; border-radius:50%; border:2px solid var(--admin-border);" alt="' + member.name + '"></td>' +
             '<td style="font-weight:700; color:var(--admin-heading);">' + member.name + '</td>' +
             '<td style="color:var(--admin-accent);">' + member.post + '</td>' +
             '<td style="color:var(--admin-muted);">' + (member.specialization || '—') + '</td>' +
-            '<td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteFaculty(\'' + docSnap.id + '\')"><i class="fa-solid fa-trash"></i></button></td>' +
+            '<td><button class="btn-admin" style="background:#ef4444; padding:6px 12px; font-size:0.8rem;" onclick="deleteFaculty(\'' + docSnap.id + '\', \'' + path + '\')"><i class="fa-solid fa-trash"></i></button></td>' +
             '</tr>';
         });
         tbody.innerHTML = html;
       });
     }
 
-    function deleteFaculty(docId) {
+    function deleteFaculty(docId, storagePath) {
       if (!confirm('Are you sure you want to remove this faculty member?')) return;
       if (!_fbFacultyReady) return alert('Firebase not ready.');
+      
+      // Delete document first so UI updates instantly
       _fbFs.deleteDoc(_fbFs.doc(_fbDb, 'faculty', docId)).then(function() {
-        // onSnapshot will auto-update the table
+        // If there's a valid storage path, delete the image from Storage too
+        if (storagePath && storagePath.startsWith('faculty_photos/')) {
+           var imageRef = _fbStorageApi.ref(_fbStorage, storagePath);
+           _fbStorageApi.deleteObject(imageRef).catch(function(e) {
+             console.warn('Storage delete error (non-fatal):', e);
+           });
+        }
       }).catch(function(e) {
         console.error('Delete error:', e);
-        alert('Failed to delete: ' + e.message);
+        alert('Failed to delete from database: ' + e.message);
       });
     }
   </script>

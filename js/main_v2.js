@@ -938,48 +938,54 @@ function loadFacultyAndInitSwiper() {
     import('./firebase-config.js'),
     import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
   ]).then(([config, fs]) => {
-    const { collection, getDocs } = fs;
-    return getDocs(collection(config.db, 'faculty'));
-  }).then(snapshot => {
-    if (!snapshot.empty) {
-      // Sort client-side by timestamp (newest first)
-      let facultyList = [];
-      snapshot.forEach(doc => facultyList.push(doc.data()));
-      facultyList.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-      
-      let html = '';
-      facultyList.forEach(member => {
-        html += `
-          <div class="swiper-slide">
-            <div class="cse-faculty-card" style="transform-style: preserve-3d; transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer;"
-              onmouseover="this.style.transform='scale(1.08) translateY(-15px) rotateY(10deg)'; this.style.boxShadow='0 25px 50px -12px rgba(0,0,0,0.25)';"
-              onmouseout="this.style.transform='scale(1) translateY(0) rotateY(0deg)'; this.style.boxShadow='';">
-              <div class="cse-faculty-img">
-                <img src="${member.image}" alt="${member.name}" loading="lazy">
-                <div class="cse-faculty-overlay">
-                  <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
-                  <a href="#"><i class="fa-solid fa-envelope"></i></a>
+    const { collection, onSnapshot } = fs;
+    
+    // Listen in real-time
+    onSnapshot(collection(config.db, 'faculty'), (snapshot) => {
+      if (!snapshot.empty) {
+        // Sort client-side by timestamp (newest first)
+        let facultyList = [];
+        snapshot.forEach(doc => facultyList.push(doc.data()));
+        facultyList.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        
+        let html = '';
+        facultyList.forEach(member => {
+          html += `
+            <div class="swiper-slide">
+              <div class="cse-faculty-card" style="transform-style: preserve-3d; transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer;"
+                onmouseover="this.style.transform='scale(1.08) translateY(-15px) rotateY(10deg)'; this.style.boxShadow='0 25px 50px -12px rgba(0,0,0,0.25)';"
+                onmouseout="this.style.transform='scale(1) translateY(0) rotateY(0deg)'; this.style.boxShadow='';">
+                <div class="cse-faculty-img">
+                  <img src="${member.image}" alt="${member.name}" loading="lazy">
+                  <div class="cse-faculty-overlay">
+                    <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+                    <a href="#"><i class="fa-solid fa-envelope"></i></a>
+                  </div>
+                </div>
+                <div class="cse-faculty-info">
+                  <h3>${member.name}</h3>
+                  <p class="designation">${member.post}</p>
+                  <p class="specialization">${member.specialization || 'Faculty'}</p>
                 </div>
               </div>
-              <div class="cse-faculty-info">
-                <h3>${member.name}</h3>
-                <p class="designation">${member.post}</p>
-                <p class="specialization">${member.specialization || 'Faculty'}</p>
-              </div>
             </div>
-          </div>
-        `;
-      });
-      wrapper.innerHTML = html;
-    } else {
-      wrapper.innerHTML = '<div class="swiper-slide"><div style="text-align:center; padding:40px; color:#64748b;">No faculty added yet.</div></div>';
-    }
-    // NOW init swiper after data is in DOM
-    initCSESwiper();
+          `;
+        });
+        wrapper.innerHTML = html;
+      } else {
+        wrapper.innerHTML = '<div class="swiper-slide"><div style="text-align:center; padding:40px; color:#64748b;">No faculty added yet.</div></div>';
+      }
+      
+      // Re-init swiper after data changes in DOM
+      initCSESwiper();
+    }, (err) => {
+      console.error("Error loading faculty from Firebase:", err);
+      // Fallback: init swiper anyway (might be empty)
+      initCSESwiper();
+    });
+    
   }).catch(err => {
-    console.error("Error loading faculty from Firebase:", err);
-    // Fallback: init swiper anyway (might be empty)
-    initCSESwiper();
+    console.error("Firebase SDK load error:", err);
   });
 }
 
