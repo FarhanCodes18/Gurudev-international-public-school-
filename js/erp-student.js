@@ -1,4 +1,6 @@
 // --- LOCAL STORAGE DATABASE ENGINE (STUDENT DASHBOARD) ---
+import { db } from './firebase-config.js';
+import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // 1. Session Management
 const currentUserData = localStorage.getItem('erp_current_user');
@@ -17,6 +19,23 @@ if (!currentUserData) {
   
   if (user.photoURL) {
     document.getElementById('topProfileImg').src = user.photoURL;
+  }
+
+  // Prevent multiple concurrent logins for students
+  if (user.role === 'student' && user.mobile && user.sessionToken) {
+     setInterval(async () => {
+        try {
+           const studentDoc = await getDoc(doc(db, "students", user.mobile));
+           if (studentDoc.exists()) {
+              const data = studentDoc.data();
+              if (data.sessionToken && data.sessionToken !== user.sessionToken) {
+                 alert("You have been logged out because your account was accessed from another device.");
+                 localStorage.removeItem('erp_current_user');
+                 window.location.href = "student-portal.html";
+              }
+           }
+        } catch(e) {}
+     }, 10000); // Check every 10 seconds
   }
 }
 

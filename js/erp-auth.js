@@ -328,6 +328,14 @@ if (loginForm) {
       }
 
       // Create Session
+      const sessionToken = Date.now().toString(36) + Math.random().toString(36).substr(2);
+      user.sessionToken = sessionToken;
+      if(db && user.role === 'student' && user.mobile) {
+         try {
+            await setDoc(doc(db, "students", user.mobile), { sessionToken: sessionToken }, { merge: true });
+         } catch(e) { console.error("Session sync error", e); }
+      }
+
       localStorage.setItem('erp_current_user', JSON.stringify(user));
       showAlert("Login successful! Redirecting...", "success");
       
