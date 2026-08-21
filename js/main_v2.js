@@ -891,40 +891,98 @@
 
 // CSE Faculty Swiper Initialization
 function initCSESwiper() {
-  if (document.querySelector('.cseSwiper')) {
-    new Swiper('.cseSwiper', {
-      slidesPerView: 1,
-      spaceBetween: 20,
-      loop: true,
-      speed: 800,
-      watchSlidesProgress: true,
-      autoplay: {
-        delay: 2000,
-        disableOnInteraction: false,
-      },
-      pagination: {
-        el: '.swiper-pagination',
-        clickable: true,
-      },
-      navigation: {
-        nextEl: '.cse-next',
-        prevEl: '.cse-prev',
-      },
-      breakpoints: {
-        576: { slidesPerView: 2, spaceBetween: 20 },
-        768: { slidesPerView: 3, spaceBetween: 30 },
-        1024: { slidesPerView: 4, spaceBetween: 30 },
-      }
-    });
+  const swiperEl = document.querySelector('.cseSwiper');
+  if (!swiperEl) return;
+  // Destroy existing instance if any
+  if (swiperEl.swiper) {
+    swiperEl.swiper.destroy(true, true);
   }
+  // Only init if there are slides
+  const slides = swiperEl.querySelectorAll('.swiper-slide');
+  if (slides.length === 0) return;
+  new Swiper('.cseSwiper', {
+    slidesPerView: 1,
+    spaceBetween: 20,
+    loop: slides.length > 4,
+    speed: 800,
+    watchSlidesProgress: true,
+    autoplay: {
+      delay: 2000,
+      disableOnInteraction: false,
+    },
+    pagination: {
+      el: '.swiper-pagination',
+      clickable: true,
+    },
+    navigation: {
+      nextEl: '.cse-next',
+      prevEl: '.cse-prev',
+    },
+    breakpoints: {
+      576: { slidesPerView: 2, spaceBetween: 20 },
+      768: { slidesPerView: 3, spaceBetween: 30 },
+      1024: { slidesPerView: 4, spaceBetween: 30 },
+    }
+  });
 }
 
-
+// Load faculty from Firebase FIRST, then init Swiper
+function loadFacultyAndInitSwiper() {
+  const wrapper = document.getElementById('faculty-wrapper');
+  if (!wrapper) {
+    // No faculty section on this page, just skip
+    return;
+  }
+  
+  Promise.all([
+    import('./firebase-config.js'),
+    import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
+  ]).then(([config, fs]) => {
+    const { collection, getDocs, query, orderBy } = fs;
+    return getDocs(query(collection(config.db, 'faculty'), orderBy('timestamp', 'desc')));
+  }).then(snapshot => {
+    if (!snapshot.empty) {
+      let html = '';
+      snapshot.forEach(doc => {
+        const member = doc.data();
+        html += `
+          <div class="swiper-slide">
+            <div class="cse-faculty-card" style="transform-style: preserve-3d; transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer;"
+              onmouseover="this.style.transform='scale(1.08) translateY(-15px) rotateY(10deg)'; this.style.boxShadow='0 25px 50px -12px rgba(0,0,0,0.25)';"
+              onmouseout="this.style.transform='scale(1) translateY(0) rotateY(0deg)'; this.style.boxShadow='';">
+              <div class="cse-faculty-img">
+                <img src="${member.image}" alt="${member.name}" loading="lazy">
+                <div class="cse-faculty-overlay">
+                  <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+                  <a href="#"><i class="fa-solid fa-envelope"></i></a>
+                </div>
+              </div>
+              <div class="cse-faculty-info">
+                <h3>${member.name}</h3>
+                <p class="designation">${member.post}</p>
+                <p class="specialization">${member.specialization || 'Faculty'}</p>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      wrapper.innerHTML = html;
+    } else {
+      wrapper.innerHTML = '<div class="swiper-slide"><div style="text-align:center; padding:40px; color:#64748b;">No faculty added yet.</div></div>';
+    }
+    // NOW init swiper after data is in DOM
+    initCSESwiper();
+  }).catch(err => {
+    console.error("Error loading faculty from Firebase:", err);
+    // Fallback: init swiper anyway (might be empty)
+    initCSESwiper();
+  });
+}
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initCSESwiper);
+  document.addEventListener('DOMContentLoaded', loadFacultyAndInitSwiper);
 } else {
-  initCSESwiper();
+  loadFacultyAndInitSwiper();
 }
 document.addEventListener("contextmenu", (e) => e.preventDefault());
 document.addEventListener("keydown", (e) => {

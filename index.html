@@ -908,38 +908,7 @@
     </div>
   </section>
 
-  <script>
-    // Dynamically load admin-added faculty into the swiper
-    (function loadAdminFaculty() {
-      const wrapper = document.getElementById('faculty-wrapper');
-      if (!wrapper) return;
-      let faculty = [];
-      try { faculty = JSON.parse(localStorage.getItem('admin_faculty') || '[]'); } catch(e) {}
-      faculty.forEach(member => {
-        const slide = document.createElement('div');
-        slide.className = 'swiper-slide';
-        slide.innerHTML = `
-          <div class="cse-faculty-card" style="transform-style: preserve-3d; transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer;"
-            onmouseover="this.style.transform='scale(1.08) translateY(-15px) rotateY(10deg)'; this.style.boxShadow='0 25px 50px -12px rgba(0,0,0,0.25)';"
-            onmouseout="this.style.transform='scale(1) translateY(0) rotateY(0deg)'; this.style.boxShadow='';">
-            <div class="cse-faculty-img">
-              <img src="${member.image}" alt="${member.name}" loading="lazy">
-              <div class="cse-faculty-overlay">
-                <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
-                <a href="#"><i class="fa-solid fa-envelope"></i></a>
-              </div>
-            </div>
-            <div class="cse-faculty-info">
-              <h3>${member.name}</h3>
-              <p class="designation">${member.post}</p>
-              <p class="specialization">${member.specialization || 'Faculty'}</p>
-            </div>
-          </div>
-        `;
-        wrapper.appendChild(slide);
-      });
-    })();
-  </script>
+  <!-- Faculty loaded from Firebase via main_v2.js -->
 
 
   <section class="testimonials-section section-padding" aria-labelledby="testimonials-title">
@@ -1434,50 +1403,7 @@
   </style>
 
 
-  <!-- Firebase Faculty Index Logic -->
-  <script type="module">
-    import { db } from './js/firebase-config.js';
-    import { collection, onSnapshot, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-    const wrapper = document.getElementById('faculty-wrapper');
-    if (wrapper) {
-      const q = query(collection(db, 'faculty'), orderBy('timestamp', 'desc'));
-      onSnapshot(q, (snapshot) => {
-        let html = '';
-        snapshot.forEach(docSnap => {
-          const member = docSnap.data();
-          html += `
-            <div class="swiper-slide">
-              <div class="cse-faculty-card" style="transform-style: preserve-3d; transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer;"
-                onmouseover="this.style.transform='scale(1.08) translateY(-15px) rotateY(10deg)'; this.style.boxShadow='0 25px 50px -12px rgba(0,0,0,0.25)';"
-                onmouseout="this.style.transform='scale(1) translateY(0) rotateY(0deg)'; this.style.boxShadow='';">
-                <div class="cse-faculty-img">
-                  <img src="${member.image}" alt="${member.name}" loading="lazy">
-                  <div class="cse-faculty-overlay">
-                    <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
-                    <a href="#"><i class="fa-solid fa-envelope"></i></a>
-                  </div>
-                </div>
-                <div class="cse-faculty-info">
-                  <h3>${member.name}</h3>
-                  <p class="designation">${member.post}</p>
-                  <p class="specialization">${member.specialization || 'Faculty'}</p>
-                </div>
-              </div>
-            </div>
-          `;
-        });
-        wrapper.innerHTML = html;
-        // Re-initialize swiper if it already exists
-        if (document.querySelector(".cseSwiper") && document.querySelector(".cseSwiper").swiper) {
-            document.querySelector(".cseSwiper").swiper.destroy(true, true);
-        }
-        if (typeof initCSESwiper === "function") {
-            initCSESwiper();
-        }
-      });
-    }
-  </script>
 
 </body>
 </html>
