@@ -1337,6 +1337,10 @@ async function loadAdminCalendar() {
       if(docSnap.exists()) {
         calendarData = docSnap.data();
         localStorage.setItem('erp_calendar', JSON.stringify(calendarData));
+      } else if(Object.keys(calendarData).length > 0) {
+        // Auto-migrate: localStorage has data but Firebase doesn't — push it!
+        await fb.fs.setDoc(fb.fs.doc(fb.db, 'school_calendar', 'data'), calendarData);
+        console.log('Calendar auto-migrated to Firebase!');
       }
     }
   } catch(e) { console.warn('Calendar Firebase load failed, using local:', e); }
