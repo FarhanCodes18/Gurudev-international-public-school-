@@ -1103,11 +1103,11 @@ function populateCertStudents() {
   let count = 0;
   
   Object.values(users).forEach(u => {
-    if(u.role === 'student' && u.class === cls) {
+    if(u.role === 'student' && String(u.class) === String(cls)) {
       const opt = document.createElement('option');
       opt.value = u.name; // Use name as value for easy access, or ID
       opt.dataset.name = u.name;
-      opt.textContent = u.name + " (ID: " + u.id + ")";
+      opt.textContent = u.name + " (ID: " + (u.studentId || u.mobile || 'N/A') + ")";
       studentSelect.appendChild(opt);
       count++;
     }
