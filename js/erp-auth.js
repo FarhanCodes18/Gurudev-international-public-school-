@@ -1,5 +1,5 @@
 import { auth, db, storage } from './firebase-config.js';
-import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { doc, setDoc, getDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { ref, uploadString, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
@@ -105,7 +105,16 @@ if (registerForm) {
 
       let users = JSON.parse(localStorage.getItem('erp_users')) || {};
       
-      // Check if mobile or email already exists
+      // Check Firebase first if available
+      if (db) {
+         const mobileDoc = await getDoc(doc(db, "students", mobile));
+         if (mobileDoc.exists()) throw new Error("Mobile number already registered.");
+         const q = query(collection(db, "students"), where("email", "==", email));
+         const snap = await getDocs(q);
+         if (!snap.empty) throw new Error("Email address already registered.");
+      }
+      
+      // Check if mobile or email already exists in local fallback
       const existingUsers = Object.values(users);
       const isMobileExists = existingUsers.some(u => u.mobile === mobile);
       const isEmailExists = existingUsers.some(u => u.email === email);

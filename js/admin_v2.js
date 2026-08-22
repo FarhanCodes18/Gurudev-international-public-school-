@@ -505,49 +505,66 @@ function loadAttendanceRegister() {
   }
 
   showLoader('Loading Register', 'Fetching records for ' + classVal, 800, () => {
-    let users = JSON.parse(localStorage.getItem('erp_users')) || {};
-    
-    let studentArray = [];
-    if(classVal === 'Staff') {
-      studentArray = Object.values(users).filter(s => s.role === 'staff');
-    } else {
-      studentArray = Object.values(users).filter(s => s.role === 'student' && s.class === classVal);
-    }
-    
-    const listBody = document.getElementById('attendance-list');
-    listBody.innerHTML = '';
-    
-    if(studentArray.length === 0) {
-      listBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--admin-muted); padding:30px;">No records found for ' + classVal + '.</td></tr>';
-    } else {
-      studentArray.forEach(st => {
-        let status = 'Present'; // default if not marked
-        if(st.attendanceRecords && st.attendanceRecords[dateObj]) {
-          status = st.attendanceRecords[dateObj];
-        }
+    _fbReady.then(async fb => {
+      let studentArray = [];
+      if (fb) {
+         const { collection, getDocs, query, where } = fb.fs;
+         if (classVal === 'Staff') {
+            const q = query(collection(fb.db, 'students'), where('role', '==', 'staff'));
+            const snap = await getDocs(q);
+            snap.forEach(d => studentArray.push(d.data()));
+         } else {
+            const q = query(collection(fb.db, 'students'), where('class', '==', classVal));
+            const snap = await getDocs(q);
+            snap.forEach(d => {
+                const data = d.data();
+                if(data.role === 'student') studentArray.push(data);
+            });
+         }
+      } else {
+         let users = JSON.parse(localStorage.getItem('erp_users')) || {};
+         if(classVal === 'Staff') {
+           studentArray = Object.values(users).filter(s => s.role === 'staff');
+         } else {
+           studentArray = Object.values(users).filter(s => s.role === 'student' && String(s.class) === String(classVal));
+         }
+      }
+      
+      const listBody = document.getElementById('attendance-list');
+      listBody.innerHTML = '';
+      
+      if(studentArray.length === 0) {
+        listBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--admin-muted); padding:30px;">No records found for ' + classVal + '.</td></tr>';
+      } else {
+        studentArray.forEach(st => {
+          let status = 'Present'; // default if not marked
+          if(st.attendanceRecords && st.attendanceRecords[dateObj]) {
+            status = st.attendanceRecords[dateObj];
+          }
 
-        listBody.innerHTML += `
-          <tr data-mobile="${st.mobile}">
-            <td><div style="display:flex; align-items:center; gap:10px;">
-              <img src="${st.photoURL || 'https://ui-avatars.com/api/?name='+st.name}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
-              <strong>${st.name}</strong>
-            </div></td>
-            <td>${st.studentId}</td>
-            <td>
-              <select class="admin-select attendance-status" style="padding:5px; width:120px;">
-                <option value="Present" ${status === 'Present' ? 'selected' : ''}>Present</option>
-                <option value="Absent" ${status === 'Absent' ? 'selected' : ''}>Absent</option>
-                <option value="Holiday" ${status === 'Holiday' ? 'selected' : ''}>Holiday</option>
-                <option value="Sunday" ${status === 'Sunday' ? 'selected' : ''}>Sunday</option>
-              </select>
-            </td>
-          </tr>
-        `;
-      });
-    }
-    
-    document.getElementById('register-subtitle').innerText = `(Class ${classVal} - ${dateObj})`;
-    document.getElementById('attendance-register-container').style.display = 'block';
+          listBody.innerHTML += `
+            <tr data-mobile="${st.mobile}">
+              <td><div style="display:flex; align-items:center; gap:10px;">
+                <img src="${st.photoURL || 'https://ui-avatars.com/api/?name='+st.name}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
+                <strong>${st.name}</strong>
+              </div></td>
+              <td>${st.studentId}</td>
+              <td>
+                <select class="admin-select attendance-status" style="padding:5px; width:120px;">
+                  <option value="Present" ${status === 'Present' ? 'selected' : ''}>Present</option>
+                  <option value="Absent" ${status === 'Absent' ? 'selected' : ''}>Absent</option>
+                  <option value="Holiday" ${status === 'Holiday' ? 'selected' : ''}>Holiday</option>
+                  <option value="Sunday" ${status === 'Sunday' ? 'selected' : ''}>Sunday</option>
+                </select>
+              </td>
+            </tr>
+          `;
+        });
+      }
+      
+      document.getElementById('register-subtitle').innerText = `(Class ${classVal} - ${dateObj})`;
+      document.getElementById('attendance-register-container').style.display = 'block';
+    });
   });
 }
 
@@ -559,29 +576,47 @@ function saveAttendance() {
     let users = JSON.parse(localStorage.getItem('erp_users')) || {};
     const rows = document.querySelectorAll('#attendance-list tr[data-mobile]');
     
-    let markedCount = 0;
-    rows.forEach(row => {
-      const mobile = row.getAttribute('data-mobile');
-      const status = row.querySelector('.attendance-status').value;
-      
-      if(users[mobile]) {
-        if(!users[mobile].attendanceRecords) {
-          users[mobile].attendanceRecords = {};
+    _fbReady.then(async fb => {
+        let markedCount = 0;
+        for(let i=0; i<rows.length; i++) {
+          let row = rows[i];
+          const mobile = row.getAttribute('data-mobile');
+          const status = row.querySelector('.attendance-status').value;
+          
+          if(users[mobile]) {
+            if(!users[mobile].attendanceRecords) {
+              users[mobile].attendanceRecords = {};
+            }
+            users[mobile].attendanceRecords[dateObj] = status;
+            
+            let records = Object.values(users[mobile].attendanceRecords).filter(s => s === 'Present' || s === 'Absent');
+            let presents = records.filter(s => s === 'Present').length;
+            users[mobile].attendance = records.length > 0 ? Math.round((presents / records.length) * 100) : 0;
+          }
+          
+          if(fb) {
+            const docRef = fb.fs.doc(fb.db, 'students', mobile);
+            const docSnap = await fb.fs.getDoc(docRef);
+            if(docSnap.exists()) {
+                const data = docSnap.data();
+                const attRecs = data.attendanceRecords || {};
+                attRecs[dateObj] = status;
+                
+                let records = Object.values(attRecs).filter(s => s === 'Present' || s === 'Absent');
+                let presents = records.filter(s => s === 'Present').length;
+                let finalAtt = records.length > 0 ? Math.round((presents / records.length) * 100) : 0;
+                
+                await fb.fs.updateDoc(docRef, { attendanceRecords: attRecs, attendance: finalAtt });
+                markedCount++;
+            }
+          } else {
+             if(users[mobile]) markedCount++; 
+          }
         }
-        users[mobile].attendanceRecords[dateObj] = status;
-        
-        // Recalculate total attendance percentage
-        let records = Object.values(users[mobile].attendanceRecords).filter(s => s === 'Present' || s === 'Absent');
-        let presents = records.filter(s => s === 'Present').length;
-        users[mobile].attendance = records.length > 0 ? Math.round((presents / records.length) * 100) : 0;
-        
-        markedCount++;
-      }
+        localStorage.setItem('erp_users', JSON.stringify(users));
+        alert('Successfully saved attendance for ' + markedCount + ' records.');
+        renderAttendanceAnalytics(); // Update donut chart instantly
     });
-
-    localStorage.setItem('erp_users', JSON.stringify(users));
-    alert('Successfully saved attendance for ' + markedCount + ' records.');
-    renderAttendanceAnalytics(); // Update donut chart instantly
   });
 }
 
