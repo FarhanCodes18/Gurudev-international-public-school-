@@ -62,6 +62,28 @@ function renderMockData() {
   });
 }
 
+window.deleteERPStudent = async (mobile, studentId) => {
+  if(!confirm(`Are you sure you want to completely delete the student account for ${studentId} (Mobile: ${mobile})? This cannot be undone.`)) return;
+  try {
+    const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+    if(db) {
+       await deleteDoc(doc(db, "users", mobile));
+       try { await deleteDoc(doc(db, "students", mobile)); } catch(e){} 
+    }
+    
+    let users = JSON.parse(localStorage.getItem('erp_users')) || {};
+    if(users[mobile]) {
+      delete users[mobile];
+      localStorage.setItem('erp_users', JSON.stringify(users));
+    }
+    
+    alert(`Student deleted successfully.`);
+  } catch (error) {
+    console.error("Error deleting student:", error);
+    alert("Failed to delete student: " + error.message);
+  }
+};
+
 if (app) {
   onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -103,6 +125,7 @@ if (app) {
                 <td>
                   <button class="action-btn" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
                   <button class="action-btn" title="Approve"><i class="fa-solid fa-check"></i></button>
+                  <button class="action-btn" title="Delete" style="color:#ef4444;" onclick="deleteERPStudent('${data.mobile}', '${data.studentId}')"><i class="fa-solid fa-trash"></i></button>
                 </td>
               </tr>
             `;

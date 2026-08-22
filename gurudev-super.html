@@ -1533,6 +1533,27 @@
     const allStudentsTbody = document.getElementById('all-students-list');
     const dashTotal = document.getElementById('dash-total-students');
     
+    window.deleteRegisteredStudent = async (mobile, studentId) => {
+      if(!confirm(`Are you sure you want to completely delete the student account for ${studentId} (Mobile: ${mobile})? This removes them from Firebase and Local Database permanently.`)) return;
+      try {
+        if(db) {
+           await deleteDoc(doc(db, "students", mobile));
+           try { await deleteDoc(doc(db, "users", mobile)); } catch(e){} // Delete from users collection if exists
+        }
+        
+        let users = JSON.parse(localStorage.getItem('erp_users')) || {};
+        if(users[mobile]) {
+          delete users[mobile];
+          localStorage.setItem('erp_users', JSON.stringify(users));
+        }
+        
+        alert(`Student deleted successfully.`);
+      } catch (error) {
+        console.error("Error deleting student:", error);
+        alert("Failed to delete student: " + error.message);
+      }
+    };
+
     if(tbody && db) {
       const q = query(collection(db, 'students'));
       onSnapshot(q, (snapshot) => {
@@ -1581,6 +1602,7 @@
                 <td><span class="status-badge status-active">Active</span></td>
                 <td style="display:flex; gap:8px;">
                   <button class="btn-admin-outline" style="padding:6px 12px; font-size:0.75rem;" onclick="alert('Profile view locked in Admin Panel')">View</button>
+                  <button class="btn-admin-outline" style="padding:6px 12px; font-size:0.75rem; border-color:var(--admin-danger); color:var(--admin-danger);" onclick="deleteRegisteredStudent('${data.mobile}', '${data.studentId}')"><i class="fa-solid fa-trash"></i> Delete</button>
                 </td>
               </tr>
              `;
