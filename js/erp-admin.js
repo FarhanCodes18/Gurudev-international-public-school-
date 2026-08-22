@@ -55,7 +55,7 @@ function renderMockData() {
         <td>
           <button class="action-btn" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
           <button class="action-btn" title="Approve"><i class="fa-solid fa-check"></i></button>
-          <button class="action-btn" title="Delete" style="color:#ef4444;"><i class="fa-solid fa-trash"></i></button>
+          <button class="action-btn" title="Permanent Delete" style="color:#ef4444;"><i class="fa-solid fa-trash"></i></button>
         </td>
       </tr>
     `;
@@ -125,7 +125,7 @@ if (app) {
                 <td>
                   <button class="action-btn" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
                   <button class="action-btn" title="Approve"><i class="fa-solid fa-check"></i></button>
-                  <button class="action-btn" title="Delete" style="color:#ef4444;" onclick="deleteERPStudent('${data.mobile}', '${data.studentId}')"><i class="fa-solid fa-trash"></i></button>
+                  <button class="action-btn" title="Permanent Delete" style="color:#ef4444;" onclick="deleteERPStudent('${data.mobile}', '${data.studentId}')"><i class="fa-solid fa-trash"></i></button>
                 </td>
               </tr>
             `;
