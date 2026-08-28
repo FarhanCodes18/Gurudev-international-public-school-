@@ -1300,7 +1300,7 @@
       // Firebase faculty loading happens below
     });
 
-    // ---- FIREBASE FACULTY FUNCTIONS (replaces old localStorage) ----
+    // ---- FIREBASE FACULTY FUNCTIONS ----
     var _fbFacultyReady = false;
     var _fbDb = null;
     var _fbFs = null;
@@ -1313,64 +1313,138 @@
       _fbDb = config.db;
       _fbFs = fs;
       _fbFacultyReady = true;
+      console.log('[Faculty Manager] Firebase connected successfully.');
       // Start real-time listener for the table
       renderFacultyList();
     }).catch(function(err) {
-      console.error('Firebase load error:', err);
+      console.error('[Faculty Manager] Firebase load error:', err);
+      alert('Firebase connection failed! Faculty features will not work. Error: ' + (err.message || err));
     });
 
+    // Aggressive image compressor for Firestore (keeps under 200KB Base64)
+    function compressFacultyImage(file, callback) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var img = new Image();
+        img.onload = function() {
+          var canvas = document.createElement('canvas');
+          var maxWidth = 400;
+          var w = img.width;
+          var h = img.height;
+          if(w > maxWidth) {
+            h = Math.round(h * maxWidth / w);
+            w = maxWidth;
+          }
+          canvas.width = w;
+          canvas.height = h;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          // Start with 0.5 quality, reduce if still too large
+          var quality = 0.5;
+          var compressed = canvas.toDataURL('image/jpeg', quality);
+          // If still over 500KB, reduce further
+          while(compressed.length > 500000 && quality > 0.1) {
+            quality -= 0.1;
+            compressed = canvas.toDataURL('image/jpeg', quality);
+          }
+          console.log('[Faculty] Compressed image size: ' + Math.round(compressed.length / 1024) + 'KB (quality: ' + quality.toFixed(1) + ')');
+          callback(compressed);
+        };
+        img.onerror = function() {
+          alert('Error loading image. Please try a different photo.');
+        };
+        img.src = e.target.result;
+      };
+      reader.onerror = function() {
+        alert('Error reading file. Please try again.');
+      };
+      reader.readAsDataURL(file);
+    }
+
     function uploadFaculty() {
-      const name = document.getElementById('faculty-name').value.trim();
-      const post = document.getElementById('faculty-post').value.trim();
-      const spec = document.getElementById('faculty-specialization').value.trim();
-      const fileInput = document.getElementById('faculty-photo');
+      var name = document.getElementById('faculty-name').value.trim();
+      var post = document.getElementById('faculty-post').value.trim();
+      var spec = document.getElementById('faculty-specialization').value.trim();
+      var fileInput = document.getElementById('faculty-photo');
 
       if (!name || !post) return alert('Please fill Name and Post fields.');
       if (fileInput.files.length === 0) return alert('Please select a photo.');
       if (!_fbFacultyReady) return alert('Firebase is still loading, please wait a moment and try again.');
 
-      compressImage(fileInput.files[0], 600, 0.8, function(compressedImage) {
-        showLoader('Uploading Faculty', 'Syncing to Firebase...', 500, function() {
-          _fbFs.addDoc(_fbFs.collection(_fbDb, 'faculty'), {
-            name: name,
-            post: post,
-            specialization: spec,
-            image: compressedImage, // Back to Base64 for instant fix
-            timestamp: Date.now()
-          }).then(function() {
-            alert('Faculty member synced to the Homepage successfully!');
-            document.getElementById('faculty-name').value = '';
-            document.getElementById('faculty-post').value = '';
-            document.getElementById('faculty-specialization').value = '';
-            fileInput.value = '';
-            document.getElementById('faculty-photo-name').innerText = 'No file chosen';
-            document.getElementById('faculty-photo-preview').style.display = 'none';
-            document.getElementById('faculty-preview-img').style.display = 'none';
-            document.getElementById('faculty-preview-placeholder').style.display = 'flex';
-            document.getElementById('faculty-preview-name').innerText = 'Faculty Name';
-            document.getElementById('faculty-preview-post').innerText = 'Designation';
-          }).catch(function(e) {
-            console.error('Firebase upload error:', e);
-            alert('Error uploading to Firebase: ' + e.message);
-          });
+      // Use aggressive faculty-specific compressor
+      compressFacultyImage(fileInput.files[0], function(compressedImage) {
+        // Validate size before uploading
+        var sizeKB = Math.round(compressedImage.length / 1024);
+        console.log('[Faculty] Final image Base64 size: ' + sizeKB + 'KB');
+        
+        if(sizeKB > 900) {
+          alert('Photo is too large even after compression (' + sizeKB + 'KB). Please use a smaller photo (under 2MB recommended).');
+          return;
+        }
+
+        var uploadBtn = document.querySelector('[onclick="uploadFaculty()"]');
+        if(uploadBtn) {
+          uploadBtn.disabled = true;
+          uploadBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+        }
+
+        _fbFs.addDoc(_fbFs.collection(_fbDb, 'faculty'), {
+          name: name,
+          post: post,
+          specialization: spec,
+          image: compressedImage,
+          timestamp: Date.now()
+        }).then(function() {
+          console.log('[Faculty] Successfully uploaded: ' + name);
+          alert('✅ Faculty member "' + name + '" synced to the Homepage successfully!');
+          document.getElementById('faculty-name').value = '';
+          document.getElementById('faculty-post').value = '';
+          document.getElementById('faculty-specialization').value = '';
+          fileInput.value = '';
+          document.getElementById('faculty-photo-name').innerText = 'No file chosen';
+          document.getElementById('faculty-photo-preview').style.display = 'none';
+          document.getElementById('faculty-preview-img').style.display = 'none';
+          document.getElementById('faculty-preview-placeholder').style.display = 'flex';
+          document.getElementById('faculty-preview-name').innerText = 'Faculty Name';
+          document.getElementById('faculty-preview-post').innerText = 'Designation';
+        }).catch(function(e) {
+          console.error('[Faculty] Firebase upload error:', e);
+          var errorMsg = e.message || String(e);
+          if(errorMsg.includes('PERMISSION_DENIED') || errorMsg.includes('permission')) {
+            alert('❌ PERMISSION ERROR: Firebase security rules are blocking writes to the "faculty" collection. Please update your Firestore rules to allow writes.\n\nGo to Firebase Console > Firestore > Rules and set:\nrules_version = \'2\';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /{document=**} {\n      allow read, write: if true;\n    }\n  }\n}');
+          } else if(errorMsg.includes('quota') || errorMsg.includes('size')) {
+            alert('❌ QUOTA/SIZE ERROR: The document is too large for Firestore. Try using a smaller photo.');
+          } else {
+            alert('❌ Error uploading to Firebase: ' + errorMsg);
+          }
+        }).finally(function() {
+          if(uploadBtn) {
+            uploadBtn.disabled = false;
+            uploadBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Upload & Sync to Homepage';
+          }
         });
       });
     }
 
     function renderFacultyList() {
-      const tbody = document.getElementById('faculty-list');
+      var tbody = document.getElementById('faculty-list');
       if (!tbody || !_fbFacultyReady) return;
 
+      console.log('[Faculty] Starting real-time listener on "faculty" collection...');
+      
       _fbFs.onSnapshot(_fbFs.collection(_fbDb, 'faculty'), function(snapshot) {
+        console.log('[Faculty] Snapshot received. Total documents: ' + snapshot.size);
+        
         if (snapshot.empty) {
-          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted);">No faculty added yet.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-muted); padding:30px;"><i class="fa-solid fa-user-slash" style="font-size:2rem; margin-bottom:10px; display:block; color:#cbd5e1;"></i>No faculty added yet.<br><small style="color:#94a3b8;">Add faculty members using the form above.</small></td></tr>';
           return;
         }
         var html = '';
         snapshot.forEach(function(docSnap) {
           var member = docSnap.data();
+          console.log('[Faculty] Loaded: ' + member.name + ' (ID: ' + docSnap.id + ')');
           html += '<tr>' +
-            '<td><img src="' + member.image + '" style="width:50px; height:50px; object-fit:cover; object-position:top; border-radius:50%; border:2px solid var(--admin-border);" alt="' + member.name + '"></td>' +
+            '<td><img src="' + member.image + '" style="width:50px; height:50px; object-fit:cover; object-position:top; border-radius:50%; border:2px solid var(--admin-border);" alt="' + member.name + '" onerror="this.src=\'https://ui-avatars.com/api/?name=' + encodeURIComponent(member.name) + '&background=2563eb&color=fff\'"></td>' +
             '<td style="font-weight:700; color:var(--admin-heading);">' + member.name + '</td>' +
             '<td style="color:var(--admin-accent);">' + member.post + '</td>' +
             '<td style="color:var(--admin-muted);">' + (member.specialization || '—') + '</td>' +
@@ -1378,6 +1452,14 @@
             '</tr>';
         });
         tbody.innerHTML = html;
+      }, function(error) {
+        console.error('[Faculty] Snapshot listener error:', error);
+        var errorMsg = error.message || String(error);
+        if(errorMsg.includes('PERMISSION_DENIED') || errorMsg.includes('permission')) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#ef4444; padding:30px;"><i class="fa-solid fa-lock" style="font-size:2rem; margin-bottom:10px; display:block;"></i><strong>Permission Denied!</strong><br><small>Firebase Firestore rules are blocking access to the "faculty" collection.<br>Please update your Firestore Security Rules in the Firebase Console.</small></td></tr>';
+        } else {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#ef4444; padding:30px;">Error loading faculty: ' + errorMsg + '</td></tr>';
+        }
       });
     }
 
@@ -1385,9 +1467,10 @@
       if (!confirm('Are you sure you want to remove this faculty member?')) return;
       if (!_fbFacultyReady) return alert('Firebase not ready.');
       _fbFs.deleteDoc(_fbFs.doc(_fbDb, 'faculty', docId)).then(function() {
+        console.log('[Faculty] Deleted document: ' + docId);
         // onSnapshot will auto-update the table
       }).catch(function(e) {
-        console.error('Delete error:', e);
+        console.error('[Faculty] Delete error:', e);
         alert('Failed to delete: ' + e.message);
       });
     }
