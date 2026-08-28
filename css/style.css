@@ -4272,5 +4272,5 @@ img, video, iframe, canvas, svg, embed, object {
   .cse-next i, .cse-prev i { font-size: 1rem; }
   .cse-prev { left: 5px !important; }
   .cse-next { right: 5px !important; }
-  .cse-faculty-img { height: 380px; }
+  .cse-faculty-img { height: 280px; }
 }
