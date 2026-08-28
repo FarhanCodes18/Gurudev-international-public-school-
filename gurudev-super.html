@@ -1673,7 +1673,7 @@
              const passwordDisplay = data.password ? `<span style="font-family:monospace; background:#e2e8f0; padding:2px 6px; border-radius:4px; font-size:0.8rem;">${data.password}</span>` : '<span style="color:#ef4444">Not Set</span>';
              
              allStudentsTbody.innerHTML += `
-              <tr>
+              <tr class="student-row" data-name="${(data.name || '').toLowerCase()}" data-class="${data.class || ''}">
                 <td class="student-cell">
                   <img src="${photoURL}" alt="Photo" style="width:36px; height:36px; border-radius:50%; object-fit:cover;">
                   <div><h5 style="margin:0; font-size:0.9rem;">${data.name}</h5><p style="margin:0; font-size:0.75rem; color:#64748b;">${data.email || 'N/A'}</p></div>
@@ -1691,11 +1691,66 @@
              `;
           }
         });
+
+        // Populate class-wise stats
+        const statsContainer = document.getElementById('class-wise-stats');
+        if(statsContainer && window.superAdminAllStudents) {
+          const classCounts = {};
+          window.superAdminAllStudents.forEach(s => {
+            const c = s.class || 'Unknown';
+            classCounts[c] = (classCounts[c] || 0) + 1;
+          });
+          
+          statsContainer.innerHTML = Object.keys(classCounts).sort().map(c => 
+            `<div style="background:var(--admin-surface); border:1px solid var(--admin-border); padding:10px 20px; border-radius:12px; font-weight:600; box-shadow:var(--shadow-sm);">
+               <span style="color:var(--admin-muted); font-size:0.85rem;">Class ${c}:</span> 
+               <span style="color:var(--admin-heading); font-size:1.1rem; margin-left:8px;">${classCounts[c]}</span>
+             </div>`
+          ).join('');
+        }
+
       }, (error) => {
         console.error("Firebase read error:", error);
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">Failed to connect to Firebase. Check config.</td></tr>';
       });
     }
+
+    // Expose filter function to window for the HTML oninput/onchange events
+    window.filterRegisteredStudents = () => {
+      const nameQuery = (document.getElementById('filter-student-name')?.value || '').toLowerCase();
+      const classQuery = document.getElementById('filter-student-class')?.value || '';
+      
+      const rows = document.querySelectorAll('#all-students-list .student-row');
+      let visibleCount = 0;
+      
+      rows.forEach(row => {
+        const name = row.getAttribute('data-name');
+        const sClass = row.getAttribute('data-class');
+        
+        const matchName = name.includes(nameQuery);
+        const matchClass = classQuery === '' || sClass === classQuery;
+        
+        if(matchName && matchClass) {
+          row.style.display = '';
+          visibleCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+      
+      // If no results match
+      let noResultRow = document.getElementById('no-students-found');
+      if(visibleCount === 0) {
+        if(!noResultRow) {
+          const tbody = document.getElementById('all-students-list');
+          tbody.innerHTML += `<tr id="no-students-found"><td colspan="7" style="text-align:center; color:var(--admin-muted); padding:30px;">No students match your filter criteria.</td></tr>`;
+        } else {
+          noResultRow.style.display = '';
+        }
+      } else {
+        if(noResultRow) noResultRow.style.display = 'none';
+      }
+    };
 
     // --- Transport Routes Logic ---
     const routeForm = document.getElementById('addRouteForm');
