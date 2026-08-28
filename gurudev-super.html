@@ -1642,20 +1642,38 @@
       onSnapshot(q, (snapshot) => {
         window.superAdminAllStudents = [];
         
-        // Update Total Students Dashboard Card
-        if(dashTotal) dashTotal.innerText = snapshot.size;
+        // 1. Get legacy students from localStorage
+        let localUsers = JSON.parse(localStorage.getItem('erp_users')) || {};
+        let localStudents = Object.values(localUsers).filter(u => u.role === 'student');
+
+        // 2. Get new students from Firebase
+        let fbStudents = [];
+        snapshot.forEach(doc => fbStudents.push(doc.data()));
+
+        // 3. Merge them, prioritizing Firebase data if mobile matches
+        let mergedMap = {};
+        localStudents.forEach(s => { if(s.mobile) mergedMap[s.mobile] = s; });
+        fbStudents.forEach(s => { if(s.mobile) mergedMap[s.mobile] = s; });
         
-        if (snapshot.empty) {
+        let finalStudents = Object.values(mergedMap);
+        window.superAdminAllStudents = finalStudents;
+        
+        // Update Total Students Dashboard Card
+        if(dashTotal) dashTotal.innerText = finalStudents.length;
+        
+        if (finalStudents.length === 0) {
           tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No students registered yet.</td></tr>';
           if(allStudentsTbody) allStudentsTbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No students registered yet.</td></tr>';
+          
+          const statsContainer = document.getElementById('class-wise-stats');
+          if(statsContainer) statsContainer.innerHTML = '<p style="color:var(--admin-muted); padding:20px;">No students registered yet.</p>';
           return;
         }
+        
         tbody.innerHTML = '';
         if(allStudentsTbody) allStudentsTbody.innerHTML = '';
         
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-          window.superAdminAllStudents.push(data);
+        finalStudents.forEach((data) => {
           const photo = data.photoURL || 'assets/images/default-avatar.png';
           tbody.innerHTML += `
             <tr>
@@ -1692,21 +1710,21 @@
           }
         });
 
-        // Populate class-wise stats
+        // Populate class-wise stats matching admin_v2.js style
         const statsContainer = document.getElementById('class-wise-stats');
-        if(statsContainer && window.superAdminAllStudents) {
+        if(statsContainer) {
           const classCounts = {};
-          window.superAdminAllStudents.forEach(s => {
+          finalStudents.forEach(s => {
             const c = s.class || 'Unknown';
             classCounts[c] = (classCounts[c] || 0) + 1;
           });
           
-          statsContainer.innerHTML = Object.keys(classCounts).sort().map(c => 
-            `<div style="background:var(--admin-surface); border:1px solid var(--admin-border); padding:10px 20px; border-radius:12px; font-weight:600; box-shadow:var(--shadow-sm);">
-               <span style="color:var(--admin-muted); font-size:0.85rem;">Class ${c}:</span> 
-               <span style="color:var(--admin-heading); font-size:1.1rem; margin-left:8px;">${classCounts[c]}</span>
-             </div>`
-          ).join('');
+          statsContainer.innerHTML = Object.keys(classCounts).sort().map(c => `
+            <div style="background:var(--admin-surface); padding:15px 25px; border-radius:12px; border:1px solid var(--admin-border); flex:1; min-width:150px; text-align:center; box-shadow:var(--shadow-sm);">
+              <h4 style="color:var(--admin-muted); font-size:0.85rem; margin-bottom:5px;">Class ${c}</h4>
+              <h2 style="color:var(--admin-primary); margin:0; font-size:2rem; font-weight:800;">${classCounts[c]} <span style="font-size:0.8rem; color:var(--admin-muted); font-weight:600;">Students</span></h2>
+            </div>
+          `).join('');
         }
 
       }, (error) => {
