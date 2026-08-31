@@ -254,50 +254,55 @@
   /* ===========================
      TESTIMONIALS SLIDER
   =========================== */
-  const testSlider = document.querySelector('.testimonials-slider');
-  if (testSlider) {
-    const track  = testSlider.querySelector('.testimonials-track');
-    const cards  = testSlider.querySelectorAll('.testimonial-card');
-    const total  = cards.length;
-    let current  = 0;
-    let autoInterval;
+  window.initTestimonialSlider = function() {
+    const testSlider = document.querySelector('.testimonials-slider');
+    if (testSlider) {
+      const track  = testSlider.querySelector('.testimonials-track');
+      const cards  = testSlider.querySelectorAll('.testimonial-card');
+      const total  = cards.length;
+      let current  = 0;
+      
+      if (testSlider._autoInterval) clearInterval(testSlider._autoInterval);
 
-    function getPerPage() {
-      if (window.innerWidth < 768) return 1;
-      if (window.innerWidth < 992) return 2;
-      return 3;
-    }
+      function getPerPage() {
+        if (window.innerWidth < 768) return 1;
+        if (window.innerWidth < 992) return 2;
+        return 3;
+      }
 
-    function goToTest(index) {
-      if(total === 0) return;
-      const perPage = getPerPage();
-      const max     = Math.max(0, total - perPage);
-      current = Math.max(0, Math.min(index, max));
-      const cardWidth = cards[0] ? cards[0].offsetWidth + 24 : 0; // + gap
-      if(track && cardWidth > 0) track.style.transform = `translateX(${-current * cardWidth}px)`;
-    }
+      function goToTest(index) {
+        if(total === 0) return;
+        const perPage = getPerPage();
+        const max     = Math.max(0, total - perPage);
+        current = Math.max(0, Math.min(index, max));
+        const cardWidth = cards[0] ? cards[0].offsetWidth + 24 : 0; // + gap
+        if(track && cardWidth > 0) track.style.transform = `translateX(${-current * cardWidth}px)`;
+      }
 
-    autoInterval = setInterval(() => {
-      if(total === 0) return;
-      const perPage = getPerPage();
-      const max     = Math.max(0, total - perPage);
-      current = current >= max ? 0 : current + 1;
-      goToTest(current);
-    }, 4000);
-
-    testSlider.addEventListener('mouseenter', () => clearInterval(autoInterval));
-    testSlider.addEventListener('mouseleave', () => {
-      autoInterval = setInterval(() => {
+      let autoInterval = setInterval(() => {
         if(total === 0) return;
         const perPage = getPerPage();
         const max     = Math.max(0, total - perPage);
         current = current >= max ? 0 : current + 1;
         goToTest(current);
       }, 4000);
-    });
+      testSlider._autoInterval = autoInterval;
 
-    window.addEventListener('resize', () => goToTest(current));
-  }
+      testSlider.addEventListener('mouseenter', () => clearInterval(testSlider._autoInterval));
+      testSlider.addEventListener('mouseleave', () => {
+        testSlider._autoInterval = setInterval(() => {
+          if(total === 0) return;
+          const perPage = getPerPage();
+          const max     = Math.max(0, total - perPage);
+          current = current >= max ? 0 : current + 1;
+          goToTest(current);
+        }, 4000);
+      });
+
+      window.addEventListener('resize', () => goToTest(current));
+    }
+  };
+  window.initTestimonialSlider();
 
   // (Reviews block moved up)
 
