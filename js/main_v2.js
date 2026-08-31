@@ -655,7 +655,7 @@
            role: role,
            rating: rating,
            text: message,
-           status: 'pending',
+           status: 'approved',
            date: new Date().toLocaleDateString('en-GB'),
            timestamp: Date.now()
          });
@@ -666,12 +666,12 @@
             <div style="text-align:center; padding: 40px 20px;">
               <i class="fa-solid fa-circle-check" style="font-size: 4rem; color: #16a34a; margin-bottom: 20px;"></i>
               <h3 style="margin-bottom: 15px; color: var(--heading-color);">Thank You!</h3>
-              <p style="color: var(--text-color); margin-bottom: 30px;">Your feedback has been successfully submitted and is pending admin approval.</p>
+              <p style="color: var(--text-color); margin-bottom: 30px;">Your feedback has been successfully submitted and is now visible!</p>
               <button class="btn btn-primary" onclick="document.getElementById('feedback-modal').classList.remove('active'); setTimeout(() => window.location.reload(), 300);">Close</button>
             </div>
           `;
         } else {
-          alert("Thank you for your feedback! It has been submitted to the admin for approval.");
+          alert("Thank you for your feedback! It has been successfully submitted and is now visible on the page.");
           feedbackForm.reset();
           document.getElementById('feedback-modal').classList.remove('active');
         }
