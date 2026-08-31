@@ -13,14 +13,14 @@
    2. CSS CUSTOM PROPERTIES (DESIGN TOKENS)
    ============================================================ */
 :root {
-  /* Brand Colors */
-  --primary:       #1e56a0;
-  --primary-dark:  #144078;
-  --primary-light: #3573c9;
+  /* Brand Colors - Elegant Slate */
+  --primary:       #334155; /* Slate 700 */
+  --primary-dark:  #1e293b; /* Slate 800 */
+  --primary-light: #475569; /* Slate 600 */
   --secondary:     #FFFFFF;
-  --accent:        #e0b62b;
-  --accent-dark:   #c29c1d;
-  --accent-light:  #ffd54f;
+  --accent:        #d4af37; /* Elegant Gold */
+  --accent-dark:   #b5952f;
+  --accent-light:  #e6c86a;
 
   /* Semantic Colors */
   --success:  #22c55e;
@@ -29,11 +29,11 @@
   --info:     #3b82f6;
 
   /* Backgrounds */
-  --bg-dark:    #11294d;
-  --bg-darker:  #0c1d38;
-  --bg-section: #f0f4fc;
+  --bg-dark:    #f8fafc; /* Very light slate */
+  --bg-darker:  #f1f5f9; /* Light slate */
+  --bg-section: #ffffff;
   --bg-card:    #ffffff;
-  --bg-glass:   rgba(255, 255, 255, 0.08);
+  --bg-glass:   rgba(0, 0, 0, 0.05);
 
   /* Text */
   --text-primary:   #0d1b2a;
@@ -442,7 +442,7 @@ input, textarea, select {
    10. TOP ANNOUNCEMENT BAR
    ============================================================ */
 .top-bar {
-  background: linear-gradient(90deg, var(--bg-dark) 0%, var(--primary-dark) 50%, var(--bg-dark) 100%);
+  background: var(--bg-darker);
   padding: 10px 0;
   position: relative;
   overflow: hidden;
@@ -481,7 +481,7 @@ input, textarea, select {
   gap: 8px;
   font-size: 0.82rem;
   font-weight: 500;
-  color: var(--text-light);
+  color: var(--text-primary);
   padding: 0 36px;
 }
 
@@ -2270,9 +2270,10 @@ textarea.form-control { resize: vertical; min-height: 120px; }
    ============================================================ */
 .footer {
   background: var(--bg-dark);
-  color: var(--secondary);
+  color: var(--text-secondary);
   position: relative;
   overflow: hidden;
+  border-top: 1px solid var(--border-color);
 }
 
 .footer::before {
@@ -2319,7 +2320,7 @@ textarea.form-control { resize: vertical; min-height: 120px; }
   font-family: var(--font-accent);
   font-size: 0.9rem;
   font-weight: 800;
-  color: var(--secondary);
+  color: var(--text-primary);
 }
 
 .footer-logo-text .tagline {
@@ -4273,4 +4274,38 @@ img, video, iframe, canvas, svg, embed, object {
   .cse-prev { left: 5px !important; }
   .cse-next { right: 5px !important; }
   .cse-faculty-img { height: 280px; }
+}
+
+/* ============================================================
+   LIGHT THEME FOOTER TEXT FIX
+   ============================================================ */
+.footer-desc, 
+.footer-link, 
+.footer-contact-info li, 
+.footer-bottom p, 
+.footer-bottom-links a,
+.footer-logo-text .tagline {
+  color: var(--text-secondary) !important;
+}
+
+.footer-link:hover, 
+.footer-bottom-links a:hover {
+  color: var(--primary) !important;
+}
+
+.footer-title,
+.footer-logo-text .name {
+  color: var(--text-primary) !important;
+}
+
+.footer-contact-info i {
+  color: var(--primary) !important;
+}
+
+.footer-social-link {
+  color: #ffffff !important;
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
 }

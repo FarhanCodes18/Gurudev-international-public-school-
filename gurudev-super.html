@@ -1287,6 +1287,25 @@
     </div>
   </div>
 
+  <!-- PHOTO PREVIEW MODAL -->
+  <div class="admin-loader-overlay" id="photo-preview-modal" onclick="this.classList.remove('active')">
+    <div style="max-width: 90%; max-height: 90vh; display: flex; align-items: center; justify-content: center; position: relative;" onclick="event.stopPropagation()">
+      <button onclick="document.getElementById('photo-preview-modal').classList.remove('active')" style="position:absolute; top:-40px; right:0px; background:transparent; border:none; font-size:2rem; color:#fff; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+      <img id="full-photo-preview" src="" style="max-width: 100%; max-height: 80vh; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); object-fit: contain;">
+    </div>
+  </div>
+
+  <script>
+    window.viewFullPhoto = (url) => {
+      if (!url || url.includes('default-avatar.png') || url.includes('ui-avatars.com')) {
+        alert('No custom photo uploaded by student.');
+        return;
+      }
+      document.getElementById('full-photo-preview').src = url;
+      document.getElementById('photo-preview-modal').classList.add('active');
+    };
+  </script>
+
   <!-- CALENDAR EDIT MODAL -->
   <div class="admin-loader-overlay" id="calendar-modal">
     <div style="background:var(--admin-surface); padding:30px; border-radius:var(--radius-xl); width:400px; max-width:90%; position:relative; box-shadow:var(--shadow-lg); border: 1px solid var(--admin-border);">
@@ -1818,7 +1837,7 @@
           const photo = data.photoURL || 'assets/images/default-avatar.png';
           tbody.innerHTML += `
             <tr>
-              <td><img src="${photo}" style="width:36px; height:36px; border-radius:50%; object-fit:cover;"></td>
+              <td><img src="${photo}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; cursor:pointer; border: 2px solid var(--admin-accent);" onclick="window.viewFullPhoto('${photo}')" title="Click to view full photo"></td>
               <td style="font-weight:600; color:var(--primary);">${data.studentId || 'N/A'}</td>
               <td>${data.name || 'Unknown'}</td>
               <td>${data.mobile || 'N/A'}</td>
@@ -1834,7 +1853,7 @@
              allStudentsTbody.innerHTML += `
               <tr class="student-row" data-name="${(data.name || '').toLowerCase()}" data-class="${data.class || ''}">
                 <td class="student-cell">
-                  <img src="${photoURL}" alt="Photo" style="width:36px; height:36px; border-radius:50%; object-fit:cover;">
+                  <img src="${photoURL}" alt="Photo" style="width:50px; height:50px; border-radius:50%; object-fit:cover; cursor:pointer; border: 2px solid var(--admin-primary);" onclick="window.viewFullPhoto('${photoURL}')" title="Click to view full photo">
                   <div><h5 style="margin:0; font-size:0.9rem;">${data.name}</h5><p style="margin:0; font-size:0.75rem; color:#64748b;">${data.email || 'N/A'}</p></div>
                 </td>
                 <td style="font-family: monospace; font-weight: 600; color:var(--admin-accent);">${data.studentId || 'N/A'}</td>

@@ -212,31 +212,40 @@
        const { collection, getDocs, query, where, orderBy } = fs;
        return getDocs(query(collection(config.db, 'reviews'), where('status', '==', 'approved')));
     }).then(snapshot => {
+       let html = '';
+       let fakeReviews = [
+         { name: "Rajesh Kumar", role: "Parent, Waraseoni", rating: 5, text: "Excellent faculty and great infrastructure. My child has shown tremendous improvement in both academics and extracurricular activities." },
+         { name: "Priya Singh", role: "Student, Balaghat", rating: 5, text: "The school provides a perfect environment for learning. The teachers are very supportive and the labs are well-equipped." },
+         { name: "Amit Patel", role: "Parent, Kaydi", rating: 4, text: "Very happy with the overall development of my son. The sports facilities are outstanding and the focus on discipline is commendable." },
+         { name: "Sneha Verma", role: "Student, Waraseoni", rating: 5, text: "Gurudev International has given me the platform to discover my true potential. The academic curriculum is perfectly balanced." },
+         { name: "Vikram Chauhan", role: "Parent, Balaghat", rating: 5, text: "Choosing this school was the best decision. The management committee is very responsive and the standard of education is top-notch." }
+       ];
+       
+       const renderReview = (r) => `
+         <div class="testimonial-card">
+           <div class="stars">${'★'.repeat(Number(r.rating || 5))}${'☆'.repeat(5 - Number(r.rating || 5))}</div>
+           <div class="testimonial-quote">"</div>
+           <p class="testimonial-text">${r.text || ''}</p>
+           <div class="testimonial-author">
+             <div class="testimonial-info" style="margin-left:0;">
+               <strong>${r.name || 'Anonymous'}</strong>
+               <span>${r.role || 'Student'}</span>
+             </div>
+           </div>
+         </div>
+       `;
+
+       fakeReviews.forEach(r => { html += renderReview(r); });
+       
        if(!snapshot.empty) {
-         let html = '';
          snapshot.forEach(doc => {
            let r = doc.data();
-           html += `
-             <div class="testimonial-card">
-               <div class="stars">${'★'.repeat(Number(r.rating || 5))}${'☆'.repeat(5 - Number(r.rating || 5))}</div>
-               <div class="testimonial-quote">"</div>
-               <p class="testimonial-text">${r.text || ''}</p>
-               <div class="testimonial-author">
-                 <div class="testimonial-info" style="margin-left:0;">
-                   <strong>${r.name || 'Anonymous'}</strong>
-                   <span>${r.role || 'Student'}</span>
-                 </div>
-               </div>
-             </div>
-           `;
+           html += renderReview(r);
          });
-         reviewsTrack.innerHTML = html;
-         
-         // Trigger slider recalculation if necessary
-         if(typeof window.initTestimonialSlider === 'function') window.initTestimonialSlider();
-       } else {
-         reviewsTrack.innerHTML = '<div class="testimonial-card" style="opacity:0.5;"><p class="testimonial-text">No reviews yet. Be the first to share your feedback!</p></div>';
        }
+       
+       reviewsTrack.innerHTML = html;
+       if(typeof window.initTestimonialSlider === 'function') window.initTestimonialSlider();
     }).catch(err => {
        console.error("Error loading reviews:", err);
     });

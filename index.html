@@ -374,132 +374,51 @@
   <!-- ====================================================
        HERO SECTION
   ==================================================== -->
-  <section class="hero" id="hero" aria-label="Hero Section">
-
-    <!-- Particle Canvas -->
-    <canvas id="particle-canvas" aria-hidden="true"></canvas>
-
-    <!-- Floating Shapes -->
-    <div class="hero-shapes" aria-hidden="true"></div>
-
-    <!-- Blobs -->
-    <div class="hero-blob hero-blob-1" aria-hidden="true"></div>
-    <div class="hero-blob hero-blob-2" aria-hidden="true"></div>
-
-    <!-- Slider -->
-    <div class="hero-slider">
-
-      <div class="hero-slide active">
-        <img src="assets/images/school_building_main.png" alt="Gurudev International Public School building" loading="eager" />
-        <div class="hero-slide-overlay"></div>
-      </div>
-
-      <div class="hero-slide">
-        <img src="assets/images/school_building_2.png" alt="Gurudev International campus view" loading="lazy" />
-        <div class="hero-slide-overlay"></div>
-      </div>
-
-      <div class="hero-slide">
-        <img src="assets/images/school_building_main.png" alt="Gurudev International Public School" loading="lazy" style="transform: scaleX(-1);" />
-        <div class="hero-slide-overlay"></div>
-      </div>
-
-      <!-- Prev / Next Arrows -->
-      <div class="hero-arrows" aria-label="Slider controls">
-        <button class="hero-arrow prev" aria-label="Previous slide"><i class="fa-solid fa-chevron-left"></i></button>
-        <button class="hero-arrow next" aria-label="Next slide"><i class="fa-solid fa-chevron-right"></i></button>
-      </div>
-
-    </div>
-
-    <!-- Hero Content -->
-    <div class="hero-content">
-      <div class="container">
-        <div class="hero-text">
-
-          <div class="hero-badge">
-            <span class="badge-dot"></span>
-            CBSE Affiliated &bull; Est. 2005 &bull; NAAC Accredited
-          </div>
-
-          <h1 class="hero-title">
-            Shaping Tomorrow's <br/>
-            <span class="highlight"
-              data-typing='["Leaders", "Innovators", "Changemakers", "Champions"]'
-              data-type-speed="90"
-              data-pause="2000">
-            </span>
-          </h1>
-
-          <p class="hero-subtitle">
-            Gurudev International Public School — where academic excellence meets character
-            development, fostering a generation of globally competent leaders.
-          </p>
-
-          <div class="hero-buttons">
-            <a href="admission.html" class="btn btn-gold btn-lg">
-              <i class="fa-solid fa-star"></i> Apply for Admission
-            </a>
-            <a href="campus.html" class="btn btn-glass btn-lg">
-              <i class="fa-solid fa-panorama"></i> Explore Campus
-            </a>
-            <a href="erp-login.html" class="btn btn-outline-white btn-lg">
-              <i class="fa-solid fa-lock"></i> Student Portal
-            </a>
-          </div>
-
+  <section class="hero-banner" id="hero" aria-label="Hero Section" style="position: relative; width: 100%; height: clamp(40vh, 75vh, 800px); min-height: 250px;">
+    <div class="swiper mainBannerSwiper" style="width: 100%; height: 100%;">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide">
+          <img src="assets/images/school_building_main.png" alt="Banner 1" style="width: 100%; height: 100%; object-fit: cover;" loading="eager" />
+        </div>
+        <div class="swiper-slide">
+          <img src="assets/images/school_building_2.png" alt="Banner 2" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy" />
+        </div>
+        <div class="swiper-slide">
+          <img src="assets/images/school_building_main.png" alt="Banner 3" style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);" loading="lazy" />
+        </div>
+        <div class="swiper-slide">
+          <img src="assets/images/science_lab.png" alt="Banner 4" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy" />
         </div>
       </div>
+      <div class="swiper-pagination"></div>
+      <div class="swiper-button-next" style="color: #ffffff;"></div>
+      <div class="swiper-button-prev" style="color: #ffffff;"></div>
     </div>
-
-    <!-- Slider Dots -->
-    <div class="hero-controls" aria-label="Slide indicators">
-      <button class="hero-dot active" aria-label="Slide 1"></button>
-      <button class="hero-dot"        aria-label="Slide 2"></button>
-      <button class="hero-dot"        aria-label="Slide 3"></button>
-    </div>
-
-    <!-- Scroll Indicator -->
-    <div class="scroll-indicator" aria-hidden="true">
-      <div class="scroll-mouse"><div class="scroll-mouse-dot"></div></div>
-      <span class="scroll-text">Scroll</span>
-    </div>
-
-    <!-- Stats Bar -->
-    <div class="hero-stats" aria-label="Quick statistics">
-      <div class="container">
-        <div class="hero-stats-grid">
-          <div class="hero-stat">
-            <div class="hero-stat-number"
-                 data-counter data-target="5000" data-suffix="+" data-duration="2500">5000+</div>
-            <div class="hero-stat-label">Students Enrolled</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-number"
-                 data-counter data-target="45" data-suffix="+" data-duration="2000">45+</div>
-            <div class="hero-stat-label">Expert Faculty</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-number"
-                 data-counter data-target="20" data-suffix="+" data-duration="1800">20+</div>
-            <div class="hero-stat-label">Years of Excellence</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-number"
-                 data-counter data-target="100" data-suffix="%" data-duration="1500">100%</div>
-            <div class="hero-stat-label">Board Pass Rate</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Wave Divider -->
-    <div class="hero-wave" aria-hidden="true">
-      <svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-        <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z" fill="#ffffff" />
-      </svg>
-    </div>
-
+    
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        if (typeof Swiper !== 'undefined') {
+          new Swiper('.mainBannerSwiper', {
+            slidesPerView: 1,
+            loop: true,
+            effect: 'fade',
+            fadeEffect: { crossFade: true },
+            autoplay: {
+              delay: 3500,
+              disableOnInteraction: false,
+            },
+            pagination: {
+              el: '.mainBannerSwiper .swiper-pagination',
+              clickable: true,
+            },
+            navigation: {
+              nextEl: '.mainBannerSwiper .swiper-button-next',
+              prevEl: '.mainBannerSwiper .swiper-button-prev',
+            },
+          });
+        }
+      });
+    </script>
   </section>
 
   <!-- ====================================================
@@ -709,63 +628,184 @@
         <div class="section-label">Leadership Messages</div>
         <h2 class="section-title" id="messages-title">Words from Our <span>Leadership</span></h2>
       </div>
-              <div class="messages-grid">
+      <div class="swiper leadershipSwiper" style="padding-bottom: 50px; overflow: hidden; position: relative;">
+        <div class="swiper-wrapper">
 
-        <!-- Vice President -->
-        <div class="message-card" data-aos="fade-up" data-aos-delay="100">
-          <div class="message-card-top">
-            <img src="assets/images/ravi meghe.png" alt="Vice President" class="message-avatar" style="width:auto;height:120px;border-radius:12px;object-fit:cover;" loading="lazy" />
-            <div class="message-name">Mr. Ravi Meghe</div>
-            <div class="message-title">Vice President</div>
-            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; font-weight: 500;">Gurudev Shikshan Samiti</div>
+          <!-- Vice President -->
+          <div class="swiper-slide" style="height: auto;">
+            <div class="message-card" style="height: 100%;">
+              <div class="message-card-top">
+                <img src="assets/images/ravi meghe.png" alt="Vice President" class="message-avatar" style="width:auto;height:120px;border-radius:12px;object-fit:cover;" loading="lazy" />
+                <div class="message-name">Mr. Ravi Meghe</div>
+                <div class="message-title">Vice President</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; font-weight: 500;">Gurudev Shikshan Samiti</div>
+              </div>
+              <div class="message-card-body">
+                <p class="message-text">
+                  "We are committed to providing an environment where every student is empowered to discover their true potential. Our focus remains on holistic development and academic excellence."
+                </p>
+                <a href="management-committee.html" class="message-read-more">
+                  Read Full Message <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
+            </div>
           </div>
-          <div class="message-card-body">
-            <p class="message-text">
-              "We are committed to providing an environment where every student is empowered to discover their true potential. Our focus remains on holistic development and academic excellence."
-            </p>
-            <a href="management-committee.html" class="message-read-more">
-              Read Full Message <i class="fa-solid fa-arrow-right"></i>
-            </a>
+
+          <!-- Treasurer -->
+          <div class="swiper-slide" style="height: auto;">
+            <div class="message-card" style="height: 100%;">
+              <div class="message-card-top">
+                <img src="assets/images/chandrakant tiwari.png" alt="Treasurer" class="message-avatar" style="width:auto;height:120px;border-radius:12px;object-fit:cover;" loading="lazy" />
+                <div class="message-name">Mr. Chandrakant Tiwari</div>
+                <div class="message-title">Treasurer</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; font-weight: 500;">Gurudev Shikshan Samiti</div>
+              </div>
+              <div class="message-card-body">
+                <p class="message-text">
+                  "Our goal is to ensure that the resources of this institution are utilized effectively to provide world-class facilities, fostering an atmosphere conducive to modern learning."
+                </p>
+                <a href="management-committee.html" class="message-read-more">
+                  Read Full Message <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
+            </div>
           </div>
+
+          <!-- Secretary -->
+          <div class="swiper-slide" style="height: auto;">
+            <div class="message-card" style="height: 100%;">
+              <div class="message-card-top">
+                <img src="assets/images/turkar.png" alt="Secretary" class="message-avatar" style="width:auto;height:120px;border-radius:12px;object-fit:cover;" loading="lazy" />
+                <div class="message-name">Mr. Thanendra Turkar</div>
+                <div class="message-title">Secretary</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; font-weight: 500;">Gurudev Shikshan Samiti</div>
+              </div>
+              <div class="message-card-body">
+                <p class="message-text">
+                  "We envision Gurudev International Public School as a beacon of knowledge and character building. We strive to instill core values that help students navigate the complexities of tomorrow."
+                </p>
+                <a href="management-committee.html" class="message-read-more">
+                  Read Full Message <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Joint Secretary -->
+          <div class="swiper-slide" style="height: auto;">
+            <div class="message-card" style="height: 100%;">
+              <div class="message-card-top">
+                <img src="assets/images/Madhuri Meghe.png" alt="Joint Secretary" class="message-avatar" style="width:auto;height:120px;border-radius:12px;object-fit:cover;" loading="lazy" />
+                <div class="message-name">Mrs. Madhuri Meghe</div>
+                <div class="message-title">Joint Secretary</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; font-weight: 500;">Gurudev Shikshan Samiti</div>
+              </div>
+              <div class="message-card-body">
+                <p class="message-text">
+                  "Education should inspire innovation and kindness alike. I am proud to be part of a team that continuously works towards creating a nurturing and inclusive environment for all students."
+                </p>
+                <a href="management-committee.html" class="message-read-more">
+                  Read Full Message <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Executive Board Member 1 -->
+          <div class="swiper-slide" style="height: auto;">
+            <div class="message-card" style="height: 100%;">
+              <div class="message-card-top">
+                <img src="assets/images/harshit.png" alt="Executive Board Member" class="message-avatar" style="width:auto;height:120px;border-radius:12px;object-fit:cover;" loading="lazy" />
+                <div class="message-name">Mr. Harshit Turkar</div>
+                <div class="message-title">Executive Board Member</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; font-weight: 500;">Gurudev Shikshan Samiti</div>
+              </div>
+              <div class="message-card-body">
+                <p class="message-text">
+                  "By integrating modern technology and innovative teaching methodologies, we aim to prepare our students to face global challenges with confidence and resilience."
+                </p>
+                <a href="management-committee.html" class="message-read-more">
+                  Read Full Message <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Executive Board Member 2 -->
+          <div class="swiper-slide" style="height: auto;">
+            <div class="message-card" style="height: 100%;">
+              <div class="message-card-top">
+                <img src="assets/images/aparna tiwari.png" alt="Executive Board Member" class="message-avatar" style="width:auto;height:120px;border-radius:12px;object-fit:cover;" loading="lazy" />
+                <div class="message-name">Mrs. Aparna Tiwari</div>
+                <div class="message-title">Executive Board Member</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; font-weight: 500;">Gurudev Shikshan Samiti</div>
+              </div>
+              <div class="message-card-body">
+                <p class="message-text">
+                  "We focus on ensuring that our curriculum and extracurricular activities are balanced, giving every child the opportunity to explore their interests and excel in their chosen paths."
+                </p>
+                <a href="management-committee.html" class="message-read-more">
+                  Read Full Message <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Principal -->
+          <div class="swiper-slide" style="height: auto;">
+            <div class="message-card" style="height: 100%;">
+              <div class="message-card-top">
+                <img src="assets/images/principal_new.png" alt="School Principal" class="message-avatar" style="width:auto;height:120px;border-radius:12px;object-fit:contain;" loading="lazy" />
+                <div class="message-name">Dr. Anshuman Tiwari</div>
+                <div class="message-title">Principal</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; font-weight: 500;">M.A. (English Lit.), M.A. (Edu), B.Ed, Ph.D.</div>
+              </div>
+              <div class="message-card-body">
+                <p class="message-text">
+                  "With over 25 years of experience in education, I believe that every day is a new opportunity to learn, grow, and become the best version of yourselves. At Gurudev International, we are committed to walking alongside you on this extraordinary journey of discovery and achievement."
+                </p>
+                <a href="principal-message.html" class="message-read-more">
+                  Read Full Message <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+
         </div>
-
-        <!-- Treasurer -->
-        <div class="message-card" data-aos="fade-up" data-aos-delay="200">
-          <div class="message-card-top">
-            <img src="assets/images/chandrakant tiwari.png" alt="Treasurer" class="message-avatar" style="width:auto;height:120px;border-radius:12px;object-fit:cover;" loading="lazy" />
-            <div class="message-name">Mr. Chandrakant Tiwari</div>
-            <div class="message-title">Treasurer</div>
-            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; font-weight: 500;">Gurudev Shikshan Samiti</div>
-          </div>
-          <div class="message-card-body">
-            <p class="message-text">
-              "Our goal is to ensure that the resources of this institution are utilized effectively to provide world-class facilities, fostering an atmosphere conducive to modern learning."
-            </p>
-            <a href="management-committee.html" class="message-read-more">
-              Read Full Message <i class="fa-solid fa-arrow-right"></i>
-            </a>
-          </div>
-        </div>
-
-        <!-- Principal -->
-        <div class="message-card" data-aos="fade-up" data-aos-delay="300">
-          <div class="message-card-top">
-            <img src="assets/images/principal_new.png" alt="School Principal" class="message-avatar" style="width:auto;height:120px;border-radius:12px;object-fit:contain;" loading="lazy" />
-            <div class="message-name">Dr. Anshuman Tiwari</div>
-            <div class="message-title">Principal</div>
-            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; font-weight: 500;">M.A. (English Lit.), M.A. (Edu), B.Ed, Ph.D.</div>
-          </div>
-          <div class="message-card-body">
-            <p class="message-text">
-              "With over 25 years of experience in education, I believe that every day is a new opportunity to learn, grow, and become the best version of yourselves. At Gurudev International, we are committed to walking alongside you on this extraordinary journey of discovery and achievement."
-            </p>
-            <a href="principal-message.html" class="message-read-more">
-              Read Full Message <i class="fa-solid fa-arrow-right"></i>
-            </a>
-          </div>
-        </div>
-
+        <div class="swiper-pagination"></div>
       </div>
+      <style>
+        /* Fix to ensure slides are fully visible and not faded out by global swiper css */
+        .leadershipSwiper .swiper-slide {
+          opacity: 1 !important;
+          transform: none !important;
+          pointer-events: auto !important;
+        }
+      </style>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          if (typeof Swiper !== 'undefined') {
+            new Swiper('.leadershipSwiper', {
+              slidesPerView: 1,
+              spaceBetween: 30,
+              loop: true,
+              autoplay: {
+                delay: 3500,
+                disableOnInteraction: false,
+              },
+              pagination: {
+                el: '.leadershipSwiper .swiper-pagination',
+                clickable: true,
+              },
+              breakpoints: {
+                640: { slidesPerView: 1 },
+                768: { slidesPerView: 2 },
+                1024: { slidesPerView: 3 },
+              }
+            });
+          }
+        });
+      </script>
     </div>
   </section>
 
