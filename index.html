@@ -67,6 +67,18 @@
 
   <style>
     /* ── Home-page specific overrides ── */
+    .hero-banner {
+      position: relative; 
+      width: 100%; 
+      height: clamp(40vh, 75vh, 800px); 
+      min-height: 250px;
+    }
+    @media (max-width: 768px) {
+      .hero-banner {
+        height: 35vh;
+        min-height: 200px;
+      }
+    }
     .home-video-bg {
       background: linear-gradient(135deg, var(--bg-dark), var(--primary-dark));
     }
@@ -374,7 +386,7 @@
   <!-- ====================================================
        HERO SECTION
   ==================================================== -->
-  <section class="hero-banner" id="hero" aria-label="Hero Section" style="position: relative; width: 100%; height: clamp(40vh, 75vh, 800px); min-height: 250px;">
+  <section class="hero-banner" id="hero" aria-label="Hero Section">
     <div class="swiper mainBannerSwiper" style="width: 100%; height: 100%;">
       <div class="swiper-wrapper">
         <div class="swiper-slide">
