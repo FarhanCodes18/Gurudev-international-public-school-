@@ -943,7 +943,7 @@ input, textarea, select {
   right: -100%;
   width: min(380px, 100vw);
   height: 100vh;
-  background: var(--bg-dark);
+  background: #1e293b;
   z-index: var(--z-overlay);
   overflow-y: auto;
   transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -955,10 +955,11 @@ input, textarea, select {
 
 .drawer-header {
   padding: 20px 24px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.15);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background: rgba(0,0,0,0.15);
 }
 
 .drawer-logo {
@@ -970,20 +971,27 @@ input, textarea, select {
 
 .drawer-logo span { color: var(--accent); }
 
+.drawer-logo-img {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+}
+
 .drawer-close {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.12);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--secondary);
+  color: #ffffff;
+  font-size: 1.1rem;
   cursor: pointer;
   transition: var(--transition-fast);
 }
 
-.drawer-close:hover { background: rgba(255,255,255,0.15); }
+.drawer-close:hover { background: rgba(255,255,255,0.22); }
 
 .drawer-nav { padding: 16px 0; flex: 1; }
 
@@ -1012,8 +1020,8 @@ input, textarea, select {
 .drawer-submenu {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.4s ease;
-  background: rgba(0,0,0,0.2);
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(0,0,0,0.25);
 }
 
 .drawer-submenu.open { max-height: 500px; }
@@ -1032,10 +1040,11 @@ input, textarea, select {
 
 .drawer-footer {
   padding: 20px 24px;
-  border-top: 1px solid rgba(255,255,255,0.08);
+  border-top: 1px solid rgba(255,255,255,0.15);
   display: flex;
   flex-direction: column;
   gap: 10px;
+  background: rgba(0,0,0,0.1);
 }
 
 /* ============================================================
