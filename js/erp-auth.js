@@ -256,7 +256,7 @@ if (loginForm) {
                await setDoc(doc(db, "admins", "admin"), {
                   role: "admin",
                   mobile: "gurudev@gmail.com",
-                  password: "Gurudev@2008",
+                  password: "2008",
                   name: "Super Admin"
                });
             }
@@ -265,7 +265,7 @@ if (loginForm) {
             try {
                if(auth) {
                  await signInWithEmailAndPassword(auth, "gurudev@gmail.com", password);
-               } else if (password !== 'Gurudev@2008' && password !== 'admin') {
+               } else if (password !== '2008' && password !== 'admin') {
                  throw new Error("auth missing");
                }
                let adminData = { role: "admin", name: "Super Admin", mobile: "gurudev@gmail.com" };
@@ -278,7 +278,7 @@ if (loginForm) {
                return;
             } catch (err) {
                // Fallback if auth fails
-               let correctPassword = "Gurudev@2008";
+               let correctPassword = "2008";
                if (adminDoc.exists() && adminDoc.data().password) correctPassword = adminDoc.data().password;
                
                if (password === correctPassword || password === 'admin') {
@@ -291,7 +291,7 @@ if (loginForm) {
             }
          } else {
             // Fallback if Firebase not setup
-            if(password === 'Gurudev@2008' || password === 'admin') {
+            if(password === '2008' || password === 'admin') {
                localStorage.setItem('erp_current_admin', JSON.stringify({ role: "admin", name: "Super Admin", mobile: "gurudev@gmail.com" }));
                window.location.href = "erp-admin.html";
                return;

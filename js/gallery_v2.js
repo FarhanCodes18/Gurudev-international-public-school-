@@ -1,5 +1,5 @@
 /* ============================================================
-   GALLERY.JS — Masonry Lightbox Gallery
+   GALLERY.JS — Masonry Lightbox Gallery (No Fallback Data)
    ============================================================ */
 
 (function() {
@@ -79,30 +79,58 @@
   const grid = document.querySelector('.gallery-grid');
   if (grid) {
     grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#888;">Loading gallery...</div>';
+    
+    const showEmptyMessage = (isError = false) => {
+      grid.innerHTML = `
+        <div style="grid-column:1/-1; text-align:center; padding:60px 20px; color:var(--text-muted); font-size:1.1rem;">
+          <i class="fa-solid fa-images" style="font-size:3.5rem; margin-bottom:20px; opacity:0.3;"></i><br>
+          <span style="font-weight:600; color:var(--text-primary); font-size:1.2rem;">Gallery is currently blank.</span><br>
+          <span style="font-size:0.95rem; display:inline-block; margin-top:8px;">Images will appear here once uploaded by the admin.</span>
+          ${isError ? '<br><br><span style="font-size:0.8rem; color:#ef4444;">(Database connection failed)</span>' : ''}
+        </div>
+      `;
+    };
+
     Promise.all([
       import('./firebase-config.js'),
       import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
     ]).then(([config, fs]) => {
       const { collection, getDocs, query, orderBy } = fs;
       getDocs(query(collection(config.db, 'school_gallery'), orderBy('timestamp', 'desc'))).then(snap => {
-        grid.innerHTML = '';
-        const itemsData = [];
-        if (snap.empty) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#888;">No photos uploaded yet. Upload from Admin Panel.</div>'; return; }
-        let i = 0;
-        snap.forEach(d => {
-          const photo = d.data();
-          const item = document.createElement('div');
-          item.className = 'gallery-item';
-          item.setAttribute('data-desc', photo.desc || '');
-          item.innerHTML = '<img src="'+photo.image+'" alt="'+(photo.desc||'School')+'" loading="lazy" /><div class="gallery-overlay"><div class="gallery-zoom-icon"><i class="fa-solid fa-magnifying-glass-plus"></i></div></div>';
-          grid.appendChild(item);
-          itemsData.push({ src: photo.image, desc: photo.desc || '' });
-          const ci = i; item.addEventListener('click', () => lb.open(ci)); item.style.cursor = 'pointer';
-          i++;
-        });
-        lb.register(itemsData);
-      }).catch(err => { console.error('Gallery fetch error:', err); grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:red;">Failed to load gallery.</div>'; });
-    }).catch(err => { console.error('Firebase import error:', err); grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:red;">Failed to connect.</div>'; });
+        
+        const renderItems = (photos) => {
+          grid.innerHTML = '';
+          const itemsData = [];
+          let i = 0;
+          photos.forEach(photo => {
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            item.setAttribute('data-desc', photo.desc || '');
+            item.innerHTML = '<img src="'+photo.image+'" alt="'+(photo.desc||'School')+'" loading="lazy" /><div class="gallery-overlay"><div class="gallery-zoom-icon"><i class="fa-solid fa-magnifying-glass-plus"></i></div></div>';
+            grid.appendChild(item);
+            itemsData.push({ src: photo.image, desc: photo.desc || '' });
+            const ci = i; item.addEventListener('click', () => lb.open(ci)); item.style.cursor = 'pointer';
+            i++;
+          });
+          lb.register(itemsData);
+        };
+
+        if (snap.empty) { 
+          showEmptyMessage(false);
+          return; 
+        }
+        
+        const fbPhotos = [];
+        snap.forEach(d => fbPhotos.push(d.data()));
+        renderItems(fbPhotos);
+      }).catch(err => { 
+        console.error('Gallery fetch error:', err); 
+        showEmptyMessage(true);
+      });
+    }).catch(err => { 
+      console.error('Firebase import error:', err); 
+      showEmptyMessage(true);
+    });
   }
 
   window.Lightbox = lb;

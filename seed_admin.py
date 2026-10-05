@@ -1,7 +1,7 @@
 import urllib.request
 import json
 
-url = "https://firestore.googleapis.com/v1/projects/gurudev-international/databases/(default)/documents/admins?documentId=admin"
+url = "https://firestore.googleapis.com/v1/projects/gips-eeaca/databases/(default)/documents/admins?documentId=admin"
 
 data = {
     "fields": {

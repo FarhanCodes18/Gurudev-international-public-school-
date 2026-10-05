@@ -1,7 +1,7 @@
 import urllib.request
 import json
 
-api_key = "AIzaSyD778gbyVVrez8R__xnvVNRMAZjAqEhVgQ"
+api_key = "AIzaSyDh401C4sAgg68T7RsB4XIITzcuEtZo5Kc"
 url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={api_key}"
 
 data = {

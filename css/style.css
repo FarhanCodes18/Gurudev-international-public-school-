@@ -315,6 +315,9 @@ input, textarea, select {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  display: inline-block;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 .section-subtitle {
@@ -1144,6 +1147,9 @@ input, textarea, select {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  display: inline-block;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 .hero-subtitle {
@@ -2278,8 +2284,8 @@ textarea.form-control { resize: vertical; min-height: 120px; }
    28. FOOTER
    ============================================================ */
 .footer {
-  background: var(--bg-dark);
-  color: var(--text-secondary);
+  background: var(--primary-dark);
+  color: rgba(255, 255, 255, 0.85);
   position: relative;
   overflow: hidden;
   border-top: 1px solid var(--border-color);
@@ -2323,25 +2329,26 @@ textarea.form-control { resize: vertical; min-height: 120px; }
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   border: 2px solid rgba(0,0,0,0.05);
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .footer-logo-text .name {
   font-family: var(--font-accent);
   font-size: 0.9rem;
   font-weight: 800;
-  color: var(--text-primary);
+  color: var(--secondary);
 }
 
 .footer-logo-text .tagline {
   font-size: 0.65rem;
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.8);
   letter-spacing: 1px;
   text-transform: uppercase;
 }
 
 .footer-desc {
   font-size: 0.85rem;
-  color: rgba(255,255,255,0.55);
+  color: rgba(255,255,255,0.85);
   line-height: 1.85;
   margin-bottom: 24px;
 }
@@ -2355,12 +2362,12 @@ textarea.form-control { resize: vertical; min-height: 120px; }
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255,255,255,0.6);
+  color: rgba(255,255,255,0.9);
   font-size: 0.85rem;
   transition: var(--transition-normal);
 }
@@ -2401,7 +2408,7 @@ textarea.form-control { resize: vertical; min-height: 120px; }
   align-items: center;
   gap: 8px;
   font-size: 0.83rem;
-  color: rgba(255,255,255,0.55);
+  color: rgba(255,255,255,0.85);
   transition: var(--transition-fast);
 }
 
@@ -2431,7 +2438,7 @@ textarea.form-control { resize: vertical; min-height: 120px; }
 
 .footer-contact-item span {
   font-size: 0.82rem;
-  color: rgba(255,255,255,0.55);
+  color: rgba(255,255,255,0.85);
   line-height: 1.6;
 }
 
@@ -4285,36 +4292,4 @@ img, video, iframe, canvas, svg, embed, object {
   .cse-faculty-img { height: 280px; }
 }
 
-/* ============================================================
-   LIGHT THEME FOOTER TEXT FIX
-   ============================================================ */
-.footer-desc, 
-.footer-link, 
-.footer-contact-info li, 
-.footer-bottom p, 
-.footer-bottom-links a,
-.footer-logo-text .tagline {
-  color: var(--text-secondary) !important;
-}
 
-.footer-link:hover, 
-.footer-bottom-links a:hover {
-  color: var(--primary) !important;
-}
-
-.footer-title,
-.footer-logo-text .name {
-  color: var(--text-primary) !important;
-}
-
-.footer-contact-info i {
-  color: var(--primary) !important;
-}
-
-.footer-social-link {
-  color: #ffffff !important;
-}
-
-.footer-bottom {
-  border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
-}

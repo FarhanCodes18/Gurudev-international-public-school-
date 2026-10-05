@@ -205,49 +205,59 @@
   =========================== */
   const reviewsTrack = document.getElementById('dynamic-reviews-track');
   if(reviewsTrack) {
+    const renderFakeReviews = () => {
+      let html = '';
+      let fakeReviews = [
+        { name: "Rajesh Kumar", role: "Parent, Waraseoni", rating: 5, text: "Excellent faculty and great infrastructure. My child has shown tremendous improvement in both academics and extracurricular activities." },
+        { name: "Priya Singh", role: "Student, Balaghat", rating: 5, text: "The school provides a perfect environment for learning. The teachers are very supportive and the labs are well-equipped." },
+        { name: "Amit Patel", role: "Parent, Kaydi", rating: 4, text: "Very happy with the overall development of my son. The sports facilities are outstanding and the focus on discipline is commendable." },
+        { name: "Sneha Verma", role: "Student, Waraseoni", rating: 5, text: "Gurudev International has given me the platform to discover my true potential. The academic curriculum is perfectly balanced." },
+        { name: "Vikram Chauhan", role: "Parent, Balaghat", rating: 5, text: "Choosing this school was the best decision. The management committee is very responsive and the standard of education is top-notch." },
+        { name: "Rahul Deshmukh", role: "Student, Waraseoni", rating: 5, text: "The coding classes and computer lab are phenomenal. I learned so much here!" }
+      ];
+      
+      const renderReview = (r) => `
+        <div class="testimonial-card">
+          <div class="stars">${'★'.repeat(Number(r.rating || 5))}${'☆'.repeat(5 - Number(r.rating || 5))}</div>
+          <div class="testimonial-quote">"</div>
+          <p class="testimonial-text">${r.text || ''}</p>
+          <div class="testimonial-author">
+            <div class="testimonial-info" style="margin-left:0;">
+              <strong>${r.name || 'Anonymous'}</strong>
+              <span>${r.role || 'Student'}</span>
+            </div>
+          </div>
+        </div>
+      `;
+
+      fakeReviews.forEach(r => { html += renderReview(r); });
+      return { html, renderReview };
+    };
+
     Promise.all([
       import('./firebase-config.js'),
       import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
     ]).then(([config, fs]) => {
-       const { collection, getDocs, query, where, orderBy } = fs;
+       const { collection, getDocs, query, where } = fs;
        return getDocs(query(collection(config.db, 'reviews'), where('status', '==', 'approved')));
     }).then(snapshot => {
-       let html = '';
-       let fakeReviews = [
-         { name: "Rajesh Kumar", role: "Parent, Waraseoni", rating: 5, text: "Excellent faculty and great infrastructure. My child has shown tremendous improvement in both academics and extracurricular activities." },
-         { name: "Priya Singh", role: "Student, Balaghat", rating: 5, text: "The school provides a perfect environment for learning. The teachers are very supportive and the labs are well-equipped." },
-         { name: "Amit Patel", role: "Parent, Kaydi", rating: 4, text: "Very happy with the overall development of my son. The sports facilities are outstanding and the focus on discipline is commendable." },
-         { name: "Sneha Verma", role: "Student, Waraseoni", rating: 5, text: "Gurudev International has given me the platform to discover my true potential. The academic curriculum is perfectly balanced." },
-         { name: "Vikram Chauhan", role: "Parent, Balaghat", rating: 5, text: "Choosing this school was the best decision. The management committee is very responsive and the standard of education is top-notch." }
-       ];
-       
-       const renderReview = (r) => `
-         <div class="testimonial-card">
-           <div class="stars">${'★'.repeat(Number(r.rating || 5))}${'☆'.repeat(5 - Number(r.rating || 5))}</div>
-           <div class="testimonial-quote">"</div>
-           <p class="testimonial-text">${r.text || ''}</p>
-           <div class="testimonial-author">
-             <div class="testimonial-info" style="margin-left:0;">
-               <strong>${r.name || 'Anonymous'}</strong>
-               <span>${r.role || 'Student'}</span>
-             </div>
-           </div>
-         </div>
-       `;
-
-       fakeReviews.forEach(r => { html += renderReview(r); });
+       const { html, renderReview } = renderFakeReviews();
+       let finalHtml = html;
        
        if(!snapshot.empty) {
          snapshot.forEach(doc => {
            let r = doc.data();
-           html += renderReview(r);
+           finalHtml += renderReview(r);
          });
        }
        
-       reviewsTrack.innerHTML = html;
+       reviewsTrack.innerHTML = finalHtml;
        if(typeof window.initTestimonialSlider === 'function') window.initTestimonialSlider();
     }).catch(err => {
        console.error("Error loading reviews:", err);
+       const { html } = renderFakeReviews();
+       reviewsTrack.innerHTML = html;
+       if(typeof window.initTestimonialSlider === 'function') window.initTestimonialSlider();
     });
   }
 
@@ -948,6 +958,10 @@ function loadFacultyAndInitSwiper() {
     return;
   }
   
+  const renderFakeFaculty = () => {
+    return '<div class="swiper-slide"><div style="text-align:center; padding:40px; color:#64748b;">No faculty added yet. Please add from Admin Panel.</div></div>';
+  };
+
   Promise.all([
     import('./firebase-config.js'),
     import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
@@ -970,7 +984,7 @@ function loadFacultyAndInitSwiper() {
                 onmouseover="this.style.transform='scale(1.08) translateY(-15px) rotateY(10deg)'; this.style.boxShadow='0 25px 50px -12px rgba(0,0,0,0.25)';"
                 onmouseout="this.style.transform='scale(1) translateY(0) rotateY(0deg)'; this.style.boxShadow='';">
                 <div class="cse-faculty-img">
-                  <img src="${member.image}" alt="${member.name}" loading="lazy">
+                  <img src="${member.image}" alt="${member.name}" loading="lazy" onerror="this.src='assets/images/hero-1.jpg'">
                   <div class="cse-faculty-overlay">
                     <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
                     <a href="#"><i class="fa-solid fa-envelope"></i></a>
@@ -987,19 +1001,21 @@ function loadFacultyAndInitSwiper() {
         });
         wrapper.innerHTML = html;
       } else {
-        wrapper.innerHTML = '<div class="swiper-slide"><div style="text-align:center; padding:40px; color:#64748b;">No faculty added yet.</div></div>';
+        wrapper.innerHTML = renderFakeFaculty();
       }
       
       // Re-init swiper after data changes in DOM
       initCSESwiper();
     }, (err) => {
       console.error("Error loading faculty from Firebase:", err);
-      // Fallback: init swiper anyway (might be empty)
+      wrapper.innerHTML = renderFakeFaculty();
       initCSESwiper();
     });
     
   }).catch(err => {
     console.error("Firebase SDK load error:", err);
+    wrapper.innerHTML = renderFakeFaculty();
+    initCSESwiper();
   });
 }
 
